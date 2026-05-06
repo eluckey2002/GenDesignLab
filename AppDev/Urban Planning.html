@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Urban Lab · UMAT Reactive Planning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #08090b;
+    --panel: #0f1115;
+    --panel-edge: #1d2026;
+    --ink: #d8dde3;
+    --ink-dim: #6b7380;
+    --ink-faint: #2a2e35;
+    --accent-transit: #7abcc9; /* Cyan */
+    --accent-commuter: #f0e9d8; /* Bone */
+    --accent-state: #c9a97a;
+    --accent-graph: #5a6b73;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body, html {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font-mono); font-size: 11px;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  #layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    height: 100vh;
+  }
+  #canvas-wrap {
+    position: relative;
+    background: radial-gradient(circle at center, #0a0c0e 0%, #050607 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas#c { display: block; max-width: 100%; max-height: 100%; }
+
+  #sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--panel-edge);
+    display: flex; flex-direction: column;
+    padding: 24px; gap: 16px;
+    overflow-y: auto;
+  }
+
+  .hud-section { display: flex; flex-direction: column; gap: 6px; }
+  .hud-title { 
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-dim);
+    border-bottom: 1px solid var(--ink-faint); padding-bottom: 4px;
+    display: flex; justify-content: space-between;
+  }
+  .metric-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .metric-val { color: var(--ink); font-size: 13px; }
+
+  #state-tag {
+    background: var(--panel-edge); color: var(--accent-state);
+    padding: 6px 8px; border-radius: 2px; font-size: 10px;
+    border: 1px solid var(--ink-faint); margin-top: 4px;
+    text-align: center; letter-spacing: 0.15em; font-weight: bold;
+    transition: all 0.3s;
+  }
+  #state-tag.alert { color: #ff5555; border-color: #552222; }
+
+  /* Data Visualization */
+  #topology-wrap {
+    width: 100%; height: 100px;
+    background: #000; border: 1px solid var(--ink-faint);
+    position: relative; margin-top: 4px;
+  }
+  canvas#topology-canvas { width: 100%; height: 100%; display: block; }
+
+  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .data-col { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--ink-faint); padding: 8px; }
+  .data-label { font-size: 8px; color: var(--ink-faint); text-transform: uppercase; }
+  .data-val { font-size: 11px; color: var(--ink); }
+
+  .control-group { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .control-item { display: flex; flex-direction: column; gap: 2px; }
+  .control-label { font-size: 9px; color: var(--ink-dim); text-transform: uppercase; display: flex; justify-content: space-between; }
+  input[type=range] { width: 100%; accent-color: var(--ink-dim); cursor: pointer; height: 18px; }
+
+  button.action-btn {
+    background: transparent; border: 1px solid var(--ink-faint);
+    color: var(--ink-dim); padding: 8px; font-family: var(--font-mono);
+    cursor: pointer; text-transform: uppercase; font-size: 10px;
+    margin-top: 2px; transition: all 0.2s;
+  }
+  button.action-btn:hover { border-color: var(--ink-dim); color: var(--ink); background: var(--panel-edge); }
+
+  #log {
+    font-size: 9px; color: var(--ink-dim);
+    border-top: 1px solid var(--ink-faint); padding-top: 12px;
+    height: 100px; overflow-y: auto; line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<div id="layout">
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+  </div>
+
+  <div id="sidebar">
+    <div class="hud-section">
+      <div class="hud-title">Economic Flux</div>
+      <div class="metric-row">
+        <span>Public Demand</span>
+        <span class="metric-val" id="val-metabolism">0.000</span>
+      </div>
+      <div id="state-tag">STATUS: INITIALIZING</div>
+    </div>
+
+    <div class="hud-section">
+      <div class="hud-title">Readout: Network Efficiency</div>
+      <div id="topology-wrap">
+        <canvas id="topology-canvas"></canvas>
+      </div>
+      <div class="data-grid">
+        <div class="data-col" style="border-top: 2px solid var(--accent-transit)">
+          <span class="data-label">Infrastructure</span>
+          <span class="data-val" id="d-grid-n">0</span>
+          <span class="data-label">Serviced Area</span>
+          <span class="data-val" id="d-serviced">0.0%</span>
+        </div>
+        <div class="data-col" style="border-top: 2px solid var(--accent-commuter)">
+          <span class="data-label">Commuters</span>
+          <span class="data-val" id="d-commuters">0</span>
+          <span class="data-label">Tax/Yield</span>
+          <span class="data-val" id="d-yield">0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-section">
+      <div class="hud-title">Planning Constraints</div>
+      <div class="control-group">
+        <div class="control-item">
+          <span class="control-label">Density <span id="val-pop">80</span></span>
+          <input type="range" id="sl-pop" min="40" max="250" step="1" value="80">
+        </div>
+        <div class="control-item">
+          <span class="control-label">Economic Speed <span id="val-replenish">0.0035</span></span>
+          <input type="range" id="sl-replenish" min="0.001" max="0.02" step="0.0001" value="0.0035">
+        </div>
+        <div class="control-item">
+          <span class="control-label">Transit Budget <span id="val-budget">0.030</span></span>
+          <input type="range" id="sl-budget" min="0.01" max="0.1" step="0.001" value="0.030">
+        </div>
+        <button class="action-btn" id="btn-reseed">Evolve New Topology</button>
+        <button class="action-btn" id="btn-cataclysm" style="color: #ff5555; border-color: #551111;">Trigger Economic Crash</button>
+      </div>
+    </div>
+
+    <div id="log"></div>
+  </div>
+</div>
+
+<script>
+// --- UMAT URBAN ENGINE (VERSION 1.5 - GOVERNED GROWTH) ---
+const UMAT = {
+  RateCoupler: (opts) => ({
+    evaluate: (commuter, field, transitGrid) => {
+      const demand = field.sample(commuter.x, commuter.y);
+      const activityThreshold = 0.78;
+      
+      if (Math.random() < demand * activityThreshold) return false;
+      
+      const goal = commuter.getGoal();
+      const dx = goal.x - commuter.x;
+      const dy = goal.y - commuter.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      
+      let ax = 0, ay = 0;
+      const attDist = 0.12;
+      for(let i=0; i<transitGrid.length; i+=10) { 
+        const n = transitGrid[i];
+        const dnx = n.x - commuter.x;
+        const dny = n.y - commuter.y;
+        const d2 = dnx*dnx + dny*dny;
+        if (d2 < attDist*attDist) {
+          const force = (attDist - Math.sqrt(d2)) * 0.08;
+          ax += dnx * force; ay += dny * force;
+        }
+      }
+      
+      if (dist > 0.04) {
+        commuter.vx += (dx/dist) * 0.004 + ax;
+        commuter.vy += (dy/dist) * 0.004 + ay;
+      } else {
+        commuter.nextGoal();
+      }
+      
+      commuter.step();
+      return true;
+    }
+  }),
+  Senescence: (opts) => ({
+    shouldPrune: (node, localDemand, totalN, austerity) => {
+      if (node.age < 300) { node.age++; return false; }
+      
+      if (localDemand < 0.22) node.stress += austerity;
+      else node.stress = Math.max(0, node.stress - 4);
+      
+      const threshold = austerity > 1 ? 150 : 400;
+      return (node.stress > threshold && Math.random() < 0.05);
+    }
+  }),
+  DemandField: (opts) => {
+    const FS = 64;
+    let buf = new Float32Array(FS * FS).fill(0.12);
+    let swap = new Float32Array(FS * FS);
+    let POIs = [];
+    
+    const generatePOIs = () => {
+      POIs = Array.from({length: 6}, () => ({
+        x: (Math.random()-0.5)*1.4, 
+        y: (Math.random()-0.5)*1.4, 
+        strength: 0.85 + Math.random() * 0.15
+      }));
+    };
+
+    return {
+      sample: (x, y) => {
+        const gx = Math.floor((x + 1) * 0.5 * (FS - 1));
+        const gy = Math.floor((y + 1) * 0.5 * (FS - 1));
+        if (gx < 0 || gx >= FS || gy < 0 || gy >= FS) return 0;
+        return buf[gy * FS + gx];
+      },
+      deposit: (x, y, amt) => {
+        const gx = Math.round((x + 1) * 0.5 * (FS - 1));
+        const gy = Math.round((y + 1) * 0.5 * (FS - 1));
+        if (gx >= 0 && gx < FS && gy >= 0 && gy < FS) {
+            buf[gy * FS + gx] = Math.min(1.5, buf[gy * FS + gx] + amt);
+        }
+      },
+      step: (replenish) => {
+        for (let j = 0; j < FS; j++) for (let i = 0; i < FS; i++) {
+          const idx = j * FS + i;
+          const neighbors = [
+            buf[idx], 
+            i > 0 ? buf[idx-1] : buf[idx], 
+            i < FS-1 ? buf[idx+1] : buf[idx],
+            j > 0 ? buf[idx-FS] : buf[idx],
+            j < FS-1 ? buf[idx+FS] : buf[idx]
+          ];
+          const avg = neighbors.reduce((a,b)=>a+b, 0) / 5;
+          swap[idx] = avg * 0.95 + (0.05 * replenish); 
+        }
+        POIs.forEach(p => {
+          const gx = Math.round((p.x + 1) * 0.5 * (FS - 1));
+          const gy = Math.round((p.y + 1) * 0.5 * (FS - 1));
+          if (gx >= 0 && gx < FS && gy >= 0 && gy < FS) {
+            swap[gy * FS + gx] = Math.max(swap[gy * FS + gx], p.strength);
+          }
+        });
+        [buf, swap] = [swap, buf];
+      },
+      stats: () => ({ mean: buf.reduce((a,b)=>a+b, 0) / buf.length }),
+      reset: (v) => { buf.fill(v); generatePOIs(); },
+      getPOIs: () => POIs,
+      buf
+    };
+  }
+};
+
+// --- CITY SYSTEM ---
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const topCanvas = document.getElementById('topology-canvas');
+const topCtx = topCanvas.getContext('2d');
+
+const field = UMAT.DemandField();
+const coupler = UMAT.RateCoupler();
+const planning = UMAT.Senescence();
+
+let transitGrid = [];
+let commuters = [];
+let history = [];
+let frame = 0;
+let params = { replenish: 0.0035, budget: 0.030, popCount: 80 };
+let currentStatus = "BALANCED";
+let austerity = 1;
+
+function reseed() {
+  field.reset(0.12);
+  const pois = field.getPOIs();
+  transitGrid = pois.map(p => ({x: p.x, y: p.y, stress: 0, age: 0}));
+  history = [];
+  spawnCommuters();
+  log("Urban Lab Reset. Construction Governor Active.");
+}
+
+function spawnCommuters() {
+  commuters = Array.from({length: params.popCount}, () => ({
+    x: (Math.random()-0.5)*0.8, y: (Math.random()-0.5)*0.8,
+    vx: 0, vy: 0,
+    goalIdx: Math.floor(Math.random()*6),
+    getGoal: function() { return field.getPOIs()[this.goalIdx]; },
+    nextGoal: function() { this.goalIdx = (this.goalIdx + 1) % 6; },
+    step: function() {
+        this.x += this.vx; this.y += this.vy;
+        this.vx *= 0.85; this.vy *= 0.85;
+    }
+  }));
+}
+
+function checkState() {
+  const s = field.stats();
+  const totalInfra = transitGrid.length;
+  let nextStatus = "BALANCED";
+  austerity = 1;
+
+  if (s.mean > 0.42 && totalInfra < 100) nextStatus = "PUBLIC WORKS";
+  else if (totalInfra > 600 && s.mean < 0.25) { nextStatus = "AUSTERITY"; austerity = 4; }
+  else if (s.mean < 0.15) nextStatus = "RECESSION";
+
+  if (nextStatus !== currentStatus) {
+    currentStatus = nextStatus;
+    const tag = document.getElementById('state-tag');
+    tag.textContent = `STATUS: ${currentStatus}`;
+    tag.className = (currentStatus === "AUSTERITY" || currentStatus === "RECESSION") ? "alert" : "";
+    log(`Urban Policy Shift: ${currentStatus}`);
+  }
+}
+
+function log(msg) {
+  const el = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = 'log-entry';
+  d.textContent = `[${frame}] ${msg}`;
+  el.prepend(d);
+  if (el.childNodes.length > 6) el.lastChild.remove();
+}
+
+function update() {
+  field.step(params.replenish);
+  checkState();
+
+  // 1. Commuters
+  commuters.forEach(c => {
+    const moved = coupler.evaluate(c, field, transitGrid);
+    field.deposit(c.x, c.y, moved ? 0.05 : 0.015);
+    if (c.x*c.x + c.y*c.y > 0.98) { c.vx *= -1.1; c.vy *= -1.1; }
+  });
+
+  // 2. Governed Growth (The FIX)
+  // CORE RULE: We limit the city to a maximum of 2 new nodes PER FRAME
+  const branchThreshold = currentStatus === "PUBLIC WORKS" ? 0.35 : 0.62;
+  let permitsThisFrame = 2; 
+  
+  const shuffledGrid = [...transitGrid].sort(() => Math.random() - 0.5);
+  for(let i=0; i<shuffledGrid.length; i++) {
+    if (permitsThisFrame <= 0) break;
+    const node = shuffledGrid[i];
+    const demand = field.sample(node.x, node.y);
+    if (demand > branchThreshold && Math.random() < params.budget && transitGrid.length < 1500) {
+      const ang = Math.random() * Math.PI * 2;
+      transitGrid.push({x: node.x + Math.cos(ang)*0.045, y: node.y + Math.sin(ang)*0.045, stress: 0, age: 0});
+      permitsThisFrame--;
+    }
+  }
+
+  // 3. Pruning
+  transitGrid = transitGrid.filter(node => !planning.shouldPrune(node, field.sample(node.x, node.y), transitGrid.length, austerity));
+
+  frame++;
+  if (frame % 60 === 0) {
+    updateHUD();
+    history.push({ demand: field.stats().mean, efficiency: (transitGrid.length / 1500) });
+    if (history.length > 100) history.shift();
+    drawTopology();
+  }
+}
+
+function updateHUD() {
+  const s = field.stats();
+  document.getElementById('val-metabolism').textContent = s.mean.toFixed(3);
+  document.getElementById('d-grid-n').textContent = transitGrid.length;
+  document.getElementById('d-commuters').textContent = commuters.length;
+  
+  let covered = 0;
+  transitGrid.forEach(n => { if (field.sample(n.x, n.y) > 0.4) covered++; });
+  document.getElementById('d-serviced').textContent = ((covered/transitGrid.length || 0) * 100).toFixed(1) + "%";
+  document.getElementById('d-yield').textContent = (s.mean * 200 / (transitGrid.length/10 || 1)).toFixed(2);
+}
+
+function drawTopology() {
+  topCtx.fillStyle = '#000'; topCtx.fillRect(0, 0, topCanvas.width, topCanvas.height);
+  if (history.length < 2) return;
+  const dx = topCanvas.width / 100;
+  history.forEach((snap, i) => {
+    const x = i * dx;
+    topCtx.fillStyle = 'var(--accent-state)';
+    topCtx.fillRect(x, topCanvas.height - (snap.demand * topCanvas.height), 2, 2);
+    topCtx.fillStyle = 'var(--accent-transit)';
+    topCtx.fillRect(x, topCanvas.height - (snap.efficiency * topCanvas.height), 2, 2);
+  });
+}
+
+function draw() {
+  ctx.fillStyle = '#08090b'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const cx = 400, cy = 400, r = 380;
+  const stepSize = (r*2)/64, buf = field.buf;
+  for(let j=0; j<64; j++) for(let i=0; i<64; i++) {
+    const v = buf[j*64+i];
+    if (v > 0.1) {
+      ctx.fillStyle = `rgba(201, 169, 122, ${v * 0.3})`;
+      ctx.fillRect(cx - r + i*stepSize, cy - r + j*stepSize, stepSize+1, stepSize+1);
+    }
+  }
+  ctx.fillStyle = 'var(--accent-transit)';
+  transitGrid.forEach(n => { ctx.beginPath(); ctx.arc(cx + n.x*r, cy + n.y*r, 1.5, 0, Math.PI*2); ctx.fill(); });
+  ctx.fillStyle = 'var(--accent-commuter)';
+  commuters.forEach(c => { ctx.beginPath(); ctx.arc(cx + c.x*r, cy + c.y*r, 2.5, 0, Math.PI*2); ctx.fill(); });
+}
+
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+
+window.onload = () => {
+  canvas.width = 800; canvas.height = 800;
+  topCanvas.width = 300; topCanvas.height = 100;
+  reseed(); loop();
+  document.getElementById('sl-pop').oninput = e => {
+    params.popCount = parseInt(e.target.value);
+    document.getElementById('val-pop').textContent = params.popCount;
+    spawnCommuters();
+  };
+  document.getElementById('sl-replenish').oninput = e => {
+    params.replenish = parseFloat(e.target.value);
+    document.getElementById('val-replenish').textContent = params.replenish.toFixed(4);
+  };
+  document.getElementById('sl-budget').oninput = e => {
+    params.budget = parseFloat(e.target.value);
+    document.getElementById('val-budget').textContent = params.budget.toFixed(3);
+  };
+  document.getElementById('btn-reseed').onclick = reseed;
+  document.getElementById('btn-cataclysm').onclick = () => {
+    field.reset(0); transitGrid = []; log("COLLAPSE: Market liquidation.");
+  };
+};
+</script>
+</body>
+</html>

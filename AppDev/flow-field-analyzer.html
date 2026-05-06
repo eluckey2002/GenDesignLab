@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flow Field Analyzer — Geometric Containment Study</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #080810; 
+      color: #e0e0e0; 
+    }
+    .container { 
+      display: grid; 
+      grid-template-columns: 320px 1fr; 
+      height: 100vh; 
+    }
+    .panel { 
+      background: #0d0d14; 
+      border-right: 1px solid #2a2a3a; 
+      padding: 20px; 
+      overflow-y: auto; 
+    }
+    h1 { 
+      margin: 0 0 8px; 
+      font-size: 18px; 
+      color: #fff; 
+    }
+    .subtitle { 
+      font-size: 12px; 
+      color: #888; 
+      margin-bottom: 20px; 
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 8px;
+    }
+    .badge.analysis { background: #2a4a4a; color: #8fc; }
+    .badge.research { background: #4a2a4a; color: #f8c; }
+    .section { 
+      margin-bottom: 20px; 
+    }
+    .section-title { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      color: #666; 
+      margin-bottom: 12px; 
+    }
+    .row { 
+      margin-bottom: 14px; 
+    }
+    .row label { 
+      display: flex; 
+      justify-content: space-between; 
+      font-size: 12px; 
+      color: #aaa; 
+      margin-bottom: 6px; 
+    }
+    .row label span { 
+      color: #8fa; 
+      font-family: monospace; 
+    }
+    input[type="range"] { 
+      width: 100%; 
+      height: 4px;
+      -webkit-appearance: none; 
+      background: #2a2a3a; 
+      border-radius: 2px; 
+      outline: none; 
+    }
+    input[type="range"]::-webkit-slider-thumb { 
+      -webkit-appearance: none; 
+      width: 14px; 
+      height: 14px; 
+      background: #8fa; 
+      border-radius: 50%; 
+      cursor: pointer; 
+    }
+    select, button { 
+      width: 100%; 
+      padding: 10px 12px; 
+      background: #1a1a24; 
+      border: 1px solid #3a3a4a; 
+      border-radius: 8px; 
+      color: #e0e0e0; 
+      font-size: 13px; 
+      cursor: pointer; 
+      margin-bottom: 8px;
+    }
+    select:hover, button:hover { 
+      background: #252530; 
+      border-color: #4a4a5a; 
+    }
+    button.primary { 
+      background: linear-gradient(135deg, #2a4a3a, #1a3a2a); 
+      border-color: #3a5a4a; 
+    }
+    button.primary:hover { 
+      background: linear-gradient(135deg, #3a5a4a, #2a4a3a); 
+    }
+    button.running {
+      background: linear-gradient(135deg, #4a4a2a, #3a3a1a);
+      border-color: #5a5a3a;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #1a1a24;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4a8, #8fa);
+      width: 0%;
+      transition: width 0.1s;
+    }
+    .stats { 
+      background: #1a1a24; 
+      border-radius: 8px; 
+      padding: 12px; 
+      font-size: 11px; 
+      color: #888; 
+      line-height: 1.8;
+    }
+    .stats strong { 
+      color: #8fa; 
+    }
+    .stats .highlight {
+      color: #fc8;
+      font-weight: bold;
+    }
+    .divider { 
+      height: 1px; 
+      background: #2a2a3a; 
+      margin: 16px 0; 
+    }
+    .main-area {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 15px;
+      overflow: auto;
+    }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .result-panel {
+      background: #0d0d14;
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid #2a2a3a;
+    }
+    .result-panel h3 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: #aaa;
+    }
+    .result-panel canvas {
+      width: 100%;
+      border-radius: 8px;
+      background: #080810;
+    }
+    .summary-panel {
+      background: #0d0d14;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #2a2a3a;
+    }
+    .summary-panel h2 {
+      margin: 0 0 15px;
+      font-size: 16px;
+      color: #fff;
+    }
+    .metric-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 15px;
+      padding: 8px 0;
+      border-bottom: 1px solid #1a1a24;
+      font-size: 12px;
+    }
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+    .metric-label {
+      color: #888;
+    }
+    .metric-euc {
+      color: #f88;
+      text-align: right;
+      font-family: monospace;
+    }
+    .metric-hyp {
+      color: #88f;
+      text-align: right;
+      font-family: monospace;
+    }
+    .metric-diff {
+      color: #fc8;
+      text-align: right;
+      font-family: monospace;
+      font-weight: bold;
+    }
+    .chart-container {
+      position: relative;
+      height: 200px;
+    }
+    .axis-label {
+      position: absolute;
+      font-size: 10px;
+      color: #666;
+    }
+    .legend {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+    .hint { 
+      font-size: 11px; 
+      color: #666; 
+      line-height: 1.5; 
+      margin-top: 12px; 
+    }
+    .findings {
+      background: #1a2a1a;
+      border: 1px solid #2a4a2a;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #8a8;
+    }
+    .findings strong {
+      color: #afa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel">
+      <h1>Flow Field Analyzer</h1>
+      <div class="subtitle">
+        <span class="badge analysis">Analysis</span>
+        <span class="badge research">Research</span>
+        Geometric Containment Study
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Sweep Parameters</div>
+        <div class="row">
+          <label>Field Strength Steps <span id="valStrengthSteps">8</span></label>
+          <input type="range" id="strengthSteps" min="3" max="15" value="8">
+        </div>
+        <div class="row">
+          <label>Field Scale Steps <span id="valScaleSteps">8</span></label>
+          <input type="range" id="scaleSteps" min="3" max="15" value="8">
+        </div>
+        <div class="row">
+          <label>Points per Trial <span id="valPointsPerTrial">80</span></label>
+          <input type="range" id="pointsPerTrial" min="30" max="200" value="80">
+        </div>
+        <div class="row">
+          <label>Path Steps <span id="valPathSteps">50</span></label>
+          <input type="range" id="pathSteps" min="20" max="100" value="50">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Sweep Ranges</div>
+        <div class="row">
+          <label>Strength Range <span id="valStrengthRange">0.5 - 3.0</span></label>
+          <input type="range" id="strengthMin" min="0.2" max="1.5" step="0.1" value="0.5">
+          <input type="range" id="strengthMax" min="1.5" max="5" step="0.1" value="3.0">
+        </div>
+        <div class="row">
+          <label>Scale Range <span id="valScaleRange">1.0 - 8.0</span></label>
+          <input type="range" id="scaleMin" min="0.5" max="3" step="0.5" value="1.0">
+          <input type="range" id="scaleMax" min="3" max="12" step="0.5" value="8.0">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Field Types to Analyze</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px;">
+          <label><input type="checkbox" id="typePerlin" checked> Perlin</label>
+          <label><input type="checkbox" id="typeRadial" checked> Radial Spiral</label>
+          <label><input type="checkbox" id="typeVortex" checked> Hyp. Vortex</label>
+          <label><input type="checkbox" id="typeBoundary" checked> Boundary</label>
+          <label><input type="checkbox" id="typeCenter" checked> Center Repel</label>
+          <label><input type="checkbox" id="typeDual" checked> Dual Vortex</label>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <button class="primary" id="runAnalysis">Run Analysis</button>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div id="progressText" style="font-size: 11px; color: #666; text-align: center;">Ready</div>
+      
+      <button id="exportCSV">Export Data (CSV)</button>
+      <button id="exportReport">Export Report</button>
+      
+      <div class="divider"></div>
+      
+      <div class="stats" id="stats">
+        <strong>Analysis Status:</strong> Not started<br>
+        <strong>Combinations:</strong> —<br>
+        <strong>Estimated time:</strong> —
+      </div>
+      
+      <div class="hint">
+        This tool sweeps parameter space and measures how Euclidean vs Hyperbolic 
+        geometry affects path containment. The "soft wall" hypothesis predicts 
+        hyperbolic paths will be contained more than Euclidean paths.
+      </div>
+    </div>
+    
+    <div class="main-area">
+      <div class="summary-panel" id="summaryPanel">
+        <h2>Analysis Summary</h2>
+        <div id="summaryContent">
+          <p style="color: #666; font-size: 13px;">Run analysis to see results...</p>
+        </div>
+      </div>
+      
+      <div class="results-grid">
+        <div class="result-panel">
+          <h3>Boundary Reach % (Euclidean - Hyperbolic)</h3>
+          <canvas id="heatmapBoundary" width="300" height="300"></canvas>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #44f;"></div> Hyp. contains more</div>
+            <div class="legend-item"><div class="legend-color" style="background: #888;"></div> Similar</div>
+            <div class="legend-item"><div class="legend-color" style="background: #f44;"></div> Euc. contains more</div>
+          </div>
+        </div>
+        
+        <div class="result-panel">
+          <h3>Average Final Radius Difference</h3>
+          <canvas id="heatmapRadius" width="300" height="300"></canvas>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #44f;"></div> Hyp. stays inner</div>
+            <div class="legend-item"><div class="legend-color" style="background: #888;"></div> Similar</div>
+            <div class="legend-item"><div class="legend-color" style="background: #f44;"></div> Euc. stays inner</div>
+          </div>
+        </div>
+        
+        <div class="result-panel">
+          <h3>Radius vs Steps (Sample Paths)</h3>
+          <canvas id="radiusChart" width="300" height="200"></canvas>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-color" style="background: #f88;"></div> Euclidean</div>
+            <div class="legend-item"><div class="legend-color" style="background: #88f;"></div> Hyperbolic</div>
+          </div>
+        </div>
+        
+        <div class="result-panel">
+          <h3>Containment by Field Type</h3>
+          <canvas id="barChart" width="300" height="200"></canvas>
+        </div>
+      </div>
+      
+      <div class="summary-panel">
+        <h2>Key Findings</h2>
+        <div class="findings" id="findings">
+          Run analysis to generate findings...
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ============================================
+// PERLIN NOISE
+// ============================================
+
+class PerlinNoise {
+  constructor(seed = 0) {
+    this.perm = [];
+    for (let i = 0; i < 256; i++) this.perm[i] = i;
+    let n = seed;
+    for (let i = 255; i > 0; i--) {
+      n = (n * 1103515245 + 12345) & 0x7fffffff;
+      const j = n % (i + 1);
+      [this.perm[i], this.perm[j]] = [this.perm[j], this.perm[i]];
+    }
+    this.perm = [...this.perm, ...this.perm];
+  }
+  
+  fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  lerp(a, b, t) { return a + t * (b - a); }
+  
+  grad(hash, x, y) {
+    const h = hash & 3;
+    const u = h < 2 ? x : y;
+    const v = h < 2 ? y : x;
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+  }
+  
+  noise(x, y) {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    const u = this.fade(x);
+    const v = this.fade(y);
+    const A = this.perm[X] + Y;
+    const B = this.perm[X + 1] + Y;
+    return this.lerp(
+      this.lerp(this.grad(this.perm[A], x, y), this.grad(this.perm[B], x - 1, y), u),
+      this.lerp(this.grad(this.perm[A + 1], x, y - 1), this.grad(this.perm[B + 1], x - 1, y - 1), u),
+      v
+    );
+  }
+}
+
+const perlin = new PerlinNoise(42);
+
+// ============================================
+// FLOW FIELD CORE
+// ============================================
+
+function getFieldVector(x, y, fieldType, fieldScale, fieldStrength) {
+  let vx = 0, vy = 0;
+  
+  switch (fieldType) {
+    case 'perlin': {
+      vx = perlin.noise(x * fieldScale, y * fieldScale) * 2;
+      vy = perlin.noise(x * fieldScale + 100, y * fieldScale) * 2;
+      break;
+    }
+    case 'radialSpiral': {
+      const r = Math.sqrt(x * x + y * y) + 0.001;
+      const theta = Math.atan2(y, x);
+      const spiralAngle = theta + r * fieldScale;
+      vx = Math.cos(spiralAngle);
+      vy = Math.sin(spiralAngle);
+      break;
+    }
+    case 'hyperbolicVortex': {
+      const r = Math.sqrt(x * x + y * y) + 0.001;
+      const intensity = 1 / (1 - r * r + 0.1);
+      const theta = Math.atan2(y, x);
+      const vortexAngle = theta + Math.PI / 2;
+      vx = Math.cos(vortexAngle) * intensity * 0.3;
+      vy = Math.sin(vortexAngle) * intensity * 0.3;
+      break;
+    }
+    case 'boundaryAttract': {
+      const r = Math.sqrt(x * x + y * y) + 0.001;
+      const theta = Math.atan2(y, x);
+      const pullStrength = r * fieldScale;
+      const swirlAngle = theta + pullStrength;
+      vx = x / r * 0.5 + Math.cos(swirlAngle) * 0.5;
+      vy = y / r * 0.5 + Math.sin(swirlAngle) * 0.5;
+      break;
+    }
+    case 'centerRepel': {
+      const r = Math.sqrt(x * x + y * y) + 0.001;
+      const theta = Math.atan2(y, x);
+      const repelAngle = theta + (1 - r) * fieldScale * 2;
+      vx = Math.cos(repelAngle);
+      vy = Math.sin(repelAngle);
+      break;
+    }
+    case 'dual': {
+      const c1 = { x: -0.3, y: 0 };
+      const c2 = { x: 0.3, y: 0 };
+      const d1 = Math.sqrt((x - c1.x) ** 2 + (y - c1.y) ** 2) + 0.1;
+      const d2 = Math.sqrt((x - c2.x) ** 2 + (y - c2.y) ** 2) + 0.1;
+      const a1 = Math.atan2(y - c1.y, x - c1.x) + Math.PI / 2;
+      const a2 = Math.atan2(y - c2.y, x - c2.x) - Math.PI / 2;
+      vx = Math.cos(a1) / d1 + Math.cos(a2) / d2;
+      vy = Math.sin(a1) / d1 + Math.sin(a2) / d2;
+      break;
+    }
+  }
+  
+  const mag = Math.sqrt(vx * vx + vy * vy) + 0.001;
+  return { x: (vx / mag) * fieldStrength, y: (vy / mag) * fieldStrength };
+}
+
+function hyperbolicStep(p, dx, dy, stepSize, useHyperbolic) {
+  if (!useHyperbolic) {
+    return { x: p.x + dx * stepSize, y: p.y + dy * stepSize };
+  }
+  
+  const r2 = p.x * p.x + p.y * p.y;
+  const conformalFactor = (1 - r2) / 2;
+  const newX = p.x + dx * stepSize * conformalFactor;
+  const newY = p.y + dy * stepSize * conformalFactor;
+  
+  const newR2 = newX * newX + newY * newY;
+  if (newR2 >= 0.99) {
+    const scale = 0.99 / Math.sqrt(newR2);
+    return { x: newX * scale, y: newY * scale };
+  }
+  return { x: newX, y: newY };
+}
+
+function tracePath(startPoint, fieldType, fieldScale, fieldStrength, pathSteps, stepSize, useHyperbolic) {
+  const radii = [Math.sqrt(startPoint.x * startPoint.x + startPoint.y * startPoint.y)];
+  let current = { ...startPoint };
+  
+  for (let i = 0; i < pathSteps; i++) {
+    const field = getFieldVector(current.x, current.y, fieldType, fieldScale, fieldStrength);
+    current = hyperbolicStep(current, field.x, field.y, stepSize, useHyperbolic);
+    const r = Math.sqrt(current.x * current.x + current.y * current.y);
+    radii.push(r);
+    if (r >= 0.98) break;
+  }
+  
+  return {
+    finalRadius: radii[radii.length - 1],
+    reachedBoundary: radii[radii.length - 1] >= 0.95,
+    radii: radii,
+    pathLength: radii.length
+  };
+}
+
+function generatePoints(N, spread) {
+  const points = [];
+  const angle = 137.5 * Math.PI / 180;
+  for (let i = 1; i <= N; i++) {
+    const r = spread * Math.tanh(Math.sqrt(i / N) * 2);
+    const theta = i * angle;
+    points.push({ x: r * Math.cos(theta), y: r * Math.sin(theta) });
+  }
+  return points;
+}
+
+// ============================================
+// ANALYSIS ENGINE
+// ============================================
+
+let analysisData = null;
+let isRunning = false;
+
+async function runAnalysis() {
+  if (isRunning) return;
+  isRunning = true;
+  
+  const btn = document.getElementById('runAnalysis');
+  btn.textContent = 'Running...';
+  btn.classList.add('running');
+  
+  const strengthSteps = parseInt(document.getElementById('strengthSteps').value);
+  const scaleSteps = parseInt(document.getElementById('scaleSteps').value);
+  const pointsPerTrial = parseInt(document.getElementById('pointsPerTrial').value);
+  const pathSteps = parseInt(document.getElementById('pathSteps').value);
+  
+  const strengthMin = parseFloat(document.getElementById('strengthMin').value);
+  const strengthMax = parseFloat(document.getElementById('strengthMax').value);
+  const scaleMin = parseFloat(document.getElementById('scaleMin').value);
+  const scaleMax = parseFloat(document.getElementById('scaleMax').value);
+  
+  const fieldTypes = [];
+  if (document.getElementById('typePerlin').checked) fieldTypes.push('perlin');
+  if (document.getElementById('typeRadial').checked) fieldTypes.push('radialSpiral');
+  if (document.getElementById('typeVortex').checked) fieldTypes.push('hyperbolicVortex');
+  if (document.getElementById('typeBoundary').checked) fieldTypes.push('boundaryAttract');
+  if (document.getElementById('typeCenter').checked) fieldTypes.push('centerRepel');
+  if (document.getElementById('typeDual').checked) fieldTypes.push('dual');
+  
+  const totalCombinations = strengthSteps * scaleSteps * fieldTypes.length;
+  let completed = 0;
+  
+  analysisData = {
+    params: { strengthSteps, scaleSteps, pointsPerTrial, pathSteps, strengthMin, strengthMax, scaleMin, scaleMax },
+    fieldTypes: fieldTypes,
+    results: [],
+    byFieldType: {}
+  };
+  
+  fieldTypes.forEach(ft => {
+    analysisData.byFieldType[ft] = { eucBoundary: [], hypBoundary: [], eucRadius: [], hypRadius: [] };
+  });
+  
+  const points = generatePoints(pointsPerTrial, 0.8);
+  const stepSize = 0.02;
+  
+  // Store sample paths for visualization
+  analysisData.samplePaths = { euc: [], hyp: [] };
+  
+  for (let si = 0; si < strengthSteps; si++) {
+    const strength = strengthMin + (si / (strengthSteps - 1)) * (strengthMax - strengthMin);
+    
+    for (let sci = 0; sci < scaleSteps; sci++) {
+      const scale = scaleMin + (sci / (scaleSteps - 1)) * (scaleMax - scaleMin);
+      
+      for (const fieldType of fieldTypes) {
+        // Run Euclidean
+        let eucBoundaryCount = 0;
+        let eucRadiusSum = 0;
+        let eucSamplePath = null;
+        
+        for (const p of points) {
+          const result = tracePath(p, fieldType, scale, strength, pathSteps, stepSize, false);
+          if (result.reachedBoundary) eucBoundaryCount++;
+          eucRadiusSum += result.finalRadius;
+          if (!eucSamplePath && p === points[0]) eucSamplePath = result.radii;
+        }
+        
+        // Run Hyperbolic
+        let hypBoundaryCount = 0;
+        let hypRadiusSum = 0;
+        let hypSamplePath = null;
+        
+        for (const p of points) {
+          const result = tracePath(p, fieldType, scale, strength, pathSteps, stepSize, true);
+          if (result.reachedBoundary) hypBoundaryCount++;
+          hypRadiusSum += result.finalRadius;
+          if (!hypSamplePath && p === points[0]) hypSamplePath = result.radii;
+        }
+        
+        const eucBoundaryPct = (eucBoundaryCount / points.length) * 100;
+        const hypBoundaryPct = (hypBoundaryCount / points.length) * 100;
+        const eucAvgRadius = eucRadiusSum / points.length;
+        const hypAvgRadius = hypRadiusSum / points.length;
+        
+        analysisData.results.push({
+          strength, scale, fieldType,
+          eucBoundaryPct, hypBoundaryPct,
+          eucAvgRadius, hypAvgRadius,
+          boundaryDiff: eucBoundaryPct - hypBoundaryPct,
+          radiusDiff: eucAvgRadius - hypAvgRadius
+        });
+        
+        analysisData.byFieldType[fieldType].eucBoundary.push(eucBoundaryPct);
+        analysisData.byFieldType[fieldType].hypBoundary.push(hypBoundaryPct);
+        analysisData.byFieldType[fieldType].eucRadius.push(eucAvgRadius);
+        analysisData.byFieldType[fieldType].hypRadius.push(hypAvgRadius);
+        
+        // Store a sample path for first combination of each type
+        if (analysisData.samplePaths.euc.length < 3 && eucSamplePath) {
+          analysisData.samplePaths.euc.push(eucSamplePath);
+          analysisData.samplePaths.hyp.push(hypSamplePath);
+        }
+        
+        completed++;
+        const progress = (completed / totalCombinations) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+        document.getElementById('progressText').textContent = 
+          `${completed} / ${totalCombinations} (${progress.toFixed(0)}%)`;
+        
+        // Yield to UI
+        if (completed % 5 === 0) {
+          await new Promise(r => setTimeout(r, 0));
+        }
+      }
+    }
+  }
+  
+  // Analysis complete
+  renderResults();
+  generateFindings();
+  
+  btn.textContent = 'Run Analysis';
+  btn.classList.remove('running');
+  document.getElementById('progressText').textContent = 'Complete!';
+  isRunning = false;
+}
+
+// ============================================
+// VISUALIZATION
+// ============================================
+
+function renderResults() {
+  if (!analysisData) return;
+  
+  renderHeatmap('heatmapBoundary', 'boundaryDiff');
+  renderHeatmap('heatmapRadius', 'radiusDiff');
+  renderRadiusChart();
+  renderBarChart();
+  renderSummary();
+}
+
+function renderHeatmap(canvasId, metric) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  ctx.fillStyle = '#0d0d14';
+  ctx.fillRect(0, 0, width, height);
+  
+  const { strengthSteps, scaleSteps } = analysisData.params;
+  const cellW = width / scaleSteps;
+  const cellH = height / strengthSteps;
+  
+  // Aggregate by strength/scale (average across field types)
+  const grid = [];
+  for (let si = 0; si < strengthSteps; si++) {
+    grid[si] = [];
+    for (let sci = 0; sci < scaleSteps; sci++) {
+      const matching = analysisData.results.filter((r, i) => {
+        const rsi = Math.floor(i / (scaleSteps * analysisData.fieldTypes.length)) % strengthSteps;
+        const rsci = Math.floor(i / analysisData.fieldTypes.length) % scaleSteps;
+        return rsi === si && rsci === sci;
+      });
+      const avg = matching.reduce((sum, r) => sum + r[metric], 0) / matching.length;
+      grid[si][sci] = avg;
+    }
+  }
+  
+  // Find range
+  const allVals = grid.flat();
+  const maxAbs = Math.max(...allVals.map(Math.abs), 1);
+  
+  // Draw cells
+  for (let si = 0; si < strengthSteps; si++) {
+    for (let sci = 0; sci < scaleSteps; sci++) {
+      const val = grid[si][sci];
+      const normalized = val / maxAbs; // -1 to 1
+      
+      let r, g, b;
+      if (normalized > 0) {
+        // Euclidean higher (red) - more paths escape in Euclidean
+        r = 100 + normalized * 155;
+        g = 100 - normalized * 60;
+        b = 100 - normalized * 60;
+      } else {
+        // Hyperbolic higher (blue) - more paths escape in Hyperbolic
+        r = 100 + normalized * 60;
+        g = 100 + normalized * 60;
+        b = 100 - normalized * 155;
+      }
+      
+      ctx.fillStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+      ctx.fillRect(sci * cellW, si * cellH, cellW - 1, cellH - 1);
+      
+      // Value text
+      if (cellW > 25 && cellH > 20) {
+        ctx.fillStyle = Math.abs(normalized) > 0.5 ? '#fff' : '#aaa';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(val.toFixed(0), sci * cellW + cellW/2, si * cellH + cellH/2 + 3);
+      }
+    }
+  }
+  
+  // Axis labels
+  ctx.fillStyle = '#666';
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Scale →', width/2, height - 3);
+  ctx.save();
+  ctx.translate(10, height/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText('Strength →', 0, 0);
+  ctx.restore();
+}
+
+function renderRadiusChart() {
+  const canvas = document.getElementById('radiusChart');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  ctx.fillStyle = '#0d0d14';
+  ctx.fillRect(0, 0, width, height);
+  
+  if (!analysisData.samplePaths.euc.length) return;
+  
+  const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+  const chartW = width - margin.left - margin.right;
+  const chartH = height - margin.top - margin.bottom;
+  
+  // Draw axes
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, height - margin.bottom);
+  ctx.lineTo(width - margin.right, height - margin.bottom);
+  ctx.stroke();
+  
+  // Labels
+  ctx.fillStyle = '#666';
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('Step', width/2, height - 5);
+  ctx.save();
+  ctx.translate(12, height/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText('Radius', 0, 0);
+  ctx.restore();
+  
+  // Y axis marks
+  ctx.textAlign = 'right';
+  ctx.fillText('1.0', margin.left - 5, margin.top + 5);
+  ctx.fillText('0.5', margin.left - 5, margin.top + chartH/2 + 3);
+  ctx.fillText('0', margin.left - 5, height - margin.bottom + 3);
+  
+  // Plot paths
+  const maxSteps = Math.max(
+    ...analysisData.samplePaths.euc.map(p => p.length),
+    ...analysisData.samplePaths.hyp.map(p => p.length)
+  );
+  
+  analysisData.samplePaths.euc.forEach((path, i) => {
+    ctx.strokeStyle = `rgba(255, 136, 136, ${0.8 - i * 0.2})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    path.forEach((r, step) => {
+      const x = margin.left + (step / maxSteps) * chartW;
+      const y = height - margin.bottom - r * chartH;
+      if (step === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+  
+  analysisData.samplePaths.hyp.forEach((path, i) => {
+    ctx.strokeStyle = `rgba(136, 136, 255, ${0.8 - i * 0.2})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    path.forEach((r, step) => {
+      const x = margin.left + (step / maxSteps) * chartW;
+      const y = height - margin.bottom - r * chartH;
+      if (step === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+  
+  // Boundary line
+  ctx.strokeStyle = 'rgba(255, 200, 100, 0.3)';
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(margin.left, height - margin.bottom - 0.95 * chartH);
+  ctx.lineTo(width - margin.right, height - margin.bottom - 0.95 * chartH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function renderBarChart() {
+  const canvas = document.getElementById('barChart');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  ctx.fillStyle = '#0d0d14';
+  ctx.fillRect(0, 0, width, height);
+  
+  const fieldTypes = analysisData.fieldTypes;
+  const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+  const chartW = width - margin.left - margin.right;
+  const chartH = height - margin.top - margin.bottom;
+  
+  const barGroupWidth = chartW / fieldTypes.length;
+  const barWidth = barGroupWidth * 0.35;
+  
+  // Calculate averages per field type
+  const avgData = fieldTypes.map(ft => {
+    const data = analysisData.byFieldType[ft];
+    return {
+      type: ft,
+      eucAvg: data.eucBoundary.reduce((a,b) => a+b, 0) / data.eucBoundary.length,
+      hypAvg: data.hypBoundary.reduce((a,b) => a+b, 0) / data.hypBoundary.length
+    };
+  });
+  
+  const maxVal = Math.max(...avgData.flatMap(d => [d.eucAvg, d.hypAvg]), 1);
+  
+  // Draw bars
+  avgData.forEach((d, i) => {
+    const groupX = margin.left + i * barGroupWidth;
+    
+    // Euclidean bar
+    const eucH = (d.eucAvg / maxVal) * chartH;
+    ctx.fillStyle = '#f88';
+    ctx.fillRect(groupX + barGroupWidth * 0.1, height - margin.bottom - eucH, barWidth, eucH);
+    
+    // Hyperbolic bar
+    const hypH = (d.hypAvg / maxVal) * chartH;
+    ctx.fillStyle = '#88f';
+    ctx.fillRect(groupX + barGroupWidth * 0.5, height - margin.bottom - hypH, barWidth, hypH);
+    
+    // Label
+    ctx.fillStyle = '#888';
+    ctx.font = '9px system-ui';
+    ctx.textAlign = 'center';
+    const shortName = d.type.substring(0, 6);
+    ctx.fillText(shortName, groupX + barGroupWidth/2, height - margin.bottom + 15);
+  });
+  
+  // Y axis
+  ctx.strokeStyle = '#333';
+  ctx.beginPath();
+  ctx.moveTo(margin.left, margin.top);
+  ctx.lineTo(margin.left, height - margin.bottom);
+  ctx.stroke();
+  
+  ctx.fillStyle = '#666';
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'right';
+  ctx.fillText(maxVal.toFixed(0) + '%', margin.left - 5, margin.top + 10);
+  ctx.fillText('0%', margin.left - 5, height - margin.bottom);
+  
+  // Legend
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#f88';
+  ctx.fillRect(width - 80, 10, 10, 10);
+  ctx.fillStyle = '#aaa';
+  ctx.fillText('Euc', width - 65, 18);
+  ctx.fillStyle = '#88f';
+  ctx.fillRect(width - 80, 25, 10, 10);
+  ctx.fillStyle = '#aaa';
+  ctx.fillText('Hyp', width - 65, 33);
+}
+
+function renderSummary() {
+  const results = analysisData.results;
+  
+  const avgEucBoundary = results.reduce((s, r) => s + r.eucBoundaryPct, 0) / results.length;
+  const avgHypBoundary = results.reduce((s, r) => s + r.hypBoundaryPct, 0) / results.length;
+  const avgEucRadius = results.reduce((s, r) => s + r.eucAvgRadius, 0) / results.length;
+  const avgHypRadius = results.reduce((s, r) => s + r.hypAvgRadius, 0) / results.length;
+  
+  const boundaryReduction = ((avgEucBoundary - avgHypBoundary) / avgEucBoundary * 100).toFixed(1);
+  const radiusReduction = ((avgEucRadius - avgHypRadius) / avgEucRadius * 100).toFixed(1);
+  
+  document.getElementById('summaryContent').innerHTML = `
+    <div class="metric-row" style="font-weight: bold; border-bottom: 2px solid #333;">
+      <div class="metric-label">Metric</div>
+      <div class="metric-euc">Euclidean</div>
+      <div class="metric-hyp">Hyperbolic</div>
+      <div class="metric-diff">Δ (Euc-Hyp)</div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">Avg. Boundary Reach %</div>
+      <div class="metric-euc">${avgEucBoundary.toFixed(1)}%</div>
+      <div class="metric-hyp">${avgHypBoundary.toFixed(1)}%</div>
+      <div class="metric-diff">+${(avgEucBoundary - avgHypBoundary).toFixed(1)}%</div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">Avg. Final Radius</div>
+      <div class="metric-euc">${avgEucRadius.toFixed(3)}</div>
+      <div class="metric-hyp">${avgHypRadius.toFixed(3)}</div>
+      <div class="metric-diff">+${(avgEucRadius - avgHypRadius).toFixed(3)}</div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">Containment Improvement</div>
+      <div class="metric-euc">—</div>
+      <div class="metric-hyp">${boundaryReduction}% fewer escape</div>
+      <div class="metric-diff"></div>
+    </div>
+    <div class="metric-row">
+      <div class="metric-label">Combinations Analyzed</div>
+      <div class="metric-euc" colspan="3" style="grid-column: 2 / -1;">${results.length}</div>
+    </div>
+  `;
+}
+
+function generateFindings() {
+  const results = analysisData.results;
+  
+  const avgEucBoundary = results.reduce((s, r) => s + r.eucBoundaryPct, 0) / results.length;
+  const avgHypBoundary = results.reduce((s, r) => s + r.hypBoundaryPct, 0) / results.length;
+  
+  // Find max divergence
+  const maxDivergence = results.reduce((max, r) => 
+    r.boundaryDiff > max.boundaryDiff ? r : max, results[0]);
+  
+  // Find field type with biggest difference
+  const byType = {};
+  analysisData.fieldTypes.forEach(ft => {
+    const typeResults = results.filter(r => r.fieldType === ft);
+    const avgDiff = typeResults.reduce((s, r) => s + r.boundaryDiff, 0) / typeResults.length;
+    byType[ft] = avgDiff;
+  });
+  const bestType = Object.entries(byType).sort((a, b) => b[1] - a[1])[0];
+  
+  // Check if hypothesis holds
+  const hypothesisHolds = avgEucBoundary > avgHypBoundary;
+  
+  document.getElementById('findings').innerHTML = `
+    <strong>Primary Finding:</strong> ${hypothesisHolds ? '✓ CONFIRMED' : '✗ NOT CONFIRMED'} — 
+    Hyperbolic geometry ${hypothesisHolds ? 'does' : 'does not'} create a "soft wall" containment effect.<br><br>
+    
+    <strong>Quantitative Result:</strong> Across ${results.length} parameter combinations, 
+    hyperbolic paths reached the boundary ${avgHypBoundary.toFixed(1)}% of the time, 
+    compared to ${avgEucBoundary.toFixed(1)}% for Euclidean paths — 
+    a <strong>${((avgEucBoundary - avgHypBoundary) / avgEucBoundary * 100).toFixed(1)}% reduction</strong> in boundary escape.<br><br>
+    
+    <strong>Maximum Divergence:</strong> At field strength ${maxDivergence.strength.toFixed(1)} 
+    and scale ${maxDivergence.scale.toFixed(1)} (${maxDivergence.fieldType}), 
+    the difference was ${maxDivergence.boundaryDiff.toFixed(1)} percentage points.<br><br>
+    
+    <strong>Best Field Type:</strong> "${bestType[0]}" showed the largest geometric divergence, 
+    with Euclidean paths escaping ${bestType[1].toFixed(1)} percentage points more often than hyperbolic.<br><br>
+    
+    <strong>Interpretation:</strong> The conformal factor (1-|z|²)/2 in hyperbolic geometry 
+    attenuates steps near the disk boundary, creating natural containment that does not exist in flat Euclidean space.
+  `;
+}
+
+// ============================================
+// EXPORT
+// ============================================
+
+function exportCSV() {
+  if (!analysisData) {
+    alert('Run analysis first');
+    return;
+  }
+  
+  let csv = 'strength,scale,fieldType,eucBoundaryPct,hypBoundaryPct,eucAvgRadius,hypAvgRadius,boundaryDiff,radiusDiff\n';
+  analysisData.results.forEach(r => {
+    csv += `${r.strength},${r.scale},${r.fieldType},${r.eucBoundaryPct},${r.hypBoundaryPct},${r.eucAvgRadius},${r.hypAvgRadius},${r.boundaryDiff},${r.radiusDiff}\n`;
+  });
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `flow-field-analysis-${Date.now()}.csv`;
+  link.click();
+}
+
+function exportReport() {
+  if (!analysisData) {
+    alert('Run analysis first');
+    return;
+  }
+  
+  const findings = document.getElementById('findings').innerText;
+  const summary = document.getElementById('summaryContent').innerText;
+  
+  const report = `
+FLOW FIELD GEOMETRIC CONTAINMENT ANALYSIS
+==========================================
+Generated: ${new Date().toISOString()}
+
+PARAMETERS
+----------
+Field Strength Range: ${analysisData.params.strengthMin} - ${analysisData.params.strengthMax}
+Field Scale Range: ${analysisData.params.scaleMin} - ${analysisData.params.scaleMax}
+Points per Trial: ${analysisData.params.pointsPerTrial}
+Path Steps: ${analysisData.params.pathSteps}
+Field Types: ${analysisData.fieldTypes.join(', ')}
+Total Combinations: ${analysisData.results.length}
+
+SUMMARY
+-------
+${summary}
+
+FINDINGS
+--------
+${findings}
+
+METHODOLOGY
+-----------
+For each parameter combination:
+1. Generate ${analysisData.params.pointsPerTrial} points via phyllotaxis (golden angle)
+2. Trace flow paths for ${analysisData.params.pathSteps} steps
+3. Measure: final radius, whether path reached boundary (r > 0.95)
+4. Compare Euclidean (flat metric) vs Hyperbolic (Poincaré disk metric)
+
+The hyperbolic step uses conformal factor (1-|z|²)/2, which attenuates
+movement near the boundary.
+
+RAW DATA
+--------
+See exported CSV for full dataset.
+`;
+  
+  const blob = new Blob([report], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `flow-field-report-${Date.now()}.txt`;
+  link.click();
+}
+
+// ============================================
+// UI SETUP
+// ============================================
+
+function setupUI() {
+  const updateValues = () => {
+    document.getElementById('valStrengthSteps').textContent = document.getElementById('strengthSteps').value;
+    document.getElementById('valScaleSteps').textContent = document.getElementById('scaleSteps').value;
+    document.getElementById('valPointsPerTrial').textContent = document.getElementById('pointsPerTrial').value;
+    document.getElementById('valPathSteps').textContent = document.getElementById('pathSteps').value;
+    document.getElementById('valStrengthRange').textContent = 
+      parseFloat(document.getElementById('strengthMin').value).toFixed(1) + ' - ' +
+      parseFloat(document.getElementById('strengthMax').value).toFixed(1);
+    document.getElementById('valScaleRange').textContent = 
+      parseFloat(document.getElementById('scaleMin').value).toFixed(1) + ' - ' +
+      parseFloat(document.getElementById('scaleMax').value).toFixed(1);
+    
+    // Update estimated time
+    const combos = parseInt(document.getElementById('strengthSteps').value) *
+                   parseInt(document.getElementById('scaleSteps').value) * 6;
+    const estTime = (combos * 0.05).toFixed(1);
+    document.getElementById('stats').innerHTML = `
+      <strong>Analysis Status:</strong> Ready<br>
+      <strong>Combinations:</strong> ~${combos}<br>
+      <strong>Estimated time:</strong> ~${estTime}s
+    `;
+  };
+  
+  ['strengthSteps', 'scaleSteps', 'pointsPerTrial', 'pathSteps', 
+   'strengthMin', 'strengthMax', 'scaleMin', 'scaleMax'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateValues);
+  });
+  
+  document.getElementById('runAnalysis').addEventListener('click', runAnalysis);
+  document.getElementById('exportCSV').addEventListener('click', exportCSV);
+  document.getElementById('exportReport').addEventListener('click', exportReport);
+  
+  updateValues();
+}
+
+setupUI();
+</script>
+</body>
+</html>

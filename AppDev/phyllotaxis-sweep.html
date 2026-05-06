@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Phyllotaxis Anomaly Detector â€” Parameter Sweep</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #0a0a0f; 
+      color: #e0e0e0;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 { 
+      font-size: 20px; 
+      margin: 0 0 4px 0; 
+      color: #7fdbca;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .controls {
+      background: #12121a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .control-group label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .control-group input, .control-group select {
+      padding: 8px 12px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 13px;
+      width: 120px;
+    }
+    .control-group input:focus, .control-group select:focus {
+      outline: none;
+      border-color: #7fdbca;
+    }
+    button {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #7fdbca 0%, #4a9c8c 100%);
+      border: none;
+      border-radius: 6px;
+      color: #0a0a0f;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover {
+      filter: brightness(1.1);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .progress {
+      font-size: 12px;
+      color: #7fdbca;
+      margin-left: 12px;
+    }
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .chart-container {
+      background: #12121a;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .chart-title {
+      font-size: 13px;
+      color: #7fdbca;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    canvas {
+      background: #0a0a0f;
+      border-radius: 4px;
+    }
+    .anomalies {
+      background: #12121a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .anomalies h3 {
+      font-size: 13px;
+      color: #7fdbca;
+      margin: 0 0 12px 0;
+    }
+    .anomaly-list {
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .anomaly-item {
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+    }
+    .anomaly-item.high {
+      background: rgba(255, 100, 100, 0.2);
+      border-left: 3px solid #f66;
+    }
+    .anomaly-item.medium {
+      background: rgba(255, 200, 100, 0.2);
+      border-left: 3px solid #fa8;
+    }
+    .anomaly-item.low {
+      background: rgba(100, 200, 150, 0.15);
+      border-left: 3px solid #7fdbca;
+    }
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: #12121a;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .stat {
+      color: #888;
+    }
+    .stat span {
+      color: #7fdbca;
+      font-weight: 600;
+    }
+    .thumbnails {
+      background: #12121a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .thumbnails h3 {
+      font-size: 13px;
+      color: #7fdbca;
+      margin: 0 0 12px 0;
+    }
+    .thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .thumb-item {
+      background: #0a0a0f;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 1px solid #2a2a3a;
+    }
+    .thumb-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 20px rgba(127, 219, 202, 0.2);
+      border-color: #7fdbca;
+    }
+    .thumb-item canvas {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 4px;
+    }
+    .thumb-label {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 6px;
+      text-align: center;
+    }
+    .thumb-label strong {
+      color: #7fdbca;
+      font-size: 13px;
+    }
+    .thumb-label .zscore {
+      color: #f66;
+      font-size: 10px;
+    }
+    /* Modal for enlarged view */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal canvas {
+      border-radius: 12px;
+      box-shadow: 0 10px 60px rgba(0, 0, 0, 0.5);
+    }
+    .modal-info {
+      color: #e0e0e0;
+      font-size: 14px;
+      text-align: center;
+    }
+    .modal-info strong {
+      color: #7fdbca;
+      font-size: 18px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 32px;
+      cursor: pointer;
+      padding: 0;
+      width: auto;
+    }
+    .modal-close:hover {
+      color: #fff;
+    }
+    .modal-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .modal-controls button {
+      padding: 8px 16px;
+      font-size: 12px;
+      width: auto;
+    }
+    .modal-controls input[type="range"] {
+      width: 120px;
+      background: #2a2a3a;
+      border-radius: 4px;
+      height: 6px;
+      -webkit-appearance: none;
+    }
+    .modal-controls input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #7fdbca;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .modal-controls label {
+      font-size: 11px;
+      color: #888;
+    }
+    .heatmap-section {
+      background: #12121a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .heatmap-section h3 {
+      font-size: 13px;
+      color: #7fdbca;
+      margin: 0 0 12px 0;
+    }
+    .heatmap-controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    .heatmap-controls .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .heatmap-controls .control-group label {
+      font-size: 10px;
+      color: #666;
+      text-transform: uppercase;
+    }
+    .heatmap-controls .control-group input {
+      width: 80px;
+      padding: 6px 8px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+    }
+    .heatmap-controls button {
+      padding: 8px 16px;
+      font-size: 12px;
+      width: auto;
+    }
+    .heatmap-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .heatmap-canvas-wrap {
+      position: relative;
+    }
+    .heatmap-canvas-wrap canvas {
+      border-radius: 4px;
+      cursor: crosshair;
+    }
+    .heatmap-tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      border: 1px solid #7fdbca;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 11px;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .heatmap-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 10px;
+      color: #888;
+    }
+    .heatmap-legend .gradient {
+      width: 20px;
+      height: 150px;
+      border-radius: 2px;
+    }
+    .heatmap-preview {
+      background: #0a0a0f;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .heatmap-preview canvas {
+      border-radius: 4px;
+    }
+    .heatmap-preview-label {
+      font-size: 11px;
+      color: #888;
+      margin-top: 8px;
+    }
+    .heatmap-preview-label strong {
+      color: #7fdbca;
+    }
+    /* Catalog styles */
+    .catalog-section {
+      background: #12121a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .catalog-section h3 {
+      font-size: 13px;
+      color: #7fdbca;
+      margin: 0 0 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .catalog-section h3 button {
+      padding: 6px 12px;
+      font-size: 11px;
+      width: auto;
+    }
+    .catalog-group {
+      margin-bottom: 24px;
+    }
+    .catalog-group-header {
+      font-size: 12px;
+      color: #fa8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #2a2a3a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .catalog-group-header .count {
+      background: #2a2a3a;
+      color: #888;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+    }
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .catalog-item {
+      background: #0a0a0f;
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid #2a2a3a;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .catalog-item:hover {
+      border-color: #7fdbca;
+      box-shadow: 0 4px 20px rgba(127, 219, 202, 0.15);
+    }
+    .catalog-item.starred {
+      border-color: #fa8;
+      background: #1a1510;
+    }
+    .catalog-item.starred .star-btn {
+      color: #fa8;
+    }
+    .catalog-item canvas {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .catalog-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    .catalog-item-info {
+      flex: 1;
+    }
+    .catalog-item-angle {
+      font-size: 14px;
+      font-weight: 600;
+      color: #7fdbca;
+    }
+    .catalog-item-type {
+      font-size: 10px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .catalog-item-name {
+      font-size: 11px;
+      color: #e0e0e0;
+      margin-top: 4px;
+      cursor: text;
+      padding: 2px 4px;
+      border-radius: 3px;
+      border: 1px solid transparent;
+      min-height: 18px;
+    }
+    .catalog-item-name:hover {
+      background: #1a1a24;
+      border-color: #2a2a3a;
+    }
+    .catalog-item-name:focus {
+      outline: none;
+      background: #1a1a24;
+      border-color: #7fdbca;
+    }
+    .catalog-item-name:empty:before {
+      content: attr(placeholder);
+      color: #555;
+      font-style: italic;
+    }
+    .catalog-item-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .star-btn, .hide-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px;
+      color: #444;
+      transition: color 0.15s;
+      width: auto;
+    }
+    .star-btn:hover {
+      color: #fa8;
+    }
+    .hide-btn:hover {
+      color: #f66;
+    }
+    .catalog-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #888;
+    }
+    .catalog-stats span {
+      color: #7fdbca;
+    }
+    .hidden-notice {
+      font-size: 11px;
+      color: #666;
+      font-style: italic;
+      margin-top: 8px;
+    }
+    .export-options {
+      display: flex;
+      gap: 8px;
+    }
+    .export-options button {
+      padding: 6px 12px;
+      font-size: 11px;
+      width: auto;
+    }
+    .heatmap-axes {
+      position: relative;
+    }
+    .heatmap-x-label {
+      text-align: center;
+      font-size: 10px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .heatmap-y-label {
+      position: absolute;
+      left: -24px;
+      top: 50%;
+      transform: rotate(-90deg) translateX(-50%);
+      transform-origin: left center;
+      font-size: 10px;
+      color: #666;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Phyllotaxis Anomaly Detector</h1>
+  <div class="subtitle">Sweep divergence angle to find structural anomalies via edge count analysis</div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label>Angle Start (Â°)</label>
+      <input type="number" id="angleStart" value="90" min="0" max="360" step="0.5">
+    </div>
+    <div class="control-group">
+      <label>Angle End (Â°)</label>
+      <input type="number" id="angleEnd" value="180" min="0" max="360" step="0.5">
+    </div>
+    <div class="control-group">
+      <label>Step (Â°)</label>
+      <input type="number" id="angleStep" value="0.5" min="0.1" max="5" step="0.1">
+    </div>
+    <div class="control-group">
+      <label>Points (N)</label>
+      <input type="number" id="pointCount" value="500" min="50" max="2000" step="50">
+    </div>
+    <div class="control-group">
+      <label>Threshold</label>
+      <input type="number" id="threshold" value="0.08" min="0.02" max="0.25" step="0.005">
+    </div>
+    <div class="control-group">
+      <label>Z-Score Threshold</label>
+      <input type="number" id="zThreshold" value="2.0" min="1.0" max="5.0" step="0.5">
+    </div>
+    <button id="runSweep">Run Sweep</button>
+    <span class="progress" id="progress"></span>
+  </div>
+
+  <div class="results">
+    <div class="chart-container">
+      <div class="chart-title">Edge Count vs. Divergence Angle</div>
+      <canvas id="chartEdgeCount" width="600" height="300"></canvas>
+    </div>
+    <div class="chart-container">
+      <div class="chart-title">Z-Score (Anomaly Magnitude)</div>
+      <canvas id="chartZScore" width="600" height="300"></canvas>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="statsBar">
+    <div class="stat">Samples: <span id="statSamples">â€”</span></div>
+    <div class="stat">Mean Edge Count: <span id="statMean">â€”</span></div>
+    <div class="stat">Std Dev: <span id="statStd">â€”</span></div>
+    <div class="stat">Anomalies Found: <span id="statAnomalies">â€”</span></div>
+  </div>
+
+  <div class="anomalies">
+    <h3>Detected Anomalies</h3>
+    <div class="anomaly-list" id="anomalyList">
+      Run a sweep to detect anomalies...
+    </div>
+  </div>
+
+  <div class="thumbnails" id="thumbnailSection" style="display: none;">
+    <h3>
+      Visual Confirmation â€” Anomaly Thumbnails
+      <span style="font-size: 11px; color: #666; font-weight: normal; margin-left: 12px;">
+        (Raw view â€” see Catalog below for classified patterns)
+      </span>
+    </h3>
+    <div class="thumb-grid" id="thumbGrid"></div>
+  </div>
+
+  <!-- Pattern Catalog Section -->
+  <div class="catalog-section" id="catalogSection" style="display: none;">
+    <h3>
+      Pattern Catalog â€” Classified & Deduplicated
+      <div class="export-options">
+        <button id="exportCatalogJson">Export JSON</button>
+        <button id="exportCatalogText">Export Summary</button>
+        <button id="showAllPatterns">Show Hidden</button>
+      </div>
+    </h3>
+    
+    <div class="catalog-stats" id="catalogStats">
+      Total: <span>â€”</span> | 
+      Unique: <span>â€”</span> | 
+      Starred: <span>â€”</span> | 
+      Hidden: <span>â€”</span>
+    </div>
+    
+    <div id="catalogContent"></div>
+  </div>
+
+  <!-- Modal for enlarged view with morph controls -->
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">Ã—</button>
+    <canvas id="modalCanvas" width="500" height="500"></canvas>
+    <div class="modal-info" id="modalInfo"></div>
+    <div class="modal-controls" id="modalControls">
+      <button id="morphBtn">â–¶ Morph Â±5Â°</button>
+      <button id="morphStop" style="display:none;">â¹ Stop</button>
+      <label>Speed:</label>
+      <input type="range" id="morphSpeed" min="1" max="20" value="10">
+      <span id="morphSpeedLabel" style="font-size:11px; color:#7fdbca;">10 fps</span>
+    </div>
+  </div>
+
+  <!-- 2D Heatmap Section -->
+  <div class="heatmap-section" id="heatmapSection">
+    <h3>2D Parameter Heatmap â€” Angle Ã— Threshold</h3>
+    
+    <div class="heatmap-controls">
+      <div class="control-group">
+        <label>Angle Start</label>
+        <input type="number" id="hmAngleStart" value="90" step="1">
+      </div>
+      <div class="control-group">
+        <label>Angle End</label>
+        <input type="number" id="hmAngleEnd" value="180" step="1">
+      </div>
+      <div class="control-group">
+        <label>Angle Steps</label>
+        <input type="number" id="hmAngleSteps" value="45" step="1">
+      </div>
+      <div class="control-group">
+        <label>Thresh Start</label>
+        <input type="number" id="hmThreshStart" value="0.03" step="0.01">
+      </div>
+      <div class="control-group">
+        <label>Thresh End</label>
+        <input type="number" id="hmThreshEnd" value="0.15" step="0.01">
+      </div>
+      <div class="control-group">
+        <label>Thresh Steps</label>
+        <input type="number" id="hmThreshSteps" value="25" step="1">
+      </div>
+      <button id="runHeatmap">Generate Heatmap</button>
+      <span class="progress" id="heatmapProgress"></span>
+    </div>
+    
+    <div class="heatmap-container">
+      <div class="heatmap-axes">
+        <div class="heatmap-y-label">Threshold â†’</div>
+        <div class="heatmap-canvas-wrap">
+          <canvas id="heatmapCanvas" width="450" height="250"></canvas>
+          <div class="heatmap-tooltip" id="heatmapTooltip"></div>
+        </div>
+        <div class="heatmap-x-label">Divergence Angle â†’</div>
+      </div>
+      
+      <div class="heatmap-legend">
+        <span>High</span>
+        <div class="gradient" id="heatmapGradient"></div>
+        <span>Low</span>
+        <span style="margin-top:8px; color:#666;">Edge Count</span>
+      </div>
+      
+      <div class="heatmap-preview">
+        <canvas id="heatmapPreview" width="150" height="150"></canvas>
+        <div class="heatmap-preview-label" id="heatmapPreviewLabel">
+          Hover or click heatmap
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/** ---------- Phyllotaxis Generation (from phyllotaxis-web.html) ---------- **/
+
+function generatePhyllotaxis(N, angleDeg, scale = 1.0) {
+  const angleRad = angleDeg * Math.PI / 180;
+  const pts = new Array(N);
+  
+  for (let i = 0; i < N; i++) {
+    // Vogel's model: r = c * sqrt(n), Î¸ = n * angle
+    const r = scale * Math.sqrt(i) / Math.sqrt(N); // Normalize to ~[0,1]
+    const theta = i * angleRad;
+    
+    pts[i] = {
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      r: r,
+      theta: theta
+    };
+  }
+  
+  return pts;
+}
+
+/** ---------- Connection Algorithm (from phyllotaxis-web.html) ---------- **/
+
+function proximityConnections(pts, threshold, maxConn = 20) {
+  const edges = [];
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    const candidates = [];
+    
+    for (let j = i + 1; j < pts.length; j++) {
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist < threshold) {
+        candidates.push({ j, dist });
+      }
+    }
+    
+    // Sort by distance, take up to maxConn
+    candidates.sort((a, b) => a.dist - b.dist);
+    
+    for (const c of candidates) {
+      if (degree[i] >= maxConn || degree[c.j] >= maxConn) continue;
+      edges.push({ i, j: c.j, dist: c.dist });
+      degree[i]++;
+      degree[c.j]++;
+    }
+  }
+  
+  return edges;
+}
+
+/** ---------- Metrics ---------- **/
+
+function computeMetrics(pts, edges) {
+  const N = pts.length;
+  
+  // Edge count (simplest metric)
+  const edgeCount = edges.length;
+  
+  // Degree distribution
+  const degree = new Array(N).fill(0);
+  for (const e of edges) {
+    degree[e.i]++;
+    degree[e.j]++;
+  }
+  
+  const avgDegree = degree.reduce((a, b) => a + b, 0) / N;
+  const maxDegree = Math.max(...degree);
+  
+  // Degree variance
+  const degreeVariance = degree.reduce((sum, d) => sum + Math.pow(d - avgDegree, 2), 0) / N;
+  
+  return {
+    edgeCount,
+    avgDegree,
+    maxDegree,
+    degreeVariance
+  };
+}
+
+/** ---------- Anomaly Detection ---------- **/
+
+function detectAnomalies(sweepResults, zThreshold) {
+  const edgeCounts = sweepResults.map(r => r.metrics.edgeCount);
+  
+  // Compute mean and standard deviation
+  const mean = edgeCounts.reduce((a, b) => a + b, 0) / edgeCounts.length;
+  const variance = edgeCounts.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / edgeCounts.length;
+  const std = Math.sqrt(variance);
+  
+  // Compute z-scores and flag anomalies
+  const anomalies = [];
+  
+  for (let i = 0; i < sweepResults.length; i++) {
+    const edgeCount = sweepResults[i].metrics.edgeCount;
+    const zScore = std > 0 ? (edgeCount - mean) / std : 0;
+    
+    sweepResults[i].zScore = zScore;
+    
+    if (Math.abs(zScore) > zThreshold) {
+      anomalies.push({
+        angle: sweepResults[i].angle,
+        edgeCount,
+        zScore,
+        direction: zScore > 0 ? 'spike' : 'drop',
+        severity: Math.abs(zScore) > 4 ? 'high' : Math.abs(zScore) > 3 ? 'medium' : 'low'
+      });
+    }
+  }
+  
+  return { anomalies, mean, std };
+}
+
+/** ---------- Sweep Execution ---------- **/
+
+async function runSweep() {
+  const angleStart = parseFloat(document.getElementById('angleStart').value);
+  const angleEnd = parseFloat(document.getElementById('angleEnd').value);
+  const angleStep = parseFloat(document.getElementById('angleStep').value);
+  const N = parseInt(document.getElementById('pointCount').value);
+  const threshold = parseFloat(document.getElementById('threshold').value);
+  const zThreshold = parseFloat(document.getElementById('zThreshold').value);
+  
+  const progressEl = document.getElementById('progress');
+  const runButton = document.getElementById('runSweep');
+  
+  runButton.disabled = true;
+  
+  const sweepResults = [];
+  const totalSteps = Math.ceil((angleEnd - angleStart) / angleStep) + 1;
+  let step = 0;
+  
+  for (let angle = angleStart; angle <= angleEnd; angle += angleStep) {
+    // Generate points and edges
+    const pts = generatePhyllotaxis(N, angle);
+    const edges = proximityConnections(pts, threshold);
+    const metrics = computeMetrics(pts, edges);
+    
+    sweepResults.push({
+      angle: Math.round(angle * 10) / 10, // Round to 1 decimal
+      metrics
+    });
+    
+    step++;
+    progressEl.textContent = `${step}/${totalSteps} (${angle.toFixed(1)}Â°)`;
+    
+    // Yield to UI every 10 steps
+    if (step % 10 === 0) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+  
+  // Detect anomalies
+  const { anomalies, mean, std } = detectAnomalies(sweepResults, zThreshold);
+  
+  // Update stats
+  document.getElementById('statSamples').textContent = sweepResults.length;
+  document.getElementById('statMean').textContent = mean.toFixed(1);
+  document.getElementById('statStd').textContent = std.toFixed(1);
+  document.getElementById('statAnomalies').textContent = anomalies.length;
+  
+  // Draw charts
+  drawEdgeCountChart(sweepResults, anomalies);
+  drawZScoreChart(sweepResults, zThreshold);
+  
+  // Display anomalies
+  displayAnomalies(anomalies);
+  
+  // Create visual thumbnails (original grid)
+  createThumbnails(anomalies, N, threshold);
+  
+  // Build and render pattern catalog
+  buildCatalog(anomalies, N, threshold);
+  renderCatalog(N, threshold);
+  
+  progressEl.textContent = 'Complete';
+  runButton.disabled = false;
+  
+  // Log to console for data export
+  console.log('Sweep Results:', sweepResults);
+  console.log('Anomalies:', anomalies);
+}
+
+/** ---------- Charting ---------- **/
+
+function drawEdgeCountChart(sweepResults, anomalies) {
+  const canvas = document.getElementById('chartEdgeCount');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+  
+  const padding = { left: 50, right: 20, top: 20, bottom: 40 };
+  const plotW = W - padding.left - padding.right;
+  const plotH = H - padding.top - padding.bottom;
+  
+  // Find data range
+  const angles = sweepResults.map(r => r.angle);
+  const edgeCounts = sweepResults.map(r => r.metrics.edgeCount);
+  
+  const minAngle = Math.min(...angles);
+  const maxAngle = Math.max(...angles);
+  const minEdge = Math.min(...edgeCounts) * 0.9;
+  const maxEdge = Math.max(...edgeCounts) * 1.1;
+  
+  // Scale functions
+  const xScale = (angle) => padding.left + (angle - minAngle) / (maxAngle - minAngle) * plotW;
+  const yScale = (edge) => padding.top + plotH - (edge - minEdge) / (maxEdge - minEdge) * plotH;
+  
+  // Draw grid
+  ctx.strokeStyle = '#1a1a24';
+  ctx.lineWidth = 1;
+  
+  // Horizontal grid lines
+  for (let i = 0; i <= 5; i++) {
+    const y = padding.top + (plotH / 5) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(W - padding.right, y);
+    ctx.stroke();
+  }
+  
+  // Draw axes
+  ctx.strokeStyle = '#2a2a3a';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padding.left, padding.top);
+  ctx.lineTo(padding.left, H - padding.bottom);
+  ctx.lineTo(W - padding.right, H - padding.bottom);
+  ctx.stroke();
+  
+  // Draw data line
+  ctx.strokeStyle = '#7fdbca';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  
+  for (let i = 0; i < sweepResults.length; i++) {
+    const x = xScale(sweepResults[i].angle);
+    const y = yScale(sweepResults[i].metrics.edgeCount);
+    
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+  ctx.stroke();
+  
+  // Mark anomalies
+  const anomalyAngles = new Set(anomalies.map(a => a.angle));
+  
+  for (const result of sweepResults) {
+    if (anomalyAngles.has(result.angle)) {
+      const x = xScale(result.angle);
+      const y = yScale(result.metrics.edgeCount);
+      
+      ctx.fillStyle = '#f66';
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  // Axis labels
+  ctx.fillStyle = '#666';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  
+  // X-axis labels
+  for (let angle = Math.ceil(minAngle / 10) * 10; angle <= maxAngle; angle += 10) {
+    const x = xScale(angle);
+    ctx.fillText(angle + 'Â°', x, H - padding.bottom + 16);
+  }
+  
+  // Y-axis labels
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 5; i++) {
+    const edge = minEdge + (maxEdge - minEdge) * (1 - i / 5);
+    const y = padding.top + (plotH / 5) * i;
+    ctx.fillText(Math.round(edge), padding.left - 8, y + 4);
+  }
+}
+
+function drawZScoreChart(sweepResults, zThreshold) {
+  const canvas = document.getElementById('chartZScore');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+  
+  const padding = { left: 50, right: 20, top: 20, bottom: 40 };
+  const plotW = W - padding.left - padding.right;
+  const plotH = H - padding.top - padding.bottom;
+  
+  // Find data range
+  const angles = sweepResults.map(r => r.angle);
+  const zScores = sweepResults.map(r => r.zScore || 0);
+  
+  const minAngle = Math.min(...angles);
+  const maxAngle = Math.max(...angles);
+  const maxZ = Math.max(Math.abs(Math.min(...zScores)), Math.abs(Math.max(...zScores)), zThreshold * 1.2);
+  
+  // Scale functions
+  const xScale = (angle) => padding.left + (angle - minAngle) / (maxAngle - minAngle) * plotW;
+  const yScale = (z) => padding.top + plotH / 2 - (z / maxZ) * (plotH / 2);
+  
+  // Draw threshold bands
+  ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
+  ctx.fillRect(padding.left, padding.top, plotW, yScale(zThreshold) - padding.top);
+  ctx.fillRect(padding.left, yScale(-zThreshold), plotW, H - padding.bottom - yScale(-zThreshold));
+  
+  // Draw zero line
+  ctx.strokeStyle = '#2a2a3a';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padding.left, yScale(0));
+  ctx.lineTo(W - padding.right, yScale(0));
+  ctx.stroke();
+  
+  // Draw threshold lines
+  ctx.strokeStyle = '#f66';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padding.left, yScale(zThreshold));
+  ctx.lineTo(W - padding.right, yScale(zThreshold));
+  ctx.moveTo(padding.left, yScale(-zThreshold));
+  ctx.lineTo(W - padding.right, yScale(-zThreshold));
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Draw data
+  for (let i = 0; i < sweepResults.length; i++) {
+    const x = xScale(sweepResults[i].angle);
+    const z = sweepResults[i].zScore || 0;
+    const y = yScale(z);
+    
+    // Draw bar
+    const barColor = Math.abs(z) > zThreshold ? '#f66' : '#7fdbca';
+    ctx.fillStyle = barColor;
+    ctx.fillRect(x - 1, Math.min(y, yScale(0)), 2, Math.abs(y - yScale(0)));
+  }
+  
+  // Axis labels
+  ctx.fillStyle = '#666';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  
+  // X-axis labels
+  for (let angle = Math.ceil(minAngle / 10) * 10; angle <= maxAngle; angle += 10) {
+    const x = xScale(angle);
+    ctx.fillText(angle + 'Â°', x, H - padding.bottom + 16);
+  }
+  
+  // Y-axis labels
+  ctx.textAlign = 'right';
+  ctx.fillText('+' + maxZ.toFixed(1), padding.left - 8, padding.top + 10);
+  ctx.fillText('0', padding.left - 8, yScale(0) + 4);
+  ctx.fillText('-' + maxZ.toFixed(1), padding.left - 8, H - padding.bottom - 4);
+}
+
+function displayAnomalies(anomalies) {
+  const listEl = document.getElementById('anomalyList');
+  
+  if (anomalies.length === 0) {
+    listEl.innerHTML = '<div style="color:#666;">No anomalies detected above threshold.</div>';
+    return;
+  }
+  
+  // Sort by z-score magnitude
+  anomalies.sort((a, b) => Math.abs(b.zScore) - Math.abs(a.zScore));
+  
+  listEl.innerHTML = anomalies.map(a => `
+    <div class="anomaly-item ${a.severity}">
+      <strong>${a.angle.toFixed(1)}Â°</strong> â€” 
+      Edge Count: ${a.edgeCount} | 
+      Z-Score: ${a.zScore > 0 ? '+' : ''}${a.zScore.toFixed(2)} | 
+      ${a.direction === 'spike' ? 'ðŸ“ˆ Spike' : 'ðŸ“‰ Drop'}
+    </div>
+  `).join('');
+}
+
+/** ---------- Pattern Classification ---------- **/
+
+const GOLDEN_ANGLE = 137.5077;
+
+function classifyPattern(angle) {
+  // Canonical angle (0-180 range, mirror equivalence)
+  const canonical = angle > 180 ? 360 - angle : angle;
+  
+  // Check for golden family first
+  const goldenDist = Math.abs(canonical - GOLDEN_ANGLE);
+  if (goldenDist < 1.0) {
+    return {
+      type: 'golden',
+      category: 'Golden Family',
+      name: 'Golden Web',
+      fold: null,
+      confidence: 'high'
+    };
+  }
+  if (goldenDist < 3.0) {
+    return {
+      type: 'near-golden',
+      category: 'Golden Family', 
+      name: 'Near-Golden',
+      fold: null,
+      confidence: 'medium'
+    };
+  }
+  
+  // Check for bilateral/alternating
+  if (Math.abs(canonical - 180) < 1.0) {
+    return {
+      type: 'bilateral',
+      category: 'Bilateral',
+      name: '2-Fold Collapse',
+      fold: 2,
+      confidence: 'high'
+    };
+  }
+  if (Math.abs(canonical - 180) < 3.0) {
+    return {
+      type: 'alternating-spiral',
+      category: 'Bilateral',
+      name: 'Alternating Spiral',
+      fold: 2,
+      confidence: 'medium'
+    };
+  }
+  
+  // Check for n-fold patterns
+  const ratio = 360 / canonical;
+  const nearestInt = Math.round(ratio);
+  const intDist = Math.abs(ratio - nearestInt);
+  
+  // Perfect n-fold star (integer ratio)
+  if (intDist < 0.02 && nearestInt >= 2 && nearestInt <= 36) {
+    const isCollapse = nearestInt <= 4;
+    return {
+      type: isCollapse ? 'collapse' : 'star',
+      category: 'Star Patterns',
+      name: `${nearestInt}-Fold ${isCollapse ? 'Collapse' : 'Star'}`,
+      fold: nearestInt,
+      confidence: 'high'
+    };
+  }
+  
+  // Near n-fold spiral (close to integer)
+  if (intDist < 0.15 && nearestInt >= 3 && nearestInt <= 20) {
+    return {
+      type: 'spiral',
+      category: 'Spiral Patterns',
+      name: `${nearestInt}-Arm Spiral`,
+      fold: nearestInt,
+      confidence: 'medium'
+    };
+  }
+  
+  // Check for rational p/q patterns (pinwheels)
+  for (let q = 2; q <= 12; q++) {
+    for (let p = 1; p < q; p++) {
+      if (gcd(p, q) !== 1) continue; // Skip non-reduced fractions
+      
+      const targetAngle = 360 * p / q;
+      if (Math.abs(canonical - targetAngle) < 1.5) {
+        return {
+          type: 'pinwheel',
+          category: 'Pinwheel Patterns',
+          name: `${q}-Blade Pinwheel`,
+          fold: q,
+          fraction: `${p}/${q}`,
+          confidence: 'medium'
+        };
+      }
+    }
+  }
+  
+  // Unclassified - potentially interesting discovery
+  return {
+    type: 'unclassified',
+    category: 'Discoveries',
+    name: `Pattern @ ${canonical.toFixed(1)}Â°`,
+    fold: null,
+    confidence: 'low'
+  };
+}
+
+function gcd(a, b) {
+  a = Math.abs(Math.round(a));
+  b = Math.abs(Math.round(b));
+  while (b) {
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+
+function getEquivalenceKey(angle) {
+  // Canonical angle in 0-180 range
+  const canonical = angle > 180 ? 360 - angle : angle;
+  // Round to 0.5Â° precision for grouping
+  return Math.round(canonical * 2) / 2;
+}
+
+/** ---------- Catalog State ---------- **/
+
+let catalogData = {
+  items: [],      // All classified patterns
+  starred: new Set(),
+  hidden: new Set(),
+  customNames: {} // angle -> custom name
+};
+
+function buildCatalog(anomalies, N, threshold) {
+  // Group by equivalence class
+  const equivalenceGroups = new Map();
+  
+  for (const anomaly of anomalies) {
+    const key = getEquivalenceKey(anomaly.angle);
+    
+    if (!equivalenceGroups.has(key)) {
+      equivalenceGroups.set(key, []);
+    }
+    equivalenceGroups.get(key).push(anomaly);
+  }
+  
+  // Take best representative from each group (highest z-score)
+  const uniquePatterns = [];
+  
+  for (const [key, group] of equivalenceGroups) {
+    // Sort by z-score magnitude, take highest
+    group.sort((a, b) => Math.abs(b.zScore) - Math.abs(a.zScore));
+    const representative = group[0];
+    
+    // Classify
+    const classification = classifyPattern(representative.angle);
+    
+    uniquePatterns.push({
+      angle: representative.angle,
+      canonicalAngle: key,
+      zScore: representative.zScore,
+      edgeCount: representative.edgeCount,
+      equivalentCount: group.length,
+      ...classification
+    });
+  }
+  
+  // Sort by category, then by fold/angle
+  uniquePatterns.sort((a, b) => {
+    const catOrder = ['Star Patterns', 'Spiral Patterns', 'Pinwheel Patterns', 'Bilateral', 'Golden Family', 'Discoveries'];
+    const catA = catOrder.indexOf(a.category);
+    const catB = catOrder.indexOf(b.category);
+    if (catA !== catB) return catA - catB;
+    if (a.fold && b.fold) return a.fold - b.fold;
+    return a.angle - b.angle;
+  });
+  
+  catalogData.items = uniquePatterns;
+  
+  return uniquePatterns;
+}
+
+function renderCatalog(N, threshold) {
+  const section = document.getElementById('catalogSection');
+  const content = document.getElementById('catalogContent');
+  
+  if (catalogData.items.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  
+  section.style.display = 'block';
+  
+  // Group by category
+  const byCategory = new Map();
+  for (const item of catalogData.items) {
+    if (!byCategory.has(item.category)) {
+      byCategory.set(item.category, []);
+    }
+    byCategory.get(item.category).push(item);
+  }
+  
+  // Update stats
+  const starredCount = catalogData.starred.size;
+  const hiddenCount = catalogData.hidden.size;
+  const visibleCount = catalogData.items.filter(i => !catalogData.hidden.has(i.angle)).length;
+  
+  document.getElementById('catalogStats').innerHTML = `
+    Total: <span>${catalogData.items.length}</span> | 
+    Visible: <span>${visibleCount}</span> | 
+    Starred: <span>${starredCount}</span> | 
+    Hidden: <span>${hiddenCount}</span>
+  `;
+  
+  // Render groups
+  content.innerHTML = '';
+  
+  for (const [category, items] of byCategory) {
+    const visibleItems = items.filter(i => !catalogData.hidden.has(i.angle));
+    if (visibleItems.length === 0) continue;
+    
+    const group = document.createElement('div');
+    group.className = 'catalog-group';
+    
+    group.innerHTML = `
+      <div class="catalog-group-header">
+        ${category}
+        <span class="count">${visibleItems.length}</span>
+      </div>
+      <div class="catalog-grid" id="catalog-${category.replace(/\s+/g, '-')}"></div>
+    `;
+    
+    content.appendChild(group);
+    
+    const grid = group.querySelector('.catalog-grid');
+    
+    for (const item of visibleItems) {
+      const card = createCatalogCard(item, N, threshold);
+      grid.appendChild(card);
+    }
+  }
+}
+
+function createCatalogCard(item, N, threshold) {
+  const card = document.createElement('div');
+  card.className = 'catalog-item' + (catalogData.starred.has(item.angle) ? ' starred' : '');
+  card.dataset.angle = item.angle;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 160;
+  canvas.height = 160;
+  
+  // Render thumbnail
+  renderPhyllotaxisToCanvas(canvas, item.angle, N, threshold);
+  
+  // Click to open modal
+  canvas.addEventListener('click', () => {
+    showModal(item, N, threshold);
+    document.getElementById('modal').dataset.angle = item.angle;
+  });
+  
+  const customName = catalogData.customNames[item.angle] || '';
+  
+  card.innerHTML = `
+    <div class="catalog-item-header">
+      <div class="catalog-item-info">
+        <div class="catalog-item-angle">${item.angle.toFixed(1)}Â°</div>
+        <div class="catalog-item-type">${item.name}</div>
+        <div class="catalog-item-name" contenteditable="true" 
+             data-angle="${item.angle}" 
+             placeholder="Custom name...">${customName}</div>
+      </div>
+      <div class="catalog-item-controls">
+        <button class="star-btn" data-angle="${item.angle}" title="Star">â˜…</button>
+        <button class="hide-btn" data-angle="${item.angle}" title="Hide">Ã—</button>
+      </div>
+    </div>
+  `;
+  
+  // Insert canvas at start
+  card.insertBefore(canvas, card.firstChild);
+  
+  // Star button handler
+  card.querySelector('.star-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleStar(item.angle);
+    card.classList.toggle('starred');
+    updateCatalogStats();
+  });
+  
+  // Hide button handler
+  card.querySelector('.hide-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    hidePattern(item.angle);
+    card.remove();
+    updateCatalogStats();
+  });
+  
+  // Custom name handler
+  card.querySelector('.catalog-item-name').addEventListener('blur', (e) => {
+    const name = e.target.textContent.trim();
+    if (name) {
+      catalogData.customNames[item.angle] = name;
+    } else {
+      delete catalogData.customNames[item.angle];
+    }
+  });
+  
+  return card;
+}
+
+function toggleStar(angle) {
+  if (catalogData.starred.has(angle)) {
+    catalogData.starred.delete(angle);
+  } else {
+    catalogData.starred.add(angle);
+  }
+}
+
+function hidePattern(angle) {
+  catalogData.hidden.add(angle);
+}
+
+function showAllPatterns() {
+  catalogData.hidden.clear();
+  const N = parseInt(document.getElementById('pointCount').value);
+  const threshold = parseFloat(document.getElementById('threshold').value);
+  renderCatalog(N, threshold);
+}
+
+function updateCatalogStats() {
+  const starredCount = catalogData.starred.size;
+  const hiddenCount = catalogData.hidden.size;
+  const visibleCount = catalogData.items.filter(i => !catalogData.hidden.has(i.angle)).length;
+  
+  document.getElementById('catalogStats').innerHTML = `
+    Total: <span>${catalogData.items.length}</span> | 
+    Visible: <span>${visibleCount}</span> | 
+    Starred: <span>${starredCount}</span> | 
+    Hidden: <span>${hiddenCount}</span>
+  `;
+}
+
+/** ---------- Export Functions ---------- **/
+
+function exportCatalogJson() {
+  const exported = {
+    exportDate: new Date().toISOString(),
+    parameters: {
+      N: parseInt(document.getElementById('pointCount').value),
+      threshold: parseFloat(document.getElementById('threshold').value),
+      angleRange: [
+        parseFloat(document.getElementById('angleStart').value),
+        parseFloat(document.getElementById('angleEnd').value)
+      ]
+    },
+    patterns: catalogData.items.map(item => ({
+      angle: item.angle,
+      canonicalAngle: item.canonicalAngle,
+      category: item.category,
+      type: item.type,
+      autoName: item.name,
+      customName: catalogData.customNames[item.angle] || null,
+      fold: item.fold,
+      zScore: item.zScore,
+      edgeCount: item.edgeCount,
+      starred: catalogData.starred.has(item.angle),
+      hidden: catalogData.hidden.has(item.angle)
+    })),
+    starred: [...catalogData.starred],
+    customNames: catalogData.customNames
+  };
+  
+  const blob = new Blob([JSON.stringify(exported, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `phyllotaxis-catalog-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportCatalogText() {
+  let text = `PHYLLOTAXIS PATTERN CATALOG\n`;
+  text += `â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n\n`;
+  text += `Generated: ${new Date().toLocaleString()}\n`;
+  text += `Parameters: N=${document.getElementById('pointCount').value}, `;
+  text += `threshold=${document.getElementById('threshold').value}\n\n`;
+  
+  // Group by category
+  const byCategory = new Map();
+  for (const item of catalogData.items) {
+    if (catalogData.hidden.has(item.angle)) continue;
+    if (!byCategory.has(item.category)) {
+      byCategory.set(item.category, []);
+    }
+    byCategory.get(item.category).push(item);
+  }
+  
+  for (const [category, items] of byCategory) {
+    text += `${category.toUpperCase()}\n`;
+    text += `${'â”€'.repeat(40)}\n`;
+    
+    for (const item of items) {
+      const star = catalogData.starred.has(item.angle) ? 'â˜… ' : '  ';
+      const customName = catalogData.customNames[item.angle];
+      const displayName = customName || item.name;
+      text += `${star}${item.angle.toFixed(1).padStart(6)}Â°  ${displayName.padEnd(20)}`;
+      if (item.fold) text += `  ${item.fold}-fold`;
+      text += `\n`;
+    }
+    text += `\n`;
+  }
+  
+  // Starred summary
+  if (catalogData.starred.size > 0) {
+    text += `\nSTARRED PATTERNS (${catalogData.starred.size})\n`;
+    text += `${'â”€'.repeat(40)}\n`;
+    for (const angle of catalogData.starred) {
+      const item = catalogData.items.find(i => i.angle === angle);
+      if (item) {
+        const customName = catalogData.customNames[angle];
+        text += `â˜… ${angle.toFixed(1)}Â° â€” ${customName || item.name}\n`;
+      }
+    }
+  }
+  
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `phyllotaxis-catalog-${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Event listeners for catalog export
+document.getElementById('exportCatalogJson').addEventListener('click', exportCatalogJson);
+document.getElementById('exportCatalogText').addEventListener('click', exportCatalogText);
+document.getElementById('showAllPatterns').addEventListener('click', showAllPatterns);
+
+/** ---------- Morph Animation ---------- **/
+
+let morphAnimationId = null;
+let morphStartAngle = 137.5;
+let morphRange = 5;
+let currentMorphAngle = 0;
+let morphDirection = 1;
+let morphN = 500;
+let morphThreshold = 0.08;
+
+function startMorph(centerAngle, N, threshold) {
+  morphStartAngle = centerAngle;
+  morphN = N;
+  morphThreshold = threshold;
+  currentMorphAngle = centerAngle - morphRange;
+  morphDirection = 1;
+  
+  document.getElementById('morphBtn').style.display = 'none';
+  document.getElementById('morphStop').style.display = 'inline-block';
+  
+  morphLoop();
+}
+
+function stopMorph() {
+  if (morphAnimationId) {
+    cancelAnimationFrame(morphAnimationId);
+    morphAnimationId = null;
+  }
+  document.getElementById('morphBtn').style.display = 'inline-block';
+  document.getElementById('morphStop').style.display = 'none';
+}
+
+function morphLoop() {
+  const fps = parseInt(document.getElementById('morphSpeed').value);
+  const frameDelay = 1000 / fps;
+  
+  const canvas = document.getElementById('modalCanvas');
+  const info = document.getElementById('modalInfo');
+  
+  // Render current frame
+  const { edges } = renderPhyllotaxisToCanvas(canvas, currentMorphAngle, morphN, morphThreshold);
+  
+  const foldRatio = 360 / currentMorphAngle;
+  info.innerHTML = `
+    <strong>${currentMorphAngle.toFixed(1)}Â°</strong><br>
+    ${edges.length} edges<br>
+    <span style="color: #888;">Morphing: ${morphStartAngle - morphRange}Â° â†’ ${morphStartAngle + morphRange}Â°</span>
+  `;
+  
+  // Update angle
+  const step = 0.2;
+  currentMorphAngle += step * morphDirection;
+  
+  // Reverse at boundaries
+  if (currentMorphAngle >= morphStartAngle + morphRange) {
+    morphDirection = -1;
+  } else if (currentMorphAngle <= morphStartAngle - morphRange) {
+    morphDirection = 1;
+  }
+  
+  // Schedule next frame
+  setTimeout(() => {
+    morphAnimationId = requestAnimationFrame(morphLoop);
+  }, frameDelay);
+}
+
+// Morph control event listeners
+document.getElementById('morphBtn').addEventListener('click', () => {
+  const angle = parseFloat(document.getElementById('modal').dataset.angle || 137.5);
+  const N = parseInt(document.getElementById('pointCount').value);
+  const threshold = parseFloat(document.getElementById('threshold').value);
+  startMorph(angle, N, threshold);
+});
+
+document.getElementById('morphStop').addEventListener('click', stopMorph);
+
+document.getElementById('morphSpeed').addEventListener('input', (e) => {
+  document.getElementById('morphSpeedLabel').textContent = e.target.value + ' fps';
+});
+
+// Stop morph when modal closes
+const originalModalClose = document.getElementById('modalClose').onclick;
+document.getElementById('modalClose').addEventListener('click', () => {
+  stopMorph();
+});
+
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal')) {
+    stopMorph();
+  }
+});
+
+/** ---------- 2D Heatmap ---------- **/
+
+let heatmapData = null;
+
+async function generateHeatmap() {
+  const angleStart = parseFloat(document.getElementById('hmAngleStart').value);
+  const angleEnd = parseFloat(document.getElementById('hmAngleEnd').value);
+  const angleSteps = parseInt(document.getElementById('hmAngleSteps').value);
+  const threshStart = parseFloat(document.getElementById('hmThreshStart').value);
+  const threshEnd = parseFloat(document.getElementById('hmThreshEnd').value);
+  const threshSteps = parseInt(document.getElementById('hmThreshSteps').value);
+  const N = parseInt(document.getElementById('pointCount').value);
+  
+  const progressEl = document.getElementById('heatmapProgress');
+  const runBtn = document.getElementById('runHeatmap');
+  runBtn.disabled = true;
+  
+  const angleStep = (angleEnd - angleStart) / (angleSteps - 1);
+  const threshStep = (threshEnd - threshStart) / (threshSteps - 1);
+  
+  // Store heatmap data
+  heatmapData = {
+    angleStart, angleEnd, angleSteps,
+    threshStart, threshEnd, threshSteps,
+    N,
+    values: [],
+    minVal: Infinity,
+    maxVal: 0
+  };
+  
+  const totalCells = angleSteps * threshSteps;
+  let cellCount = 0;
+  
+  // Generate data grid
+  for (let ti = 0; ti < threshSteps; ti++) {
+    const threshold = threshStart + ti * threshStep;
+    const row = [];
+    
+    for (let ai = 0; ai < angleSteps; ai++) {
+      const angle = angleStart + ai * angleStep;
+      
+      const pts = generatePhyllotaxis(N, angle);
+      const edges = proximityConnections(pts, threshold);
+      const edgeCount = edges.length;
+      
+      row.push({ angle, threshold, edgeCount });
+      
+      if (edgeCount < heatmapData.minVal) heatmapData.minVal = edgeCount;
+      if (edgeCount > heatmapData.maxVal) heatmapData.maxVal = edgeCount;
+      
+      cellCount++;
+      if (cellCount % 20 === 0) {
+        progressEl.textContent = `${cellCount}/${totalCells}`;
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+    
+    heatmapData.values.push(row);
+  }
+  
+  progressEl.textContent = 'Rendering...';
+  await new Promise(r => setTimeout(r, 0));
+  
+  drawHeatmap();
+  
+  progressEl.textContent = 'Complete';
+  runBtn.disabled = false;
+}
+
+function valueToColor(value, min, max) {
+  const t = (value - min) / (max - min);
+  
+  // Color scale: dark blue (low) â†’ cyan â†’ yellow â†’ red (high)
+  if (t < 0.33) {
+    const u = t / 0.33;
+    return `rgb(${Math.round(20 + u * 40)}, ${Math.round(40 + u * 180)}, ${Math.round(80 + u * 140)})`;
+  } else if (t < 0.66) {
+    const u = (t - 0.33) / 0.33;
+    return `rgb(${Math.round(60 + u * 195)}, ${Math.round(220 - u * 20)}, ${Math.round(220 - u * 180)})`;
+  } else {
+    const u = (t - 0.66) / 0.34;
+    return `rgb(${Math.round(255)}, ${Math.round(200 - u * 150)}, ${Math.round(40 - u * 40)})`;
+  }
+}
+
+function drawHeatmap() {
+  if (!heatmapData) return;
+  
+  const canvas = document.getElementById('heatmapCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  
+  const { angleSteps, threshSteps, values, minVal, maxVal } = heatmapData;
+  
+  const cellW = W / angleSteps;
+  const cellH = H / threshSteps;
+  
+  // Draw cells
+  for (let ti = 0; ti < threshSteps; ti++) {
+    for (let ai = 0; ai < angleSteps; ai++) {
+      const cell = values[ti][ai];
+      const color = valueToColor(cell.edgeCount, minVal, maxVal);
+      
+      ctx.fillStyle = color;
+      ctx.fillRect(ai * cellW, ti * cellH, cellW + 1, cellH + 1);
+    }
+  }
+  
+  // Draw gradient legend
+  const gradient = document.getElementById('heatmapGradient');
+  gradient.style.background = `linear-gradient(to bottom, 
+    ${valueToColor(maxVal, minVal, maxVal)}, 
+    ${valueToColor((maxVal + minVal) / 2, minVal, maxVal)}, 
+    ${valueToColor(minVal, minVal, maxVal)})`;
+}
+
+function heatmapCoordsToCell(x, y) {
+  if (!heatmapData) return null;
+  
+  const canvas = document.getElementById('heatmapCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  
+  const cx = (x - rect.left) * scaleX;
+  const cy = (y - rect.top) * scaleY;
+  
+  const cellW = canvas.width / heatmapData.angleSteps;
+  const cellH = canvas.height / heatmapData.threshSteps;
+  
+  const ai = Math.floor(cx / cellW);
+  const ti = Math.floor(cy / cellH);
+  
+  if (ai >= 0 && ai < heatmapData.angleSteps && ti >= 0 && ti < heatmapData.threshSteps) {
+    return heatmapData.values[ti][ai];
+  }
+  return null;
+}
+
+function updateHeatmapPreview(cell) {
+  const canvas = document.getElementById('heatmapPreview');
+  const label = document.getElementById('heatmapPreviewLabel');
+  
+  renderPhyllotaxisToCanvas(canvas, cell.angle, heatmapData.N, cell.threshold);
+  
+  label.innerHTML = `
+    <strong>${cell.angle.toFixed(1)}Â°</strong> Ã— <strong>${cell.threshold.toFixed(3)}</strong><br>
+    ${cell.edgeCount} edges
+  `;
+}
+
+// Heatmap mouse events
+document.getElementById('heatmapCanvas').addEventListener('mousemove', (e) => {
+  const cell = heatmapCoordsToCell(e.clientX, e.clientY);
+  const tooltip = document.getElementById('heatmapTooltip');
+  
+  if (cell) {
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.offsetX + 15) + 'px';
+    tooltip.style.top = (e.offsetY + 15) + 'px';
+    tooltip.innerHTML = `${cell.angle.toFixed(1)}Â° Ã— ${cell.threshold.toFixed(3)}<br>${cell.edgeCount} edges`;
+    
+    updateHeatmapPreview(cell);
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+document.getElementById('heatmapCanvas').addEventListener('mouseleave', () => {
+  document.getElementById('heatmapTooltip').style.display = 'none';
+});
+
+document.getElementById('heatmapCanvas').addEventListener('click', (e) => {
+  const cell = heatmapCoordsToCell(e.clientX, e.clientY);
+  
+  if (cell) {
+    // Open in modal for full view
+    const anomaly = {
+      angle: cell.angle,
+      zScore: 0,
+      edgeCount: cell.edgeCount
+    };
+    
+    // Temporarily override threshold for this render
+    const originalThreshold = document.getElementById('threshold').value;
+    document.getElementById('threshold').value = cell.threshold;
+    
+    showModal(anomaly, heatmapData.N, cell.threshold);
+    
+    // Store cell info in modal for morph
+    document.getElementById('modal').dataset.angle = cell.angle;
+    document.getElementById('modal').dataset.threshold = cell.threshold;
+  }
+});
+
+document.getElementById('runHeatmap').addEventListener('click', generateHeatmap);
+
+/** ---------- Enhanced Modal (store angle for morph) ---------- **/
+
+/** ---------- Thumbnail Rendering ---------- **/
+
+function renderPhyllotaxisToCanvas(canvas, angleDeg, N, threshold) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.42;
+  
+  // Clear
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Generate points and edges
+  const pts = generatePhyllotaxis(N, angleDeg);
+  const edges = proximityConnections(pts, threshold);
+  
+  // Find edge length range for coloring
+  let minDist = Infinity, maxDist = 0;
+  for (const e of edges) {
+    if (e.dist < minDist) minDist = e.dist;
+    if (e.dist > maxDist) maxDist = e.dist;
+  }
+  if (maxDist - minDist < 0.001) maxDist = minDist + 0.1;
+  
+  // Draw edges
+  ctx.lineWidth = W > 200 ? 0.5 : 0.3;
+  ctx.lineCap = 'round';
+  ctx.globalAlpha = W > 200 ? 0.25 : 0.35;
+  
+  for (const e of edges) {
+    const p1 = pts[e.i];
+    const p2 = pts[e.j];
+    
+    const x1 = cx + p1.x * radius;
+    const y1 = cy + p1.y * radius;
+    const x2 = cx + p2.x * radius;
+    const y2 = cy + p2.y * radius;
+    
+    // Color by length
+    const u = (e.dist - minDist) / (maxDist - minDist);
+    const hue = (1 - u) * 120 + u * 280; // Green â†’ Purple
+    
+    ctx.strokeStyle = `hsl(${hue} 70% 55%)`;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+  
+  ctx.globalAlpha = 1;
+  
+  return { pts, edges };
+}
+
+function createThumbnails(anomalies, N, threshold) {
+  const section = document.getElementById('thumbnailSection');
+  const grid = document.getElementById('thumbGrid');
+  
+  if (anomalies.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  
+  section.style.display = 'block';
+  grid.innerHTML = '';
+  
+  // Add golden angle baseline for comparison
+  const goldenAngle = 137.5077;
+  const baseline = {
+    angle: goldenAngle,
+    zScore: 0,
+    isBaseline: true
+  };
+  
+  // Sort by angle for visual coherence, insert baseline
+  const sorted = [...anomalies].sort((a, b) => a.angle - b.angle);
+  
+  // Find where to insert baseline
+  let baselineInserted = false;
+  const withBaseline = [];
+  for (const a of sorted) {
+    if (!baselineInserted && a.angle > goldenAngle) {
+      withBaseline.push(baseline);
+      baselineInserted = true;
+    }
+    withBaseline.push(a);
+  }
+  if (!baselineInserted) withBaseline.push(baseline);
+  
+  for (const anomaly of withBaseline) {
+    const item = document.createElement('div');
+    item.className = 'thumb-item';
+    if (anomaly.isBaseline) {
+      item.style.borderColor = '#4a9c8c';
+      item.style.background = '#0d1a18';
+    }
+    item.dataset.angle = anomaly.angle;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 140;
+    canvas.height = 140;
+    
+    // Render thumbnail
+    renderPhyllotaxisToCanvas(canvas, anomaly.angle, N, threshold);
+    
+    const label = document.createElement('div');
+    label.className = 'thumb-label';
+    
+    if (anomaly.isBaseline) {
+      label.innerHTML = `
+        <strong style="color: #4a9c8c;">137.5Â° (Golden)</strong><br>
+        <span style="color: #4a9c8c; font-size: 10px;">BASELINE</span>
+      `;
+    } else {
+      label.innerHTML = `
+        <strong>${anomaly.angle.toFixed(1)}Â°</strong><br>
+        <span class="zscore">z = ${anomaly.zScore > 0 ? '+' : ''}${anomaly.zScore.toFixed(2)}</span>
+      `;
+    }
+    
+    item.appendChild(canvas);
+    item.appendChild(label);
+    
+    // Click to enlarge
+    item.addEventListener('click', () => showModal(anomaly, N, threshold));
+    
+    grid.appendChild(item);
+  }
+}
+
+function showModal(anomaly, N, threshold) {
+  const modal = document.getElementById('modal');
+  const canvas = document.getElementById('modalCanvas');
+  const info = document.getElementById('modalInfo');
+  
+  // Store angle for morph
+  modal.dataset.angle = anomaly.angle;
+  
+  // Render larger version
+  const { edges } = renderPhyllotaxisToCanvas(canvas, anomaly.angle, N, threshold);
+  
+  // Calculate 360/angle to show fold number
+  const foldRatio = 360 / anomaly.angle;
+  const foldDisplay = Number.isInteger(foldRatio) 
+    ? `${foldRatio}-fold symmetry` 
+    : `â‰ˆ ${foldRatio.toFixed(2)} ratio`;
+  
+  info.innerHTML = `
+    <strong>${anomaly.angle.toFixed(1)}Â°</strong><br>
+    ${edges.length} edges | Z-Score: ${anomaly.zScore > 0 ? '+' : ''}${anomaly.zScore.toFixed(2)}<br>
+    <span style="color: #888;">${foldDisplay}</span>
+  `;
+  
+  // Reset morph UI
+  stopMorph();
+  
+  modal.classList.add('active');
+}
+
+// Modal close handlers
+document.getElementById('modalClose').addEventListener('click', () => {
+  document.getElementById('modal').classList.remove('active');
+});
+
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('active');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    stopMorph();
+    document.getElementById('modal').classList.remove('active');
+  }
+});
+
+/** ---------- Event Listeners ---------- **/
+
+document.getElementById('runSweep').addEventListener('click', runSweep);
+
+// Allow Enter key to trigger sweep
+document.querySelectorAll('input').forEach(input => {
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') runSweep();
+  });
+});
+</script>
+
+</body>
+</html>

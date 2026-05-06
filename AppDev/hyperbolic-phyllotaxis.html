@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hyperbolic Phyllotaxis â€” Golden Spirals in Curved Space</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#080810; color:#e0e0e0; }
+    .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
+    .panel { background:#0d0d14; border-right:1px solid #2a2a3a; padding:16px; overflow:auto; }
+    h2 { margin:0 0 10px; font-size:16px; color:#fff; }
+    .row { margin:10px 0; }
+    label { display:flex; justify-content:space-between; gap:12px; font-size:12px; color:#aaa; }
+    input[type="range"]{ width:100%; background:#2a2a3a; }
+    select, button {
+      width:100%; padding:10px; border-radius:10px; border:1px solid #3a3a4a; background:#1a1a24;
+      font-size:13px; cursor:pointer; color:#e0e0e0;
+    }
+    button:hover { background:#2a2a3a; }
+    .hint { font-size:12px; color:#777; line-height:1.45; margin-top:12px; }
+    .canvasWrap { display:flex; align-items:center; justify-content:center; padding:16px; background:#080810; }
+    canvas { background:#080810; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+    .pill { display:inline-block; padding:4px 8px; border-radius:999px; background:#2a2a3a; font-size:11px; color:#f8a; }
+    .pill.green { color:#8fa; }
+    .divider { height:1px; background:#2a2a3a; margin:14px 0; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .stats { background:#1a1a24; border-radius:8px; padding:10px; margin-top:10px; font-size:11px; color:#888; }
+    .stats span { color:#8fa; }
+    .badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:6px; }
+    .badge.phyllo { background:#234; color:#8cf; }
+    .badge.hyper { background:#423; color:#f8a; }
+  </style>
+</head>
+<body>
+<!--
+catalogue:
+  world: HyperbolicPhyllotaxis
+  generator.object: pointset
+  generator.family: phyllotaxis
+  generator.concept: golden_angle
+  nailbed.source: generator
+  nailbed.shape: pointset
+  substrate: hyperbolic
+  substrate.model: poincare_disk
+  pairing.rule: proximity
+  edge.model: hyperbolic
+  edge.path: intrinsic
+  novelty: hybrid
+  parents: [PhyllotaxisProximityWeb, HyperbolicStringArt]
+-->
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Hyperbolic Phyllotaxis 
+      <span class="badge phyllo">Ï† points</span>
+      <span class="badge hyper">HÂ² geodesics</span>
+    </h2>
+    <div class="pill">hybrid: golden angle + curved space</div>
+
+    <div class="row" style="margin-top:14px;">
+      <label>Preset <span id="presetName" class="pill green">â€”</span></label>
+      <select id="preset"></select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Points N <span id="NOut">400</span></label>
+      <input id="N" type="range" min="50" max="1500" step="10" value="400">
+    </div>
+
+    <div class="row">
+      <label>Divergence Angle <span id="angleOut">137.5Â°</span></label>
+      <input id="angle" type="range" min="90" max="180" step="0.1" value="137.5">
+    </div>
+
+    <div class="row">
+      <label>Disk Coverage <span id="coverageOut">0.92</span></label>
+      <input id="coverage" type="range" min="0.5" max="0.98" step="0.01" value="0.92">
+    </div>
+    
+    <div class="hint">Coverage controls how close points get to the boundary (infinity).</div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Connection Rule</label>
+      <select id="rule">
+        <option value="proximity">Proximity (distance threshold)</option>
+        <option value="knn">K-Nearest Neighbors</option>
+        <option value="hyperbolic_proximity">Hyperbolic Distance</option>
+      </select>
+    </div>
+
+    <div class="row" id="thresholdRow">
+      <label>Euclidean Threshold <span id="thresholdOut">0.12</span></label>
+      <input id="threshold" type="range" min="0.03" max="0.35" step="0.005" value="0.12">
+    </div>
+
+    <div class="row" id="knnRow" style="display:none;">
+      <label>K Neighbors <span id="knnOut">5</span></label>
+      <input id="knn" type="range" min="1" max="15" step="1" value="5">
+    </div>
+
+    <div class="row" id="hypThreshRow" style="display:none;">
+      <label>Hyperbolic Threshold <span id="hypThreshOut">1.5</span></label>
+      <input id="hypThresh" type="range" min="0.3" max="4.0" step="0.1" value="1.5">
+    </div>
+
+    <div class="row">
+      <label>Max Connections/Point <span id="maxConnOut">8</span></label>
+      <input id="maxConn" type="range" min="1" max="20" step="1" value="8">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Connector Type <span class="pill">the hybrid axis</span></label>
+      <select id="connector">
+        <option value="geodesic">Hyperbolic Geodesic</option>
+        <option value="straight">Euclidean Straight</option>
+        <option value="both">Both (overlay)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>Geodesic Steps <span id="gStepsOut">48</span></label>
+      <input id="gSteps" type="range" min="12" max="96" step="4" value="48">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Color Mode</label>
+      <select id="colorMode">
+        <option value="curvature">By geodesic curvature</option>
+        <option value="length">By connection length</option>
+        <option value="radial">By radial position</option>
+        <option value="spiral">By spiral arm</option>
+        <option value="solid">Solid</option>
+      </select>
+    </div>
+
+    <div class="grid2">
+      <div class="row">
+        <label>Line Width <span id="lwOut">0.6</span></label>
+        <input id="lw" type="range" min="0.1" max="2.0" step="0.1" value="0.6">
+      </div>
+      <div class="row">
+        <label>Alpha <span id="alphaOut">0.30</span></label>
+        <input id="alpha" type="range" min="0.03" max="0.7" step="0.01" value="0.30">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="row">
+        <label>Show Points</label>
+        <select id="showPoints">
+          <option value="none">None</option>
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Show Boundary</label>
+        <select id="showBoundary">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="grid2">
+      <button id="render">Render</button>
+      <button id="exportPng">Export PNG</button>
+    </div>
+
+    <div class="stats" id="stats">
+      Points: <span>â€”</span> | Connections: <span>â€”</span> | Avg degree: <span>â€”</span>
+    </div>
+
+    <div class="hint" style="margin-top:16px;">
+      <b>The Hypothesis:</b> Combining golden-angle points with hyperbolic geodesics should produce 
+      Fibonacci spirals that <em>curve toward the boundary</em> â€” organic tendrils reaching for infinity.
+      <br><br>
+      <b>Key Test:</b> Switch between Geodesic and Straight connectors. If they look fundamentally different,
+      the Connector axis is truly independent.
+    </div>
+  </div>
+
+  <div class="canvasWrap">
+    <canvas id="c" width="900" height="900"></canvas>
+  </div>
+</div>
+
+<script>
+/** ---------- Phyllotaxis Generation ---------- **/
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+const GOLDEN_ANGLE = 360 / (PHI * PHI);
+
+function generatePhyllotaxis(N, angleDeg, maxRadius) {
+  const angleRad = angleDeg * Math.PI / 180;
+  const pts = new Array(N);
+  
+  for (let i = 0; i < N; i++) {
+    // Vogel's model, scaled to fit in disk
+    const r = maxRadius * Math.sqrt(i / N);
+    const theta = i * angleRad;
+    
+    pts[i] = {
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      r: r,
+      theta: theta
+    };
+  }
+  
+  return pts;
+}
+
+/** ---------- Hyperbolic Geometry ---------- **/
+
+// Hyperbolic distance in PoincarÃ© disk
+function hyperbolicDistance(p, q) {
+  const px = p.x, py = p.y, qx = q.x, qy = q.y;
+  const eucDist2 = (qx - px) * (qx - px) + (qy - py) * (qy - py);
+  const p2 = px * px + py * py;
+  const q2 = qx * qx + qy * qy;
+  
+  // d_H(p,q) = acosh(1 + 2|p-q|Â² / ((1-|p|Â²)(1-|q|Â²)))
+  const denom = (1 - p2) * (1 - q2);
+  if (denom <= 0) return Infinity;
+  
+  const coshD = 1 + 2 * eucDist2 / denom;
+  return Math.acosh(Math.max(1, coshD));
+}
+
+// Geodesic arc between two points in PoincarÃ© disk
+function geodesicPolyline(p, q, steps) {
+  const px = p.x, py = p.y, qx = q.x, qy = q.y;
+  const cross = px * qy - py * qx;
+  
+  // If collinear with origin, geodesic is a straight line (diameter)
+  if (Math.abs(cross) < 1e-8) {
+    const out = new Array(steps + 1);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      out[i] = { x: px + (qx - px) * t, y: py + (qy - py) * t };
+    }
+    return out;
+  }
+  
+  // Find circle orthogonal to unit circle through p and q
+  const p2 = px * px + py * py;
+  const q2 = qx * qx + qy * qy;
+  const rhs1 = (p2 + 1) / 2;
+  const rhs2 = (q2 + 1) / 2;
+  
+  const det = px * qy - py * qx;
+  if (Math.abs(det) < 1e-10) {
+    const out = new Array(steps + 1);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      out[i] = { x: px + (qx - px) * t, y: py + (qy - py) * t };
+    }
+    return out;
+  }
+  
+  const cx = (rhs1 * qy - py * rhs2) / det;
+  const cy = (-rhs1 * qx + px * rhs2) / det;
+  const r = Math.hypot(px - cx, py - cy);
+  
+  // Angles around the circle center
+  let a0 = Math.atan2(py - cy, px - cx);
+  let a1 = Math.atan2(qy - cy, qx - cx);
+  
+  // Shortest arc
+  let da = a1 - a0;
+  while (da > Math.PI) da -= 2 * Math.PI;
+  while (da < -Math.PI) da += 2 * Math.PI;
+  
+  const out = new Array(steps + 1);
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const a = a0 + da * t;
+    out[i] = { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  }
+  
+  return out;
+}
+
+// Compute curvature of geodesic (how much it bends)
+function geodesicCurvature(p, q) {
+  const px = p.x, py = p.y, qx = q.x, qy = q.y;
+  const cross = px * qy - py * qx;
+  
+  if (Math.abs(cross) < 1e-8) return 0; // Diameter = no curve
+  
+  const p2 = px * px + py * py;
+  const q2 = qx * qx + qy * qy;
+  const rhs1 = (p2 + 1) / 2;
+  const rhs2 = (q2 + 1) / 2;
+  const det = px * qy - py * qx;
+  
+  const cx = (rhs1 * qy - py * rhs2) / det;
+  const cy = (-rhs1 * qx + px * rhs2) / det;
+  const r = Math.hypot(px - cx, py - cy);
+  
+  // Curvature = 1/r (smaller radius = more curved)
+  return 1 / r;
+}
+
+/** ---------- Connection Algorithms ---------- **/
+
+function proximityConnections(pts, threshold, maxConn) {
+  const edges = [];
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    const candidates = [];
+    
+    for (let j = i + 1; j < pts.length; j++) {
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist < threshold) {
+        candidates.push({ j, dist });
+      }
+    }
+    
+    candidates.sort((a, b) => a.dist - b.dist);
+    
+    for (const c of candidates) {
+      if (degree[i] >= maxConn || degree[c.j] >= maxConn) continue;
+      edges.push({ i, j: c.j, dist: c.dist });
+      degree[i]++;
+      degree[c.j]++;
+    }
+  }
+  
+  return edges;
+}
+
+function knnConnections(pts, k, maxConn) {
+  const edges = [];
+  const edgeSet = new Set();
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    const distances = [];
+    
+    for (let j = 0; j < pts.length; j++) {
+      if (i === j) continue;
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      distances.push({ j, dist });
+    }
+    
+    distances.sort((a, b) => a.dist - b.dist);
+    
+    for (let n = 0; n < Math.min(k, distances.length); n++) {
+      const j = distances[n].j;
+      const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+      
+      if (!edgeSet.has(key) && degree[i] < maxConn && degree[j] < maxConn) {
+        edgeSet.add(key);
+        edges.push({ i, j, dist: distances[n].dist });
+        degree[i]++;
+        degree[j]++;
+      }
+    }
+  }
+  
+  return edges;
+}
+
+function hyperbolicProximityConnections(pts, threshold, maxConn) {
+  const edges = [];
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    const candidates = [];
+    
+    for (let j = i + 1; j < pts.length; j++) {
+      const hDist = hyperbolicDistance(pts[i], pts[j]);
+      
+      if (hDist < threshold) {
+        candidates.push({ j, dist: hDist });
+      }
+    }
+    
+    candidates.sort((a, b) => a.dist - b.dist);
+    
+    for (const c of candidates) {
+      if (degree[i] >= maxConn || degree[c.j] >= maxConn) continue;
+      edges.push({ i, j: c.j, dist: c.dist, hyperbolic: true });
+      degree[i]++;
+      degree[c.j]++;
+    }
+  }
+  
+  return edges;
+}
+
+/** ---------- Rendering ---------- **/
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+function gatherParams() {
+  return {
+    N: +$('N').value,
+    angle: +$('angle').value,
+    coverage: +$('coverage').value,
+    rule: $('rule').value,
+    threshold: +$('threshold').value,
+    knn: +$('knn').value,
+    hypThresh: +$('hypThresh').value,
+    maxConn: +$('maxConn').value,
+    connector: $('connector').value,
+    gSteps: +$('gSteps').value,
+    colorMode: $('colorMode').value,
+    lw: +$('lw').value,
+    alpha: +$('alpha').value,
+    showPoints: $('showPoints').value,
+    showBoundary: $('showBoundary').value
+  };
+}
+
+function hsl(h, s, l) {
+  return `hsl(${h} ${s}% ${l}%)`;
+}
+
+function render(params) {
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.44;
+  
+  // Clear
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Draw boundary circle (the "infinity" of hyperbolic space)
+  if (params.showBoundary === 'yes') {
+    ctx.strokeStyle = 'rgba(255,150,100,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  
+  // Generate phyllotaxis points
+  const pts = generatePhyllotaxis(params.N, params.angle, params.coverage);
+  
+  // Generate connections
+  let edges;
+  switch (params.rule) {
+    case 'knn':
+      edges = knnConnections(pts, params.knn, params.maxConn);
+      break;
+    case 'hyperbolic_proximity':
+      edges = hyperbolicProximityConnections(pts, params.hypThresh, params.maxConn);
+      break;
+    default:
+      edges = proximityConnections(pts, params.threshold, params.maxConn);
+  }
+  
+  // Stats
+  const avgDegree = pts.length > 0 ? (edges.length * 2 / pts.length) : 0;
+  $('stats').innerHTML = `Points: <span>${params.N}</span> | Connections: <span>${edges.length}</span> | Avg degree: <span>${avgDegree.toFixed(1)}</span>`;
+  
+  // Precompute curvatures for color mapping
+  let minCurv = Infinity, maxCurv = 0;
+  for (const e of edges) {
+    const curv = geodesicCurvature(pts[e.i], pts[e.j]);
+    if (curv < minCurv) minCurv = curv;
+    if (curv > maxCurv) maxCurv = curv;
+  }
+  if (maxCurv - minCurv < 0.001) maxCurv = minCurv + 0.1;
+  
+  // Draw edges
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  function drawEdge(e, connectorType, alpha) {
+    const p1 = pts[e.i];
+    const p2 = pts[e.j];
+    
+    // Color based on mode
+    let hue = 0;
+    switch (params.colorMode) {
+      case 'curvature':
+        const curv = geodesicCurvature(p1, p2);
+        const u = (curv - minCurv) / (maxCurv - minCurv);
+        hue = (1 - u) * 180 + u * 320; // Cyan â†’ Magenta
+        break;
+      case 'length':
+        const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        hue = len * 500 + 120;
+        break;
+      case 'radial':
+        const avgR = (p1.r + p2.r) / 2 / params.coverage;
+        hue = avgR * 280 + 30;
+        break;
+      case 'spiral':
+        const armIndex = (p1.index + p2.index) % 34;
+        hue = (armIndex / 34) * 360;
+        break;
+      default:
+        hue = 160;
+    }
+    
+    ctx.strokeStyle = params.colorMode === 'solid' ? '#4a9' : hsl(hue, 65, 55);
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = params.lw;
+    
+    ctx.beginPath();
+    
+    if (connectorType === 'geodesic') {
+      const poly = geodesicPolyline(p1, p2, params.gSteps);
+      ctx.moveTo(cx + poly[0].x * radius, cy + poly[0].y * radius);
+      for (let k = 1; k < poly.length; k++) {
+        ctx.lineTo(cx + poly[k].x * radius, cy + poly[k].y * radius);
+      }
+    } else {
+      ctx.moveTo(cx + p1.x * radius, cy + p1.y * radius);
+      ctx.lineTo(cx + p2.x * radius, cy + p2.y * radius);
+    }
+    
+    ctx.stroke();
+  }
+  
+  // Draw based on connector mode
+  if (params.connector === 'both') {
+    // Draw straight first (dimmer), then geodesic
+    for (const e of edges) {
+      drawEdge(e, 'straight', params.alpha * 0.3);
+    }
+    for (const e of edges) {
+      drawEdge(e, 'geodesic', params.alpha);
+    }
+  } else {
+    for (const e of edges) {
+      drawEdge(e, params.connector, params.alpha);
+    }
+  }
+  
+  // Draw points if requested
+  if (params.showPoints !== 'none') {
+    const ptSize = params.showPoints === 'small' ? 1.5 : 3;
+    ctx.globalAlpha = 0.6;
+    
+    for (const p of pts) {
+      const x = cx + p.x * radius;
+      const y = cy + p.y * radius;
+      
+      const hue = (p.r / params.coverage) * 280 + 30;
+      ctx.fillStyle = hsl(hue, 60, 65);
+      ctx.beginPath();
+      ctx.arc(x, y, ptSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  ctx.globalAlpha = 1;
+}
+
+/** ---------- UI ---------- **/
+
+function updateOutputs() {
+  const p = gatherParams();
+  
+  $('NOut').textContent = p.N;
+  $('angleOut').textContent = p.angle.toFixed(1) + 'Â°';
+  $('coverageOut').textContent = p.coverage.toFixed(2);
+  $('thresholdOut').textContent = p.threshold.toFixed(3);
+  $('knnOut').textContent = p.knn;
+  $('hypThreshOut').textContent = p.hypThresh.toFixed(1);
+  $('maxConnOut').textContent = p.maxConn >= 20 ? 'âˆž' : p.maxConn;
+  $('gStepsOut').textContent = p.gSteps;
+  $('lwOut').textContent = p.lw.toFixed(1);
+  $('alphaOut').textContent = p.alpha.toFixed(2);
+  
+  // Show/hide rule-specific controls
+  $('thresholdRow').style.display = p.rule === 'proximity' ? 'block' : 'none';
+  $('knnRow').style.display = p.rule === 'knn' ? 'block' : 'none';
+  $('hypThreshRow').style.display = p.rule === 'hyperbolic_proximity' ? 'block' : 'none';
+}
+
+// Event listeners
+['N', 'angle', 'coverage', 'threshold', 'knn', 'hypThresh', 'maxConn', 'gSteps', 'lw', 'alpha'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    updateOutputs();
+    render(gatherParams());
+  });
+});
+
+['rule', 'connector', 'colorMode', 'showPoints', 'showBoundary'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    updateOutputs();
+    render(gatherParams());
+  });
+});
+
+$('render').addEventListener('click', () => render(gatherParams()));
+
+$('exportPng').addEventListener('click', () => {
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `hyperbolic-phyllotaxis-${Date.now()}.png`;
+  a.click();
+});
+
+/** ---------- Presets ---------- **/
+
+const presets = [
+  {
+    name: "Golden Geodesics (baseline)",
+    params: { N:400, angle:137.5, coverage:0.92, rule:'proximity', threshold:0.12, knn:5, hypThresh:1.5, maxConn:8,
+              connector:'geodesic', gSteps:48, colorMode:'curvature', lw:0.6, alpha:0.30, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Straight vs Geodesic (compare)",
+    params: { N:350, angle:137.5, coverage:0.88, rule:'knn', threshold:0.12, knn:4, hypThresh:1.5, maxConn:6,
+              connector:'both', gSteps:48, colorMode:'radial', lw:0.7, alpha:0.35, showPoints:'small', showBoundary:'yes' }
+  },
+  {
+    name: "Hyperbolic Distance Pairing",
+    params: { N:500, angle:137.5, coverage:0.94, rule:'hyperbolic_proximity', threshold:0.12, knn:5, hypThresh:1.8, maxConn:10,
+              connector:'geodesic', gSteps:56, colorMode:'curvature', lw:0.5, alpha:0.25, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Dense Tendril Web",
+    params: { N:800, angle:137.5, coverage:0.95, rule:'proximity', threshold:0.08, knn:5, hypThresh:1.5, maxConn:12,
+              connector:'geodesic', gSteps:64, colorMode:'spiral', lw:0.4, alpha:0.18, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "126Â° Pinwheel (hybrid angle)",
+    params: { N:450, angle:126.2, coverage:0.90, rule:'knn', threshold:0.12, knn:5, hypThresh:1.5, maxConn:10,
+              connector:'geodesic', gSteps:48, colorMode:'curvature', lw:0.6, alpha:0.30, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Boundary Reach (high coverage)",
+    params: { N:600, angle:137.5, coverage:0.97, rule:'proximity', threshold:0.10, knn:5, hypThresh:1.5, maxConn:8,
+              connector:'geodesic', gSteps:56, colorMode:'radial', lw:0.5, alpha:0.25, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Rational Collapse (120Â°)",
+    params: { N:400, angle:120.0, coverage:0.90, rule:'proximity', threshold:0.12, knn:5, hypThresh:1.5, maxConn:8,
+              connector:'geodesic', gSteps:48, colorMode:'radial', lw:0.7, alpha:0.35, showPoints:'small', showBoundary:'yes' }
+  }
+];
+
+const presetSel = $('preset');
+presets.forEach((preset, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = preset.name;
+  presetSel.appendChild(opt);
+});
+
+presetSel.addEventListener('change', () => {
+  const idx = +presetSel.value;
+  const p = presets[idx].params;
+  
+  $('presetName').textContent = presets[idx].name;
+  
+  Object.keys(p).forEach(key => {
+    const el = $(key);
+    if (el) {
+      if (el.tagName === 'SELECT') el.value = p[key];
+      else el.value = p[key];
+    }
+  });
+  
+  updateOutputs();
+  render(gatherParams());
+});
+
+// Initialize
+presetSel.value = '0';
+$('presetName').textContent = presets[0].name;
+updateOutputs();
+render(gatherParams());
+</script>
+</body>
+</html>

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hyperbolic Voronoi â€” Phyllotaxis in Curved Space</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #080810; 
+      color: #e0e0e0; 
+    }
+    .container { 
+      display: grid; 
+      grid-template-columns: 360px 1fr; 
+      height: 100vh; 
+    }
+    .panel { 
+      background: #0d0d14; 
+      border-right: 1px solid #2a2a3a; 
+      padding: 20px; 
+      overflow-y: auto; 
+    }
+    h1 { 
+      margin: 0 0 8px; 
+      font-size: 18px; 
+      color: #fff; 
+    }
+    .subtitle { 
+      font-size: 12px; 
+      color: #888; 
+      margin-bottom: 20px; 
+    }
+    .section { 
+      margin-bottom: 20px; 
+    }
+    .section-title { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      color: #666; 
+      margin-bottom: 12px; 
+    }
+    .row { 
+      margin-bottom: 14px; 
+    }
+    .row label { 
+      display: flex; 
+      justify-content: space-between; 
+      font-size: 12px; 
+      color: #aaa; 
+      margin-bottom: 6px; 
+    }
+    .row label span { 
+      color: #8fa; 
+      font-family: monospace; 
+    }
+    input[type="range"] { 
+      width: 100%; 
+      height: 4px;
+      -webkit-appearance: none; 
+      background: #2a2a3a; 
+      border-radius: 2px; 
+      outline: none; 
+    }
+    input[type="range"]::-webkit-slider-thumb { 
+      -webkit-appearance: none; 
+      width: 14px; 
+      height: 14px; 
+      background: #8fa; 
+      border-radius: 50%; 
+      cursor: pointer; 
+    }
+    select, button { 
+      width: 100%; 
+      padding: 10px 12px; 
+      background: #1a1a24; 
+      border: 1px solid #3a3a4a; 
+      border-radius: 8px; 
+      color: #e0e0e0; 
+      font-size: 13px; 
+      cursor: pointer; 
+      margin-bottom: 8px;
+    }
+    select:hover, button:hover { 
+      background: #252530; 
+      border-color: #4a4a5a; 
+    }
+    button.primary { 
+      background: linear-gradient(135deg, #2a4a3a, #1a3a2a); 
+      border-color: #3a5a4a; 
+    }
+    button.primary:hover { 
+      background: linear-gradient(135deg, #3a5a4a, #2a4a3a); 
+    }
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 11px;
+      background: #1a1a24;
+      border: 1px solid #3a3a4a;
+      border-radius: 6px;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      background: #2a3a2a;
+      border-color: #4a6a4a;
+      color: #8fa;
+    }
+    .stats { 
+      background: #1a1a24; 
+      border-radius: 8px; 
+      padding: 12px; 
+      font-size: 11px; 
+      color: #888; 
+      line-height: 1.6;
+    }
+    .stats strong { 
+      color: #8fa; 
+    }
+    .divider { 
+      height: 1px; 
+      background: #2a2a3a; 
+      margin: 16px 0; 
+    }
+    .canvas-wrap { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+      background: #080810; 
+    }
+    canvas { 
+      border-radius: 12px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+    }
+    .hint { 
+      font-size: 11px; 
+      color: #666; 
+      line-height: 1.5; 
+      margin-top: 12px; 
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge.novel { background: #3a2a4a; color: #c8a; }
+    .badge.validated { background: #2a3a2a; color: #8fa; }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .comparison canvas {
+      width: 100%;
+      height: auto;
+    }
+    .canvas-label {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel">
+      <h1>Hyperbolic Voronoi</h1>
+      <div class="subtitle">
+        <span class="badge novel">Novel</span>
+        Phyllotaxis â†’ Voronoi in PoincarÃ© Disk
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Generator: Phyllotaxis</div>
+        <div class="row">
+          <label>Points (N) <span id="valN">150</span></label>
+          <input type="range" id="N" min="10" max="400" value="150">
+        </div>
+        <div class="row">
+          <label>Divergence Angle <span id="valAngle">137.5Â°</span></label>
+          <input type="range" id="angle" min="90" max="180" step="0.1" value="137.5">
+        </div>
+        <div class="row">
+          <label>Spread (Hyperbolic) <span id="valSpread">0.85</span></label>
+          <input type="range" id="spread" min="0.3" max="0.98" step="0.01" value="0.85">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Visualization</div>
+        <div class="row">
+          <label>Color Mode</label>
+          <select id="colorMode">
+            <option value="spiral">Spiral Arm</option>
+            <option value="radial">Radial Distance</option>
+            <option value="index">Point Index</option>
+            <option value="area">Cell Area (approx)</option>
+            <option value="neighbors">Neighbor Count</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Cell Alpha <span id="valCellAlpha">0.7</span></label>
+          <input type="range" id="cellAlpha" min="0.1" max="1" step="0.05" value="0.7">
+        </div>
+        <div class="row">
+          <label>Border Width <span id="valBorderWidth">1.5</span></label>
+          <input type="range" id="borderWidth" min="0" max="4" step="0.5" value="1.5">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Display Options</div>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="showCells">Cells</button>
+          <button class="toggle-btn active" id="showBorders">Borders</button>
+          <button class="toggle-btn" id="showPoints">Points</button>
+          <button class="toggle-btn" id="showDual">Delaunay</button>
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="modeHyperbolic">Hyperbolic</button>
+          <button class="toggle-btn" id="modeEuclidean">Euclidean</button>
+          <button class="toggle-btn" id="modeCompare">Compare</button>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Presets</div>
+        <select id="presets">
+          <option value="">â€” Select Preset â€”</option>
+          <option value="golden">Golden Spiral (137.5Â°)</option>
+          <option value="lucas">Lucas Spiral (99.5Â°)</option>
+          <option value="fibonacci">Dense Fibonacci (137.508Â°)</option>
+          <option value="rational">Rational Collapse (120Â°)</option>
+          <option value="pinwheel">Pinwheel (126.2Â°)</option>
+          <option value="sparse">Sparse Field</option>
+        </select>
+      </div>
+      
+      <button class="primary" id="render">Render</button>
+      <button id="export">Export PNG</button>
+      
+      <div class="divider"></div>
+      
+      <div class="stats" id="stats">
+        <strong>Points:</strong> 150<br>
+        <strong>Render time:</strong> â€”<br>
+        <strong>Mode:</strong> Hyperbolic
+      </div>
+      
+      <div class="hint">
+        <strong>What's happening:</strong> Voronoi cells computed using hyperbolic distance 
+        in the PoincarÃ© disk model. Cell boundaries curve toward the disk edge, 
+        reflecting how distances grow near infinity in hyperbolic space.
+      </div>
+    </div>
+    
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="canvas" width="700" height="700"></canvas>
+    </div>
+  </div>
+
+<script>
+// ============================================
+// HYPERBOLIC GEOMETRY UTILITIES
+// ============================================
+
+// Complex number helpers
+const cx = (re, im = 0) => ({ re, im });
+const cxAdd = (a, b) => cx(a.re + b.re, a.im + b.im);
+const cxSub = (a, b) => cx(a.re - b.re, a.im - b.im);
+const cxMul = (a, b) => cx(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
+const cxDiv = (a, b) => {
+  const d = b.re * b.re + b.im * b.im;
+  return cx((a.re * b.re + a.im * b.im) / d, (a.im * b.re - a.re * b.im) / d);
+};
+const cxConj = (a) => cx(a.re, -a.im);
+const cxAbs = (a) => Math.sqrt(a.re * a.re + a.im * a.im);
+const cxScale = (a, s) => cx(a.re * s, a.im * s);
+
+// Hyperbolic distance in PoincarÃ© disk
+function hyperbolicDist(p1, p2) {
+  // d(z1, z2) = 2 * arctanh(|z1 - z2| / |1 - z1 * conj(z2)|)
+  const z1 = cx(p1.x, p1.y);
+  const z2 = cx(p2.x, p2.y);
+  const num = cxAbs(cxSub(z1, z2));
+  const denom = cxAbs(cxSub(cx(1, 0), cxMul(z1, cxConj(z2))));
+  const ratio = num / denom;
+  if (ratio >= 1) return Infinity;
+  return 2 * Math.atanh(ratio);
+}
+
+// Euclidean distance
+function euclideanDist(p1, p2) {
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+// ============================================
+// PHYLLOTAXIS GENERATOR
+// ============================================
+
+function generatePhyllotaxis(N, angleDeg, spread) {
+  const points = [];
+  const angle = angleDeg * Math.PI / 180;
+  
+  for (let i = 1; i <= N; i++) {
+    // Fermat spiral in hyperbolic space
+    // Map sqrt(i) radius to hyperbolic disk with tanh-like compression
+    const euclideanR = Math.sqrt(i / N);
+    // Compress to fit in disk with spread parameter
+    const r = spread * Math.tanh(euclideanR * 2);
+    const theta = i * angle;
+    
+    points.push({
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      theta: theta,
+      euclideanR: euclideanR
+    });
+  }
+  
+  return points;
+}
+
+// ============================================
+// VORONOI COMPUTATION (Pixel-based)
+// ============================================
+
+function computeVoronoiPixels(points, width, height, useHyperbolic, diskRadius) {
+  const pixels = new Int32Array(width * height);
+  const distFunc = useHyperbolic ? hyperbolicDist : euclideanDist;
+  
+  for (let py = 0; py < height; py++) {
+    for (let px = 0; px < width; px++) {
+      // Convert to disk coordinates [-1, 1]
+      const x = (px / width - 0.5) * 2 * diskRadius;
+      const y = (py / height - 0.5) * 2 * diskRadius;
+      
+      // Check if inside disk
+      const r = Math.sqrt(x * x + y * y);
+      if (r >= 0.99) {
+        pixels[py * width + px] = -1; // Outside disk
+        continue;
+      }
+      
+      // Find nearest point
+      let minDist = Infinity;
+      let nearest = -1;
+      const testPoint = { x, y };
+      
+      for (let i = 0; i < points.length; i++) {
+        const d = distFunc(testPoint, points[i]);
+        if (d < minDist) {
+          minDist = d;
+          nearest = i;
+        }
+      }
+      
+      pixels[py * width + px] = nearest;
+    }
+  }
+  
+  return pixels;
+}
+
+// Detect borders (where nearest point changes)
+function detectBorders(pixels, width, height) {
+  const borders = new Uint8Array(width * height);
+  
+  for (let py = 1; py < height - 1; py++) {
+    for (let px = 1; px < width - 1; px++) {
+      const idx = py * width + px;
+      const cell = pixels[idx];
+      if (cell < 0) continue;
+      
+      // Check neighbors
+      const neighbors = [
+        pixels[idx - 1],
+        pixels[idx + 1],
+        pixels[idx - width],
+        pixels[idx + width]
+      ];
+      
+      for (const n of neighbors) {
+        if (n !== cell && n >= 0) {
+          borders[idx] = 1;
+          break;
+        }
+      }
+    }
+  }
+  
+  return borders;
+}
+
+// Approximate neighbor count for each cell
+function computeNeighborCounts(pixels, width, height, numPoints) {
+  const neighborSets = Array.from({ length: numPoints }, () => new Set());
+  
+  for (let py = 1; py < height - 1; py++) {
+    for (let px = 1; px < width - 1; px++) {
+      const idx = py * width + px;
+      const cell = pixels[idx];
+      if (cell < 0) continue;
+      
+      const neighbors = [
+        pixels[idx - 1],
+        pixels[idx + 1],
+        pixels[idx - width],
+        pixels[idx + width]
+      ];
+      
+      for (const n of neighbors) {
+        if (n !== cell && n >= 0) {
+          neighborSets[cell].add(n);
+        }
+      }
+    }
+  }
+  
+  return neighborSets.map(s => s.size);
+}
+
+// Approximate cell areas
+function computeCellAreas(pixels, width, height, numPoints) {
+  const areas = new Int32Array(numPoints);
+  
+  for (let i = 0; i < pixels.length; i++) {
+    const cell = pixels[i];
+    if (cell >= 0) areas[cell]++;
+  }
+  
+  return areas;
+}
+
+// ============================================
+// DELAUNAY DUAL (approximate from Voronoi)
+// ============================================
+
+function computeDelaunayEdges(pixels, width, height, numPoints, neighborCounts) {
+  const edges = new Set();
+  
+  for (let py = 1; py < height - 1; py++) {
+    for (let px = 1; px < width - 1; px++) {
+      const idx = py * width + px;
+      const cell = pixels[idx];
+      if (cell < 0) continue;
+      
+      const neighbors = [
+        pixels[idx + 1],
+        pixels[idx + width]
+      ];
+      
+      for (const n of neighbors) {
+        if (n !== cell && n >= 0) {
+          const key = cell < n ? `${cell}-${n}` : `${n}-${cell}`;
+          edges.add(key);
+        }
+      }
+    }
+  }
+  
+  return Array.from(edges).map(e => {
+    const [a, b] = e.split('-').map(Number);
+    return { a, b };
+  });
+}
+
+// ============================================
+// COLOR SCHEMES
+// ============================================
+
+function spiralColor(point, N) {
+  // Color by spiral arm (theta mod 2Ï€)
+  const arm = ((point.theta % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  const hue = (arm / (Math.PI * 2)) * 360;
+  return hslToRgb(hue, 0.7, 0.5);
+}
+
+function radialColor(point) {
+  const r = Math.sqrt(point.x * point.x + point.y * point.y);
+  const hue = r * 270; // Blue to red
+  return hslToRgb(240 - hue, 0.8, 0.45);
+}
+
+function indexColor(point, N) {
+  const hue = (point.index / N) * 300;
+  return hslToRgb(hue, 0.75, 0.5);
+}
+
+function areaColor(area, maxArea) {
+  const t = Math.min(area / maxArea, 1);
+  const hue = (1 - t) * 240; // Blue (large) to red (small)
+  return hslToRgb(hue, 0.8, 0.45);
+}
+
+function neighborColor(count, maxCount) {
+  // Highlight unusual counts (not 6 in Euclidean)
+  const colors = {
+    3: [255, 100, 100],
+    4: [255, 150, 100],
+    5: [255, 220, 100],
+    6: [100, 255, 150],
+    7: [100, 200, 255],
+    8: [150, 100, 255],
+  };
+  return colors[count] || [200, 200, 200];
+}
+
+function hslToRgb(h, s, l) {
+  h /= 360;
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+// ============================================
+// GEODESIC DRAWING
+// ============================================
+
+function drawGeodesic(ctx, p1, p2, useHyperbolic) {
+  if (!useHyperbolic) {
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    return;
+  }
+  
+  // PoincarÃ© disk geodesic: circular arc perpendicular to boundary
+  const x1 = p1.x, y1 = p1.y;
+  const x2 = p2.x, y2 = p2.y;
+  
+  // Check if nearly collinear with origin (diameter case)
+  const cross = x1 * y2 - x2 * y1;
+  if (Math.abs(cross) < 0.001) {
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    return;
+  }
+  
+  // Find circle through p1, p2 perpendicular to unit circle
+  // Using inversion: the geodesic passes through p1, p2, and their inversions
+  const inv1 = { x: x1 / (x1*x1 + y1*y1), y: y1 / (x1*x1 + y1*y1) };
+  
+  // Circle through p1, p2, inv1
+  const ax = x1, ay = y1;
+  const bx = x2, by = y2;
+  const cx = inv1.x, cy = inv1.y;
+  
+  const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+  if (Math.abs(d) < 0.0001) {
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    return;
+  }
+  
+  const ux = ((ax*ax + ay*ay) * (by - cy) + (bx*bx + by*by) * (cy - ay) + (cx*cx + cy*cy) * (ay - by)) / d;
+  const uy = ((ax*ax + ay*ay) * (cx - bx) + (bx*bx + by*by) * (ax - cx) + (cx*cx + cy*cy) * (bx - ax)) / d;
+  const r = Math.sqrt((ax - ux) * (ax - ux) + (ay - uy) * (ay - uy));
+  
+  // Draw arc
+  const startAngle = Math.atan2(y1 - uy, x1 - ux);
+  const endAngle = Math.atan2(y2 - uy, x2 - ux);
+  
+  // Determine direction
+  let diff = endAngle - startAngle;
+  while (diff > Math.PI) diff -= 2 * Math.PI;
+  while (diff < -Math.PI) diff += 2 * Math.PI;
+  
+  ctx.arc(ux, uy, r, startAngle, endAngle, diff > 0);
+}
+
+// ============================================
+// MAIN RENDER
+// ============================================
+
+function render() {
+  const startTime = performance.now();
+  
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  // Get parameters
+  const N = parseInt(document.getElementById('N').value);
+  const angle = parseFloat(document.getElementById('angle').value);
+  const spread = parseFloat(document.getElementById('spread').value);
+  const colorMode = document.getElementById('colorMode').value;
+  const cellAlpha = parseFloat(document.getElementById('cellAlpha').value);
+  const borderWidth = parseFloat(document.getElementById('borderWidth').value);
+  
+  const showCells = document.getElementById('showCells').classList.contains('active');
+  const showBorders = document.getElementById('showBorders').classList.contains('active');
+  const showPoints = document.getElementById('showPoints').classList.contains('active');
+  const showDual = document.getElementById('showDual').classList.contains('active');
+  
+  const isHyperbolic = document.getElementById('modeHyperbolic').classList.contains('active');
+  const isEuclidean = document.getElementById('modeEuclidean').classList.contains('active');
+  const isCompare = document.getElementById('modeCompare').classList.contains('active');
+  
+  // Clear canvas
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, width, height);
+  
+  // Generate points
+  const points = generatePhyllotaxis(N, angle, spread);
+  
+  if (isCompare) {
+    // Side-by-side comparison
+    const halfWidth = Math.floor(width / 2) - 10;
+    renderVoronoi(ctx, points, 5, 5, halfWidth, height - 10, true, colorMode, cellAlpha, borderWidth, showCells, showBorders, showPoints, showDual);
+    renderVoronoi(ctx, points, halfWidth + 15, 5, halfWidth, height - 10, false, colorMode, cellAlpha, borderWidth, showCells, showBorders, showPoints, showDual);
+    
+    // Labels
+    ctx.fillStyle = '#888';
+    ctx.font = '12px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Hyperbolic', 5 + halfWidth/2, height - 15);
+    ctx.fillText('Euclidean', halfWidth + 15 + halfWidth/2, height - 15);
+  } else {
+    const useHyperbolic = isHyperbolic;
+    renderVoronoi(ctx, points, 0, 0, width, height, useHyperbolic, colorMode, cellAlpha, borderWidth, showCells, showBorders, showPoints, showDual);
+  }
+  
+  const renderTime = (performance.now() - startTime).toFixed(0);
+  
+  // Update stats
+  document.getElementById('stats').innerHTML = `
+    <strong>Points:</strong> ${N}<br>
+    <strong>Render time:</strong> ${renderTime}ms<br>
+    <strong>Mode:</strong> ${isCompare ? 'Comparison' : (isHyperbolic ? 'Hyperbolic' : 'Euclidean')}<br>
+    <strong>Divergence:</strong> ${angle.toFixed(1)}Â°
+  `;
+}
+
+function renderVoronoi(ctx, points, offsetX, offsetY, width, height, useHyperbolic, colorMode, cellAlpha, borderWidth, showCells, showBorders, showPoints, showDual) {
+  const size = Math.min(width, height);
+  const centerX = offsetX + width / 2;
+  const centerY = offsetY + height / 2;
+  const diskRadius = size * 0.45;
+  
+  // Compute at lower resolution for performance
+  const resolution = 200;
+  const pixels = computeVoronoiPixels(points, resolution, resolution, useHyperbolic, 1.0);
+  
+  // Compute cell properties
+  const areas = computeCellAreas(pixels, resolution, resolution, points.length);
+  const maxArea = Math.max(...areas);
+  const neighborCounts = computeNeighborCounts(pixels, resolution, resolution, points.length);
+  
+  // Draw disk background
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, diskRadius, 0, Math.PI * 2);
+  ctx.fillStyle = '#0a0a12';
+  ctx.fill();
+  ctx.clip();
+  
+  // Draw cells
+  if (showCells) {
+    const imageData = ctx.createImageData(resolution, resolution);
+    const data = imageData.data;
+    
+    for (let py = 0; py < resolution; py++) {
+      for (let px = 0; px < resolution; px++) {
+        const idx = py * resolution + px;
+        const cell = pixels[idx];
+        
+        let color = [20, 20, 30];
+        if (cell >= 0) {
+          const point = points[cell];
+          switch (colorMode) {
+            case 'spiral':
+              color = spiralColor(point, points.length);
+              break;
+            case 'radial':
+              color = radialColor(point);
+              break;
+            case 'index':
+              color = indexColor(point, points.length);
+              break;
+            case 'area':
+              color = areaColor(areas[cell], maxArea);
+              break;
+            case 'neighbors':
+              color = neighborColor(neighborCounts[cell], 8);
+              break;
+          }
+        }
+        
+        const pixelIdx = idx * 4;
+        data[pixelIdx] = color[0];
+        data[pixelIdx + 1] = color[1];
+        data[pixelIdx + 2] = color[2];
+        data[pixelIdx + 3] = cell >= 0 ? Math.floor(cellAlpha * 255) : 0;
+      }
+    }
+    
+    // Scale up to canvas
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = resolution;
+    tempCanvas.height = resolution;
+    tempCanvas.getContext('2d').putImageData(imageData, 0, 0);
+    
+    ctx.drawImage(tempCanvas, centerX - diskRadius, centerY - diskRadius, diskRadius * 2, diskRadius * 2);
+  }
+  
+  // Draw borders
+  if (showBorders && borderWidth > 0) {
+    const borders = detectBorders(pixels, resolution, resolution);
+    ctx.fillStyle = `rgba(255, 255, 255, ${cellAlpha * 0.8})`;
+    
+    const scale = (diskRadius * 2) / resolution;
+    for (let py = 0; py < resolution; py++) {
+      for (let px = 0; px < resolution; px++) {
+        if (borders[py * resolution + px]) {
+          const x = centerX - diskRadius + px * scale;
+          const y = centerY - diskRadius + py * scale;
+          ctx.fillRect(x, y, Math.max(borderWidth, scale), Math.max(borderWidth, scale));
+        }
+      }
+    }
+  }
+  
+  // Draw Delaunay edges
+  if (showDual) {
+    const edges = computeDelaunayEdges(pixels, resolution, resolution, points.length, neighborCounts);
+    ctx.strokeStyle = 'rgba(255, 200, 100, 0.4)';
+    ctx.lineWidth = 1;
+    
+    for (const edge of edges) {
+      const p1 = points[edge.a];
+      const p2 = points[edge.b];
+      
+      ctx.beginPath();
+      const screenP1 = { x: centerX + p1.x * diskRadius, y: centerY + p1.y * diskRadius };
+      const screenP2 = { x: centerX + p2.x * diskRadius, y: centerY + p2.y * diskRadius };
+      
+      if (useHyperbolic) {
+        drawGeodesic(ctx, 
+          { x: centerX + p1.x * diskRadius, y: centerY + p1.y * diskRadius },
+          { x: centerX + p2.x * diskRadius, y: centerY + p2.y * diskRadius },
+          false // Draw geodesics in screen space (approximation)
+        );
+      } else {
+        ctx.moveTo(screenP1.x, screenP1.y);
+        ctx.lineTo(screenP2.x, screenP2.y);
+      }
+      ctx.stroke();
+    }
+  }
+  
+  // Draw points
+  if (showPoints) {
+    ctx.fillStyle = '#fff';
+    for (const p of points) {
+      const x = centerX + p.x * diskRadius;
+      const y = centerY + p.y * diskRadius;
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  ctx.restore();
+  
+  // Draw disk boundary
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, diskRadius, 0, Math.PI * 2);
+  ctx.strokeStyle = '#3a3a4a';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+// ============================================
+// UI SETUP
+// ============================================
+
+function setupUI() {
+  // Value displays
+  const updateValues = () => {
+    document.getElementById('valN').textContent = document.getElementById('N').value;
+    document.getElementById('valAngle').textContent = parseFloat(document.getElementById('angle').value).toFixed(1) + 'Â°';
+    document.getElementById('valSpread').textContent = parseFloat(document.getElementById('spread').value).toFixed(2);
+    document.getElementById('valCellAlpha').textContent = parseFloat(document.getElementById('cellAlpha').value).toFixed(2);
+    document.getElementById('valBorderWidth').textContent = parseFloat(document.getElementById('borderWidth').value).toFixed(1);
+  };
+  
+  // Slider events
+  ['N', 'angle', 'spread', 'cellAlpha', 'borderWidth'].forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      updateValues();
+      render();
+    });
+  });
+  
+  // Select events
+  document.getElementById('colorMode').addEventListener('change', render);
+  
+  // Toggle buttons
+  ['showCells', 'showBorders', 'showPoints', 'showDual'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      e.target.classList.toggle('active');
+      render();
+    });
+  });
+  
+  // Mode buttons (mutually exclusive)
+  ['modeHyperbolic', 'modeEuclidean', 'modeCompare'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      ['modeHyperbolic', 'modeEuclidean', 'modeCompare'].forEach(m => {
+        document.getElementById(m).classList.remove('active');
+      });
+      e.target.classList.add('active');
+      render();
+    });
+  });
+  
+  // Presets
+  document.getElementById('presets').addEventListener('change', (e) => {
+    const presets = {
+      golden: { N: 150, angle: 137.5, spread: 0.85 },
+      lucas: { N: 150, angle: 99.5, spread: 0.85 },
+      fibonacci: { N: 200, angle: 137.508, spread: 0.88 },
+      rational: { N: 120, angle: 120, spread: 0.8 },
+      pinwheel: { N: 180, angle: 126.2, spread: 0.85 },
+      sparse: { N: 50, angle: 137.5, spread: 0.7 }
+    };
+    
+    const preset = presets[e.target.value];
+    if (preset) {
+      document.getElementById('N').value = preset.N;
+      document.getElementById('angle').value = preset.angle;
+      document.getElementById('spread').value = preset.spread;
+      updateValues();
+      render();
+    }
+    e.target.value = '';
+  });
+  
+  // Render button
+  document.getElementById('render').addEventListener('click', render);
+  
+  // Export
+  document.getElementById('export').addEventListener('click', () => {
+    const canvas = document.getElementById('canvas');
+    const link = document.createElement('a');
+    link.download = `hyperbolic-voronoi-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+  
+  updateValues();
+}
+
+// Initialize
+setupUI();
+render();
+</script>
+</body>
+</html>

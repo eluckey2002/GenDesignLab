@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wake · Strange Attractor on an Energy Substrate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c0a;
+    --bg-deep:#050605;
+    --ink:#d4dccd;
+    --ink-dim:#6c7568;
+    --ink-faint:#252a25;
+    --jade:#aedca9;
+    --jade-soft:rgba(174,220,169,.4);
+    --bone:#f0e9d8;
+    --serif:'Cormorant Garamond',Georgia,serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;width:100%;overflow:hidden;background:var(--bg-deep);color:var(--ink);font-family:var(--mono);-webkit-font-smoothing:antialiased;font-feature-settings:'tnum'}
+  body{display:grid;grid-template-rows:1fr auto;height:100dvh}
+
+  .stage{position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#0a0c0a 0%,#020302 95%)}
+  canvas#field{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .stage::before,.stage::after{content:'';position:absolute;width:14px;height:14px;border:1px solid var(--ink-faint);pointer-events:none}
+  .stage::before{top:14px;left:14px;border-right:0;border-bottom:0}
+  .stage::after{bottom:14px;right:14px;border-left:0;border-top:0}
+
+  .header{position:absolute;top:18px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:flex-start;z-index:5;pointer-events:none;gap:16px}
+  .title{font-family:var(--serif);font-style:italic;font-weight:300;font-size:22px;letter-spacing:.01em;color:var(--ink);line-height:1}
+  .subtitle{font-family:var(--mono);font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-dim);margin-top:6px}
+  .climate{font-family:var(--serif);font-style:italic;font-size:13px;letter-spacing:.04em;color:var(--ink-dim);text-align:right;line-height:1.7}
+  .climate .v{color:var(--jade);font-feature-settings:'tnum'}
+
+  .footer{position:absolute;bottom:14px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:flex-end;z-index:5;pointer-events:none;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);gap:16px}
+
+  .controls{padding:22px 28px 24px;background:var(--bg);border-top:1px solid var(--ink-faint);display:flex;flex-direction:column;gap:16px;max-width:1100px;width:100%;margin:0 auto}
+
+  .label-row{display:flex;align-items:baseline;justify-content:center;gap:14px;font-family:var(--serif);line-height:1;flex-wrap:wrap}
+  .lsym{font-style:italic;font-weight:300;font-size:clamp(28px,5vw,40px);color:var(--ink)}
+  .leq{font-style:italic;font-weight:300;font-size:clamp(20px,3.5vw,28px);color:var(--ink-dim)}
+  .lnum{font-style:italic;font-weight:300;font-size:clamp(28px,5vw,40px);color:var(--ink);font-feature-settings:'tnum';min-width:6ch;text-align:right}
+  .ltag{font-family:var(--mono);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--jade);align-self:flex-end;padding-bottom:5px}
+
+  .chip-row{display:flex;justify-content:center;gap:6px;align-items:center;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.14em;color:var(--ink-dim);background:transparent;border:1px solid var(--ink-faint);padding:7px 12px;cursor:pointer;transition:all 160ms;border-radius:0;min-height:30px}
+  .chip:hover{color:var(--ink);border-color:var(--ink-dim)}
+  .chip.active{color:var(--bg);background:var(--jade);border-color:var(--jade);box-shadow:0 0 16px var(--jade-soft)}
+  .chip.warn{color:var(--ink-dim)}
+  .chip.warn:hover{color:var(--bone);border-color:var(--bone)}
+  .chip-divider{width:1px;height:14px;background:var(--ink-faint);margin:0 8px}
+
+  .param-grid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:560px;margin:0 auto;padding-top:6px;border-top:1px dashed var(--ink-faint)}
+  .param{display:flex;flex-direction:column;gap:2px}
+  .param-row{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;padding:0 2px}
+  .param-name{color:var(--ink-dim)}
+  .param-name em{font-family:var(--serif);font-style:italic;color:var(--ink);font-size:12px;letter-spacing:.02em;text-transform:none;margin-right:8px}
+  .param-value{color:var(--jade);font-feature-settings:'tnum';font-size:11px;letter-spacing:.06em;text-transform:none}
+
+  .slider-wrap{position:relative;padding:8px 8px}
+  .slider-wrap::before{content:'';position:absolute;left:8px;right:8px;top:50%;height:1px;background:linear-gradient(to right,var(--ink-faint) 0%,var(--ink-dim) 50%,var(--ink-faint) 100%);transform:translateY(-50%)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;position:relative;z-index:2;height:24px;margin:0}
+  input[type=range]:focus{outline:none}
+  input[type=range]::-webkit-slider-runnable-track{background:transparent;height:24px}
+  input[type=range]::-moz-range-track{background:transparent;height:24px;border:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--jade);margin-top:5px;cursor:grab;box-shadow:0 0 0 2px var(--bg),0 0 22px var(--jade-soft);transition:transform 140ms cubic-bezier(.2,.6,.2,1)}
+  input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.25)}
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--jade);cursor:grab;border:none;box-shadow:0 0 0 2px var(--bg),0 0 22px var(--jade-soft)}
+
+  @media (max-width:600px){
+    .header{left:18px;right:18px}
+    .controls{padding:18px 18px 20px;gap:14px}
+    .footer{font-size:8px;left:18px;right:18px}
+    .climate{font-size:11px}
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <canvas id="field"></canvas>
+    <div class="header">
+      <div>
+        <div class="title">Wake</div>
+        <div class="subtitle">Strange Attractor &middot; Energy Substrate</div>
+      </div>
+      <div class="climate">
+        the field feeds &middot; the path forages &middot; the wake remains<br>
+        steps <span class="v" id="hSteps">&mdash;</span> &middot; age <span class="v" id="hAge">&mdash;</span>s &middot; mean E <span class="v" id="hE">&mdash;</span>
+      </div>
+    </div>
+    <div class="footer">
+      <span>clifford &middot; deposit live &middot; gating live &middot; sliders v1</span>
+      <span id="footRules">a=&minus;1.4 &middot; b=+1.6 &middot; c=+1.0 &middot; d=+0.7</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="label-row">
+      <span class="lsym">E</span>
+      <span class="leq">=</span>
+      <span class="lnum" id="evReadout">1.000</span>
+      <span class="ltag" id="evTag">FIELD UNIFORM</span>
+    </div>
+
+    <div class="chip-row">
+      <button class="chip active" id="run">&#9208; DRIFTING</button>
+      <button class="chip warn" id="reset">&#8634; RESEED</button>
+      <button class="chip active" id="fieldToggle" title="show energy field">&#9673; FIELD</button>
+    </div>
+
+    <div class="param-grid">
+      <div class="param">
+        <div class="param-row">
+          <span class="param-name"><em>k</em><sub>consume</sub> &nbsp; deposit per substep</span>
+          <span class="param-value" id="vConsume">0.0050</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="sConsume" min="0.0005" max="0.0200" step="0.0005" value="0.005">
+        </div>
+      </div>
+
+      <div class="param">
+        <div class="param-row">
+          <span class="param-name"><em>forage</em> &nbsp; linger probability scale</span>
+          <span class="param-value" id="vForage">0.70</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="sForage" min="0" max="1" step="0.01" value="0.7">
+        </div>
+      </div>
+
+      <div class="param">
+        <div class="param-row">
+          <span class="param-name"><em>replenish</em> &nbsp; field regrowth rate</span>
+          <span class="param-value" id="vReplenish">0.0018</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="sReplenish" min="0.0002" max="0.0080" step="0.0001" value="0.0018">
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// =====================================================================
+// IMPORTED: UMAT.EnergyField  (canonical, clean v1)
+// In a multi-file build this would be a separate <script src="...">.
+// Inlined here because Wake ships as a single-file artifact.
+// =====================================================================
+(function (global) {
+  'use strict';
+
+  const DEFAULTS = {
+    size:         96,        // grid resolution (size x size)
+    replenish:    0.0018,    // per-cell-per-step regrowth toward 1.0
+    diffuse:      0.10,      // per-step neighbor mixing (0..1)
+    initial:      1.0,       // starting energy everywhere
+
+    color_r:      200,
+    color_g:      152,
+    color_b:       88,
+    render_alpha: 0.55,
+    render_gamma: 2.0,
+  };
+
+  function EnergyField(opts) {
+    const cfg = Object.assign({}, DEFAULTS, opts || {});
+    const FS  = cfg.size | 0;
+
+    let buf  = new Float32Array(FS * FS);
+    let swap = new Float32Array(FS * FS);
+
+    const offscreen = (typeof document !== 'undefined') ? document.createElement('canvas') : null;
+    let offCtx = null, offImage = null;
+    if (offscreen) {
+      offscreen.width  = FS;
+      offscreen.height = FS;
+      offCtx   = offscreen.getContext('2d');
+      offImage = offCtx.createImageData(FS, FS);
+    }
+
+    function reset() { buf.fill(cfg.initial); }
+    reset();
+
+    function _toGrid(x, y) {
+      return [(x + 1) * 0.5 * (FS - 1), (y + 1) * 0.5 * (FS - 1)];
+    }
+
+    function sample(x, y) {
+      if (x * x + y * y >= 1) return 1.0;
+      const g = _toGrid(x, y);
+      const fi = g[0], fj = g[1];
+      if (fi < 0 || fi > FS - 1 || fj < 0 || fj > FS - 1) return 1.0;
+      const i0 = Math.floor(fi), j0 = Math.floor(fj);
+      const i1 = Math.min(FS - 1, i0 + 1), j1 = Math.min(FS - 1, j0 + 1);
+      const fx = fi - i0, fy = fj - j0;
+      const a = buf[j0 * FS + i0];
+      const b = buf[j0 * FS + i1];
+      const c = buf[j1 * FS + i0];
+      const d = buf[j1 * FS + i1];
+      return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
+    }
+
+    function deposit(x, y, amount) {
+      if (x * x + y * y >= 1) return;
+      const g = _toGrid(x, y);
+      const i = Math.round(g[0]), j = Math.round(g[1]);
+      if (i < 0 || i >= FS || j < 0 || j >= FS) return;
+      const idx = j * FS + i;
+      buf[idx] = Math.max(0, buf[idx] - amount);
+    }
+
+    function step() {
+      const rep = cfg.replenish;
+      for (let i = 0; i < buf.length; i++) {
+        buf[i] += (1.0 - buf[i]) * rep;
+      }
+      const d = cfg.diffuse;
+      for (let j = 0; j < FS; j++) {
+        for (let i = 0; i < FS; i++) {
+          const idx = j * FS + i;
+          const n  = j > 0      ? buf[idx - FS] : buf[idx];
+          const s  = j < FS - 1 ? buf[idx + FS] : buf[idx];
+          const w  = i > 0      ? buf[idx - 1]  : buf[idx];
+          const e  = i < FS - 1 ? buf[idx + 1]  : buf[idx];
+          const lap = (n + s + w + e) * 0.25 - buf[idx];
+          swap[idx] = buf[idx] + d * lap;
+        }
+      }
+      const tmp = buf; buf = swap; swap = tmp;
+    }
+
+    function render(ctx, sx, sy, w, h) {
+      if (!offCtx) return;
+      const data = offImage.data;
+      const r = cfg.color_r, g = cfg.color_g, b = cfg.color_b;
+      const gamma = cfg.render_gamma;
+      for (let j = 0; j < FS; j++) {
+        for (let i = 0; i < FS; i++) {
+          const v = buf[j * FS + i];
+          const x = (i / (FS - 1)) * 2 - 1;
+          const y = (j / (FS - 1)) * 2 - 1;
+          // Smooth disk edge: linear falloff over the last ~2 grid cells
+          // (avoids stair-stepping at the boundary when upsampled large)
+          const r2 = x * x + y * y;
+          const edge = Math.max(0, Math.min(1, (1.0 - r2) / 0.10));
+          const intensity = edge * Math.pow(v, gamma);
+          const idx = (j * FS + i) * 4;
+          data[idx + 0] = (r * intensity) | 0;
+          data[idx + 1] = (g * intensity) | 0;
+          data[idx + 2] = (b * intensity) | 0;
+          data[idx + 3] = 255;
+        }
+      }
+      offCtx.putImageData(offImage, 0, 0);
+
+      const prevOp     = ctx.globalCompositeOperation;
+      const prevAlpha  = ctx.globalAlpha;
+      const prevSmooth = ctx.imageSmoothingEnabled;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = cfg.render_alpha;
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(offscreen, sx, sy, w, h);
+      ctx.globalCompositeOperation = prevOp;
+      ctx.globalAlpha = prevAlpha;
+      ctx.imageSmoothingEnabled = prevSmooth;
+    }
+
+    function stats() {
+      let sum = 0, mn = 1, mx = 0;
+      for (let i = 0; i < buf.length; i++) {
+        const v = buf[i];
+        sum += v;
+        if (v < mn) mn = v;
+        if (v > mx) mx = v;
+      }
+      return { mean: sum / buf.length, min: mn, max: mx, size: FS };
+    }
+
+    function setConfig(patch) { Object.assign(cfg, patch); }
+
+    return {
+      sample, deposit, step, render, reset, stats, setConfig,
+      get size() { return FS; },
+    };
+  }
+
+  global.UMAT = global.UMAT || {};
+  global.UMAT.EnergyField = EnergyField;
+  global.EnergyField = EnergyField;
+})(typeof window !== 'undefined' ? window : this);
+// =====================================================================
+// END IMPORTED MODULE
+// =====================================================================
+
+
+// =====================================================================
+// WAKE  --  Clifford attractor on an energy substrate
+// =====================================================================
+
+const PARAMS = {
+  // Attractor dynamics
+  substeps:    250,            // attractor iterations per frame
+  scale:       0.45,           // attractor coords -> world coords [-1,+1]
+
+  // Clifford parameters (default preset)
+  a: -1.4,
+  b:  1.6,
+  c:  1.0,
+  d:  0.7,
+
+  // Trail rendering
+  trail_alpha: 0.030,          // per-frame trail fade (lower = longer persistence)
+  point_size:  1.0,            // stamped dot size in css px
+  point_color: 'rgba(232,244,222,0.55)',  // bone-cream
+  point_halo:  'rgba(174,220,169,0.18)',  // jade halo
+
+  // Field
+  field_show:  true,
+  k_consume:   0.005,          // per-substep deposit at trajectory point
+  forage_strength: 0.7,        // probability of lingering scales with local e
+                               //   linger = random() < forage_strength * e
+                               //   high e -> often linger (graze in fresh)
+                               //   low e  -> never linger (flee depleted)
+                               //   preserves Clifford dynamics when stepping
+};
+
+// ---- Module instance ------------------------------------------------
+const umatField = new UMAT.EnergyField({
+  size:      96,
+  replenish: 0.0018,
+  diffuse:   0.10,
+});
+
+// ---- Canvas / sizing ------------------------------------------------
+const cv  = document.getElementById('field');
+const ctx = cv.getContext('2d');
+let dpr = 1, cw = 0, ch = 0, cs = 0;
+let trailCanvas, trailCtx;
+
+function resize() {
+  const wrap = cv.parentElement;
+  const r = wrap.getBoundingClientRect();
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width  = Math.max(2, Math.floor(r.width  * dpr));
+  cv.height = Math.max(2, Math.floor(r.height * dpr));
+  cv.style.width  = r.width + 'px';
+  cv.style.height = r.height + 'px';
+  cw = r.width; ch = r.height;
+  cs = Math.min(cw, ch) * 0.45;
+
+  trailCanvas = document.createElement('canvas');
+  trailCanvas.width  = cv.width;
+  trailCanvas.height = cv.height;
+  trailCtx = trailCanvas.getContext('2d');
+  trailCtx.fillStyle = '#020302';
+  trailCtx.fillRect(0, 0, trailCanvas.width, trailCanvas.height);
+}
+
+// world [-1,+1] -> screen px (css)
+function w2s(x, y) { return [cw * 0.5 + x * cs, ch * 0.5 - y * cs]; }
+
+// ---- Clifford attractor ---------------------------------------------
+let ax = 0.1, ay = 0.0;
+let stepCount = 0;
+
+function cliffordStep() {
+  const nx = Math.sin(PARAMS.a * ay) + PARAMS.c * Math.cos(PARAMS.a * ax);
+  const ny = Math.sin(PARAMS.b * ax) + PARAMS.d * Math.cos(PARAMS.b * ay);
+  ax = nx; ay = ny;
+  stepCount++;
+  return [nx, ny];
+}
+
+function reseed() {
+  ax = 0.1; ay = 0.0;
+  stepCount = 0;
+  ageMs = 0;
+  if (trailCtx) {
+    trailCtx.fillStyle = '#020302';
+    trailCtx.fillRect(0, 0, trailCanvas.width, trailCanvas.height);
+  }
+  umatField.reset();
+}
+
+// ---- Render loop ----------------------------------------------------
+const state = { running: true };
+let lastT = performance.now();
+let ageMs = 0;
+
+function tick(now) {
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (state.running) {
+    ageMs += dt * 1000;
+
+    // Stamp attractor points onto trail buffer
+    trailCtx.save();
+    trailCtx.scale(dpr, dpr);
+    trailCtx.globalCompositeOperation = 'lighter';
+
+    for (let s = 0; s < PARAMS.substeps; s++) {
+      // Sample local energy at current trajectory position.
+      // Foraging via stochastic linger:
+      //   when fed, often pause in place and graze (still depositing);
+      //   when depleted, always step (flee).
+      // This preserves Clifford's chaotic dynamics -- whenever we DO step,
+      // it is a full unmodified iteration -- and only modulates the rate.
+      const e = umatField.sample(ax * PARAMS.scale, ay * PARAMS.scale);
+      const linger = Math.random() < PARAMS.forage_strength * e;
+      if (!linger) cliffordStep();
+
+      const wx = ax * PARAMS.scale;
+      const wy = ay * PARAMS.scale;
+      const sxsy = w2s(wx, wy);
+      const sx = sxsy[0], sy = sxsy[1];
+
+      // Consume -- generator owns the deposit.  Lingers consume too,
+      // which is what eventually frees the trajectory from a fresh patch.
+      umatField.deposit(wx, wy, PARAMS.k_consume);
+
+      // halo
+      trailCtx.fillStyle = PARAMS.point_halo;
+      trailCtx.fillRect(sx - 1.5, sy - 1.5, 3, 3);
+      // core
+      trailCtx.fillStyle = PARAMS.point_color;
+      trailCtx.fillRect(sx - 0.5, sy - 0.5, PARAMS.point_size, PARAMS.point_size);
+    }
+    trailCtx.restore();
+
+    // Field advances each frame.
+    // Phase D: deposits live — consumption happens inside the substep loop above.
+    umatField.step();
+  }
+
+  render();
+  updateReadouts();
+  requestAnimationFrame(tick);
+}
+
+function render() {
+  // 1) Fade trail (dark wash)
+  trailCtx.globalCompositeOperation = 'source-over';
+  trailCtx.fillStyle = 'rgba(2,3,2,' + PARAMS.trail_alpha + ')';
+  trailCtx.fillRect(0, 0, trailCanvas.width, trailCanvas.height);
+
+  // 2) Visible canvas -- bg
+  ctx.fillStyle = '#020302';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+
+  // 3) Field glow (under everything else)
+  if (PARAMS.field_show) {
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    const sx = cw * 0.5 - cs;
+    const sy = ch * 0.5 - cs;
+    umatField.render(ctx, sx, sy, cs * 2, cs * 2);
+    ctx.restore();
+  }
+
+  // 4) Composite trail (lighter) on top of field
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.drawImage(trailCanvas, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+
+  // 5) Boundary disk (faint dashed)
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = 'rgba(212,220,205,0.10)';
+  ctx.setLineDash([2, 5]);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cw * 0.5, ch * 0.5, cs, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+// ---- Readouts -------------------------------------------------------
+function updateReadouts() {
+  document.getElementById('hSteps').textContent = stepCount.toLocaleString();
+  document.getElementById('hAge').textContent = (ageMs / 1000).toFixed(1);
+
+  const s = umatField.stats();
+  document.getElementById('hE').textContent = s.mean.toFixed(3);
+  document.getElementById('evReadout').textContent = s.mean.toFixed(3);
+
+  // Tag interpretation
+  const tag = document.getElementById('evTag');
+  if (s.mean > 0.99)      tag.textContent = 'FIELD UNIFORM';
+  else if (s.mean > 0.85) tag.textContent = 'LIGHT CONSUMPTION';
+  else if (s.mean > 0.55) tag.textContent = 'ACTIVE METABOLISM';
+  else                    tag.textContent = 'DEPLETED';
+}
+
+// ---- Events ---------------------------------------------------------
+const runBtn = document.getElementById('run');
+runBtn.addEventListener('click', () => {
+  state.running = !state.running;
+  runBtn.textContent = state.running ? '\u23F8 DRIFTING' : '\u25B6 DRIFTING';
+  runBtn.classList.toggle('active', state.running);
+});
+
+document.getElementById('reset').addEventListener('click', reseed);
+
+const fieldBtn = document.getElementById('fieldToggle');
+fieldBtn.addEventListener('click', () => {
+  PARAMS.field_show = !PARAMS.field_show;
+  fieldBtn.classList.toggle('active', PARAMS.field_show);
+});
+
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    state.running = !state.running;
+    runBtn.textContent = state.running ? '\u23F8 DRIFTING' : '\u25B6 DRIFTING';
+    runBtn.classList.toggle('active', state.running);
+  } else if (e.key === 'r' || e.key === 'R') {
+    reseed();
+  }
+});
+
+// ---- Live param sliders ---------------------------------------------
+const sConsume   = document.getElementById('sConsume');
+const sForage    = document.getElementById('sForage');
+const sReplenish = document.getElementById('sReplenish');
+const vConsume   = document.getElementById('vConsume');
+const vForage    = document.getElementById('vForage');
+const vReplenish = document.getElementById('vReplenish');
+
+sConsume.addEventListener('input', e => {
+  PARAMS.k_consume = parseFloat(e.target.value);
+  vConsume.textContent = PARAMS.k_consume.toFixed(4);
+});
+sForage.addEventListener('input', e => {
+  PARAMS.forage_strength = parseFloat(e.target.value);
+  vForage.textContent = PARAMS.forage_strength.toFixed(2);
+});
+sReplenish.addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  umatField.setConfig({ replenish: v });
+  vReplenish.textContent = v.toFixed(4);
+});
+
+new ResizeObserver(resize).observe(cv.parentElement);
+resize();
+reseed();
+requestAnimationFrame(t => { lastT = t; tick(t); });
+</script>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Curvature Morph · UMAT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0d16;
+    --bg-canvas:#05070d;
+    --ink:#f0e4d0;
+    --ink-dim:#8a7c6a;
+    --ink-faint:#3a342c;
+    --accent:#ffb878;
+    --accent-soft:rgba(255,184,120,.4);
+    --serif:'Cormorant Garamond','EB Garamond',Georgia,serif;
+    --mono:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--mono);font-feature-settings:'tnum';-webkit-font-smoothing:antialiased}
+  body{display:grid;grid-template-rows:1fr auto;height:100dvh}
+
+  .stage{position:relative;overflow:hidden;background:radial-gradient(ellipse at center,var(--bg-canvas) 0%,var(--bg) 95%)}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+  .stage::before,.stage::after{
+    content:'';position:absolute;pointer-events:none;
+    width:14px;height:14px;border:1px solid var(--ink-faint);
+  }
+  .stage::before{top:14px;left:14px;border-right:0;border-bottom:0}
+  .stage::after{bottom:14px;right:14px;border-left:0;border-top:0}
+
+  .header{position:absolute;top:18px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:baseline;z-index:5;pointer-events:none;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim)}
+  .header .title{color:var(--ink);letter-spacing:.32em}
+  .header .metric{font-family:var(--serif);font-style:italic;font-size:13px;letter-spacing:.04em;text-transform:none;color:var(--ink-dim)}
+  .header .metric sub{font-size:.75em;letter-spacing:0}
+
+  .footer{position:absolute;bottom:14px;left:28px;right:28px;display:flex;justify-content:space-between;align-items:flex-end;z-index:5;pointer-events:none;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint)}
+
+  /* Controls panel */
+  .controls{padding:22px 28px 24px;background:var(--bg);border-top:1px solid var(--ink-faint);display:flex;flex-direction:column;gap:18px;max-width:1200px;width:100%;margin:0 auto}
+
+  /* Hero κ readout */
+  .readout{display:flex;align-items:baseline;justify-content:center;gap:18px;font-family:var(--serif);line-height:1;flex-wrap:wrap}
+  .kappa-sym{font-style:italic;font-weight:300;font-size:clamp(40px,7vw,64px);color:var(--ink)}
+  .kappa-eq{font-style:italic;font-weight:300;font-size:clamp(28px,5vw,40px);color:var(--ink-dim)}
+  .kappa-num{font-style:italic;font-weight:400;font-size:clamp(40px,7vw,64px);color:var(--ink);min-width:5ch;text-align:right;font-feature-settings:'tnum';letter-spacing:.01em}
+  .kappa-tag{font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);align-self:flex-end;padding-bottom:8px;transition:color 240ms}
+  .kappa-tag.eu{color:#dcd0b8}
+  .kappa-tag.hy{color:#9bc4e0}
+  .kappa-tag.sp{color:var(--accent)}
+
+  /* Slider */
+  .slider-wrap{position:relative;padding:14px 8px}
+  .slider-wrap::before{content:'';position:absolute;left:8px;right:8px;top:50%;height:1px;background:linear-gradient(to right,var(--ink-faint) 0%,var(--ink-dim) 50%,var(--ink-faint) 100%);transform:translateY(-50%)}
+  .slider-wrap::after{content:'';position:absolute;left:50%;top:calc(50% - 5px);width:1px;height:10px;background:var(--ink-dim);transform:translateX(-1px)}
+  .tick{position:absolute;top:50%;width:1px;height:6px;background:var(--ink-faint);transform:translateY(-3px)}
+  .tick.l{left:8px}.tick.r{right:8px}
+  .ticklabel{position:absolute;top:calc(50% + 14px);font-size:9px;letter-spacing:.2em;color:var(--ink-faint);transform:translateX(-50%)}
+  .ticklabel.l{left:8px}.ticklabel.c{left:50%}.ticklabel.r{left:calc(100% - 8px)}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;position:relative;z-index:2;height:24px;margin:0}
+  input[type=range]:focus{outline:none}
+  input[type=range]::-webkit-slider-runnable-track{background:transparent;height:24px}
+  input[type=range]::-moz-range-track{background:transparent;height:24px;border:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);margin-top:5px;cursor:grab;box-shadow:0 0 0 2px var(--bg),0 0 22px var(--accent-soft);transition:transform 140ms cubic-bezier(.2,.6,.2,1)}
+  input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.25)}
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:grab;border:none;box-shadow:0 0 0 2px var(--bg),0 0 22px var(--accent-soft)}
+
+  /* Chips */
+  .chip-row{display:flex;justify-content:center;gap:6px;align-items:center;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.14em;color:var(--ink-dim);background:transparent;border:1px solid var(--ink-faint);padding:7px 12px;cursor:pointer;transition:all 160ms;border-radius:0;min-height:30px}
+  .chip:hover{color:var(--ink);border-color:var(--ink-dim)}
+  .chip.active{color:var(--bg);background:var(--accent);border-color:var(--accent);box-shadow:0 0 16px var(--accent-soft)}
+  .chip-divider{width:1px;height:14px;background:var(--ink-faint);margin:0 8px}
+
+  /* Advanced collapsible */
+  details.advanced{margin-top:2px;text-align:center}
+  details.advanced > summary{cursor:pointer;list-style:none;color:var(--ink-dim);letter-spacing:.28em;text-transform:uppercase;font-size:9px;padding:8px 0;user-select:none;display:inline-flex;align-items:center;gap:8px}
+  details.advanced > summary::-webkit-details-marker{display:none}
+  details.advanced > summary::before{content:'+';font-family:var(--serif);font-size:14px;color:var(--ink-dim);transition:transform 200ms}
+  details.advanced[open] > summary::before{transform:rotate(45deg)}
+  details.advanced > summary:hover{color:var(--ink)}
+
+  .knob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px 28px;margin-top:14px;text-align:left}
+  .knob{display:flex;flex-direction:column;gap:5px}
+  .knob label{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim);display:flex;justify-content:space-between;align-items:baseline}
+  .knob label .val{color:var(--ink);font-feature-settings:'tnum';letter-spacing:.04em;text-transform:none}
+  .knob input[type=range]::-webkit-slider-thumb{width:10px;height:10px;margin-top:7px;box-shadow:0 0 0 2px var(--bg),0 0 12px var(--accent-soft)}
+  .knob input[type=range]::-moz-range-thumb{width:10px;height:10px;box-shadow:0 0 0 2px var(--bg),0 0 12px var(--accent-soft)}
+  .knob .slider-wrap{padding:8px 0}
+  .knob .slider-wrap::before{left:0;right:0;background:var(--ink-faint)}
+  .knob .slider-wrap::after{display:none}
+
+  @media (max-width:600px){
+    .header{left:18px;right:18px;font-size:9px}
+    .header .metric{font-size:11px}
+    .controls{padding:18px 18px 20px;gap:14px}
+    .footer{font-size:8px;left:18px;right:18px}
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <canvas id="c"></canvas>
+    <div class="header">
+      <span class="title">Curvature&nbsp;Morph</span>
+      <span class="metric">ds² = dr² + S<sub>κ</sub>(r)² dθ²</span>
+    </div>
+    <div class="footer">
+      <span>Phyllotaxis · K-Nearest · Geodesic</span>
+      <span id="footer-status">N=200 · k=4</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="readout">
+      <span class="kappa-sym">κ</span>
+      <span class="kappa-eq">=</span>
+      <span class="kappa-num" id="kv">+0.000</span>
+      <span class="kappa-tag eu" id="kl">Euclidean</span>
+    </div>
+
+    <div class="slider-wrap">
+      <span class="tick l"></span><span class="tick r"></span>
+      <span class="ticklabel l">−1</span>
+      <span class="ticklabel c">0</span>
+      <span class="ticklabel r">+1</span>
+      <input type="range" id="kappa" min="-1" max="1" step="0.001" value="0">
+    </div>
+
+    <div class="chip-row">
+      <button class="chip" data-snap="-1">κ = −1</button>
+      <button class="chip" data-snap="0">κ = 0</button>
+      <button class="chip" data-snap="1">κ = +1</button>
+      <span class="chip-divider"></span>
+      <button class="chip active" id="auto-toggle">⏸ AUTO‑SWEEP</button>
+    </div>
+
+    <details class="advanced">
+      <summary>Generator</summary>
+      <div class="knob-grid">
+        <div class="knob">
+          <label>Points <span class="val" id="n-val">200</span></label>
+          <div class="slider-wrap"><input type="range" id="n" min="50" max="500" step="10" value="200"></div>
+        </div>
+        <div class="knob">
+          <label>Divergence <span class="val" id="ang-val">137.5077°</span></label>
+          <div class="slider-wrap"><input type="range" id="ang" min="60" max="180" step="0.0001" value="137.5077"></div>
+        </div>
+        <div class="knob">
+          <label>Neighbors (k) <span class="val" id="k-val">4</span></label>
+          <div class="slider-wrap"><input type="range" id="k" min="0" max="8" step="1" value="4"></div>
+        </div>
+        <div class="knob">
+          <label>Trail <span class="val" id="t-val">36</span></label>
+          <div class="slider-wrap"><input type="range" id="t" min="0" max="120" step="1" value="36"></div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+<script>
+"use strict";
+
+// =====================================================================
+// MATH — Constant-curvature 2D space, unified across κ ∈ [−1, +1]
+// =====================================================================
+//
+// Intrinsic coords: (r, θ).  r is geodesic distance from origin.
+// Metric:  ds² = dr² + S_κ(r)² dθ²      where
+//   S_κ(r) =  sin(√κ·r)/√κ   for κ > 0   (sphere of curvature κ)
+//             r                for κ = 0   (Euclidean plane)
+//             sinh(√|κ|·r)/√|κ|  for κ < 0 (hyperbolic plane)
+//
+// Embedding (lifts (r,θ) into ℝ³):
+//   κ > 0:  P = (sin(kr)cosθ, sin(kr)sinθ, cos(kr))         on unit sphere
+//   κ = 0:  P = (r cosθ, r sinθ, 1)                         on plane z=1
+//   κ < 0:  P = (sinh(kr)cosθ, sinh(kr)sinθ, cosh(kr))      on unit hyperboloid
+//   (k = √|κ|)
+//
+// Stereographic projection from "south pole" (0,0,-1) → unit disk.
+// Normalized so that intrinsic r=1 maps to disk-radius 1.
+
+const EPS = 0.005;
+
+function geoDist(k,r1,t1,r2,t2){
+  const dt = t1 - t2;
+  if (Math.abs(k) < EPS) return Math.sqrt(r1*r1 + r2*r2 - 2*r1*r2*Math.cos(dt));
+  if (k > 0){
+    const sk = Math.sqrt(k);
+    let c = Math.cos(sk*r1)*Math.cos(sk*r2) + Math.sin(sk*r1)*Math.sin(sk*r2)*Math.cos(dt);
+    if (c > 1) c = 1; else if (c < -1) c = -1;
+    return Math.acos(c)/sk;
+  }
+  const sk = Math.sqrt(-k);
+  let c = Math.cosh(sk*r1)*Math.cosh(sk*r2) - Math.sinh(sk*r1)*Math.sinh(sk*r2)*Math.cos(dt);
+  if (c < 1) c = 1;
+  return Math.acosh(c)/sk;
+}
+
+function lift(k,r,t){
+  if (Math.abs(k) < EPS) return [r*Math.cos(t), r*Math.sin(t), 1];
+  if (k > 0){
+    const sk = Math.sqrt(k), s = Math.sin(sk*r), co = Math.cos(sk*r);
+    return [s*Math.cos(t), s*Math.sin(t), co];
+  }
+  const sk = Math.sqrt(-k), s = Math.sinh(sk*r), co = Math.cosh(sk*r);
+  return [s*Math.cos(t), s*Math.sin(t), co];
+}
+
+function normFactor(k){
+  if (Math.abs(k) < EPS) return 1;          // Euclidean: r∈[0,1] → ρ∈[0,1]
+  const sk = Math.sqrt(Math.abs(k));
+  return k > 0 ? Math.tan(sk/2) : Math.tanh(sk/2);
+}
+
+function projectDisk(k,X,Y,Z,nf){
+  if (Math.abs(k) < EPS) return [X/nf, Y/nf];
+  const denom = 1 + Z;
+  return [(X/denom)/nf, (Y/denom)/nf];
+}
+
+function toDisk(k,r,t,nf){
+  const [X,Y,Z] = lift(k,r,t);
+  return projectDisk(k,X,Y,Z,nf);
+}
+
+// Sample geodesic from (r1,t1) to (r2,t2), return (samples+1) disk points.
+function geoArc(k,r1,t1,r2,t2,samples,nf){
+  const out = new Array(samples + 1);
+  if (Math.abs(k) < EPS){
+    const x1 = r1*Math.cos(t1), y1 = r1*Math.sin(t1);
+    const x2 = r2*Math.cos(t2), y2 = r2*Math.sin(t2);
+    for (let i = 0; i <= samples; i++){
+      const u = i/samples;
+      out[i] = [(x1 + (x2-x1)*u)/nf, (y1 + (y2-y1)*u)/nf];
+    }
+    return out;
+  }
+  const P1 = lift(k,r1,t1), P2 = lift(k,r2,t2);
+  if (k > 0){
+    let dot = P1[0]*P2[0] + P1[1]*P2[1] + P1[2]*P2[2];
+    if (dot > 1) dot = 1; else if (dot < -1) dot = -1;
+    const d = Math.acos(dot);
+    if (d < 1e-7){
+      const p = projectDisk(k,P1[0],P1[1],P1[2],nf);
+      for (let i = 0; i <= samples; i++) out[i] = p;
+      return out;
+    }
+    const sd = Math.sin(d);
+    const Tx = (P2[0]-P1[0]*dot)/sd, Ty = (P2[1]-P1[1]*dot)/sd, Tz = (P2[2]-P1[2]*dot)/sd;
+    for (let i = 0; i <= samples; i++){
+      const s = (i/samples)*d, cs = Math.cos(s), ss = Math.sin(s);
+      out[i] = projectDisk(k, P1[0]*cs + Tx*ss, P1[1]*cs + Ty*ss, P1[2]*cs + Tz*ss, nf);
+    }
+    return out;
+  }
+  // hyperbolic: Minkowski metric (+,+,−), <P,P>_M = -1
+  const ip = P1[0]*P2[0] + P1[1]*P2[1] - P1[2]*P2[2];   // = -cosh(d)
+  let cd = -ip; if (cd < 1) cd = 1;
+  const d = Math.acosh(cd);
+  if (d < 1e-7){
+    const p = projectDisk(k,P1[0],P1[1],P1[2],nf);
+    for (let i = 0; i <= samples; i++) out[i] = p;
+    return out;
+  }
+  const sd = Math.sinh(d);
+  const Tx = (P2[0]-P1[0]*cd)/sd, Ty = (P2[1]-P1[1]*cd)/sd, Tz = (P2[2]-P1[2]*cd)/sd;
+  for (let i = 0; i <= samples; i++){
+    const s = (i/samples)*d, ch = Math.cosh(s), sh = Math.sinh(s);
+    out[i] = projectDisk(k, P1[0]*ch + Tx*sh, P1[1]*ch + Ty*sh, P1[2]*ch + Tz*sh, nf);
+  }
+  return out;
+}
+
+// =====================================================================
+// STATE
+// =====================================================================
+
+const state = {
+  kappa: 0,
+  autoSweep: true,
+  sweepT: 0.001,    // start near 0 but moving
+  N: 200,
+  angleDeg: 137.5077,
+  k: 4,
+  trailLen: 36,
+};
+
+let points = [];          // {r,theta,hue}
+let trails = [];          // [[x,y], ...]
+let edges = [];           // [i,j] pairs (symmetric KNN, deduped)
+let lastEdgeKappa = NaN;
+
+function rebuildPoints(){
+  points = [];
+  trails = [];
+  const ang = state.angleDeg * Math.PI / 180;
+  for (let i = 0; i < state.N; i++){
+    const r = Math.sqrt((i + 0.5) / state.N);
+    const t = i * ang;
+    // hue spans cool→warm: 220° (blue) → 80° (gold), 220° wide
+    const hue = (220 + (i / state.N) * 220) % 360;
+    points.push({ r, theta: t, hue });
+    trails.push([]);
+  }
+  lastEdgeKappa = NaN;
+}
+
+function rebuildEdges(){
+  edges = [];
+  if (state.k <= 0){ lastEdgeKappa = state.kappa; return; }
+  const N = points.length;
+  const pairs = new Set();
+  const tmp = new Array(N - 1);
+  for (let i = 0; i < N; i++){
+    let w = 0;
+    for (let j = 0; j < N; j++){
+      if (j === i) continue;
+      tmp[w++] = { j, d: geoDist(state.kappa, points[i].r, points[i].theta, points[j].r, points[j].theta) };
+    }
+    tmp.length = w;
+    tmp.sort((a,b) => a.d - b.d);
+    const lim = Math.min(state.k, tmp.length);
+    for (let kk = 0; kk < lim; kk++){
+      const j = tmp[kk].j;
+      const a = i < j ? i : j, b = i < j ? j : i;
+      pairs.add(a * 100000 + b);
+    }
+  }
+  edges = new Array(pairs.size);
+  let idx = 0;
+  for (const key of pairs){
+    edges[idx++] = [Math.floor(key / 100000), key % 100000];
+  }
+  lastEdgeKappa = state.kappa;
+}
+
+// =====================================================================
+// RENDER
+// =====================================================================
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d', { alpha: false });
+let cw = 1, ch = 1, cs = 1, dpr = 1;
+
+function resizeCanvas(){
+  const wrap = canvas.parentElement;
+  const rect = wrap.getBoundingClientRect();
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width  = Math.max(2, Math.floor(rect.width  * dpr));
+  canvas.height = Math.max(2, Math.floor(rect.height * dpr));
+  canvas.style.width  = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  cw = rect.width;
+  ch = rect.height;
+  cs = Math.min(cw, ch) * 0.43;
+}
+
+function diskToScreen(x, y){
+  return [cw*0.5 + x*cs, ch*0.5 - y*cs];
+}
+
+function render(){
+  ctx.save();
+  ctx.scale(dpr, dpr);
+
+  // Background — solid for performance, the CSS gradient supplies the vignette
+  ctx.fillStyle = '#05070d';
+  ctx.fillRect(0, 0, cw, ch);
+
+  // Boundary disk
+  ctx.strokeStyle = 'rgba(240,228,208,0.16)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 5]);
+  ctx.beginPath();
+  ctx.arc(cw*0.5, ch*0.5, cs, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Faint cross-hairs at the disk center
+  ctx.strokeStyle = 'rgba(240,228,208,0.06)';
+  ctx.beginPath();
+  ctx.moveTo(cw*0.5 - 6, ch*0.5); ctx.lineTo(cw*0.5 + 6, ch*0.5);
+  ctx.moveTo(cw*0.5, ch*0.5 - 6); ctx.lineTo(cw*0.5, ch*0.5 + 6);
+  ctx.stroke();
+
+  // Compute disk positions for all points
+  const nf = normFactor(state.kappa);
+  const positions = new Array(points.length);
+  for (let i = 0; i < points.length; i++){
+    positions[i] = toDisk(state.kappa, points[i].r, points[i].theta, nf);
+  }
+
+  // ── EDGES (geodesic polylines) ─────────────────────────────────────
+  if (state.k > 0 && edges.length){
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineWidth = 0.55;
+    ctx.lineCap = 'round';
+    const sampleN = Math.abs(state.kappa) < EPS ? 1 : 14;
+    for (let e = 0; e < edges.length; e++){
+      const i = edges[e][0], j = edges[e][1];
+      const arc = geoArc(state.kappa, points[i].r, points[i].theta, points[j].r, points[j].theta, sampleN, nf);
+      const h = (points[i].hue + points[j].hue) * 0.5;
+      ctx.strokeStyle = `hsla(${h},55%,55%,0.16)`;
+      ctx.beginPath();
+      const p0 = diskToScreen(arc[0][0], arc[0][1]);
+      ctx.moveTo(p0[0], p0[1]);
+      for (let s = 1; s < arc.length; s++){
+        const p = diskToScreen(arc[s][0], arc[s][1]);
+        ctx.lineTo(p[0], p[1]);
+      }
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // ── TRAILS — push current positions, draw fading polylines ────────
+  for (let i = 0; i < points.length; i++){
+    trails[i].push(positions[i]);
+    while (trails[i].length > state.trailLen) trails[i].shift();
+  }
+  if (state.trailLen > 0){
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineWidth = 1.0;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < points.length; i++){
+      const tr = trails[i];
+      if (tr.length < 2) continue;
+      const h = points[i].hue;
+      for (let s = 1; s < tr.length; s++){
+        const a = (s / tr.length) * 0.55;
+        ctx.strokeStyle = `hsla(${h},75%,60%,${a})`;
+        const p1 = diskToScreen(tr[s-1][0], tr[s-1][1]);
+        const p2 = diskToScreen(tr[s][0],   tr[s][1]);
+        ctx.beginPath();
+        ctx.moveTo(p1[0], p1[1]);
+        ctx.lineTo(p2[0], p2[1]);
+        ctx.stroke();
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // ── POINTS — glow halo + core ─────────────────────────────────────
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < points.length; i++){
+    const [x, y] = diskToScreen(positions[i][0], positions[i][1]);
+    const h = points[i].hue;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, 5);
+    grad.addColorStop(0,   `hsla(${h},85%,68%,1.0)`);
+    grad.addColorStop(0.4, `hsla(${h},85%,60%,0.35)`);
+    grad.addColorStop(1,   `hsla(${h},85%,60%,0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = `hsl(${h},90%,80%)`;
+    ctx.beginPath();
+    ctx.arc(x, y, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+
+  ctx.restore();
+}
+
+// =====================================================================
+// LOOP
+// =====================================================================
+
+let lastT = performance.now();
+const SWEEP_PERIOD = 8.0;  // seconds for full κ cycle
+
+function tick(now){
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  if (state.autoSweep){
+    state.sweepT += dt / SWEEP_PERIOD;
+    state.kappa = Math.sin(state.sweepT * Math.PI * 2);
+    document.getElementById('kappa').value = state.kappa.toFixed(3);
+  }
+
+  // Throttle KNN rebuilds to ~50ms-equivalent kappa motion
+  if (Math.abs(state.kappa - lastEdgeKappa) > 0.025){
+    rebuildEdges();
+  }
+
+  updateReadouts();
+  render();
+  requestAnimationFrame(tick);
+}
+
+function updateReadouts(){
+  const k = state.kappa;
+  const kvEl = document.getElementById('kv');
+  const klEl = document.getElementById('kl');
+  const sign = k < -0.0005 ? '−' : '+';
+  kvEl.textContent = sign + Math.abs(k).toFixed(3);
+
+  klEl.classList.remove('eu','hy','sp');
+  if (k < -0.05){ klEl.textContent = 'Hyperbolic'; klEl.classList.add('hy'); }
+  else if (k > 0.05){ klEl.textContent = 'Spherical'; klEl.classList.add('sp'); }
+  else { klEl.textContent = 'Euclidean'; klEl.classList.add('eu'); }
+
+  document.querySelectorAll('[data-snap]').forEach(b => {
+    const v = parseFloat(b.dataset.snap);
+    b.classList.toggle('active', !state.autoSweep && Math.abs(state.kappa - v) < 0.005);
+  });
+
+  document.getElementById('n-val').textContent   = state.N;
+  document.getElementById('ang-val').textContent = state.angleDeg.toFixed(4) + '°';
+  document.getElementById('k-val').textContent   = state.k;
+  document.getElementById('t-val').textContent   = state.trailLen;
+  document.getElementById('footer-status').textContent = `N=${state.N} · k=${state.k} · ${edges.length} edges`;
+}
+
+function setKappa(v, fromUser=true){
+  state.kappa = Math.max(-1, Math.min(1, v));
+  document.getElementById('kappa').value = state.kappa;
+  if (fromUser){
+    state.autoSweep = false;
+    // re-anchor sweepT so it picks up smoothly if user resumes
+    state.sweepT = Math.asin(state.kappa) / (Math.PI * 2);
+  }
+  updateAutoButton();
+  if (Math.abs(state.kappa - lastEdgeKappa) > 0.025) rebuildEdges();
+}
+
+function updateAutoButton(){
+  const btn = document.getElementById('auto-toggle');
+  btn.textContent = state.autoSweep ? '⏸ AUTO‑SWEEP' : '▶ AUTO‑SWEEP';
+  btn.classList.toggle('active', state.autoSweep);
+}
+
+// =====================================================================
+// EVENTS
+// =====================================================================
+
+document.getElementById('kappa').addEventListener('input', e => setKappa(parseFloat(e.target.value)));
+
+document.querySelectorAll('[data-snap]').forEach(b => {
+  b.addEventListener('click', () => setKappa(parseFloat(b.dataset.snap)));
+});
+
+document.getElementById('auto-toggle').addEventListener('click', () => {
+  state.autoSweep = !state.autoSweep;
+  if (state.autoSweep){
+    // resume from current kappa position so there's no jump
+    state.sweepT = Math.asin(state.kappa) / (Math.PI * 2);
+  }
+  updateAutoButton();
+});
+
+document.getElementById('n').addEventListener('input', e => {
+  state.N = parseInt(e.target.value);
+  rebuildPoints();
+});
+document.getElementById('ang').addEventListener('input', e => {
+  state.angleDeg = parseFloat(e.target.value);
+  rebuildPoints();
+});
+document.getElementById('k').addEventListener('input', e => {
+  state.k = parseInt(e.target.value);
+  lastEdgeKappa = NaN;
+});
+document.getElementById('t').addEventListener('input', e => {
+  state.trailLen = parseInt(e.target.value);
+  if (state.trailLen === 0) for (let i = 0; i < trails.length; i++) trails[i].length = 0;
+});
+
+// Spacebar = play/pause auto-sweep
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space' && e.target.tagName !== 'INPUT'){
+    e.preventDefault();
+    state.autoSweep = !state.autoSweep;
+    if (state.autoSweep) state.sweepT = Math.asin(state.kappa) / (Math.PI * 2);
+    updateAutoButton();
+  }
+});
+
+// =====================================================================
+// INIT
+// =====================================================================
+
+new ResizeObserver(resizeCanvas).observe(canvas.parentElement);
+resizeCanvas();
+rebuildPoints();
+rebuildEdges();
+updateAutoButton();
+requestAnimationFrame((t) => { lastT = t; tick(t); });
+</script>
+</body>
+</html>

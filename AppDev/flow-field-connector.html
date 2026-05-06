@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flow-Field Connector</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #0a0a0f; 
+      color: #e0e0e0;
+    }
+    .wrap { 
+      display: grid; 
+      grid-template-columns: 400px 1fr; 
+      height: 100vh; 
+    }
+    .panel { 
+      background: #12121a; 
+      border-right: 1px solid #2a2a3a; 
+      padding: 20px; 
+      overflow-y: auto;
+    }
+    h1 { 
+      font-size: 18px; 
+      margin: 0 0 4px 0; 
+      color: #7fdbca;
+    }
+    .subtitle {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .section { 
+      margin-bottom: 24px; 
+    }
+    .section-title { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      color: #7fdbca; 
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #2a2a3a;
+    }
+    .row { 
+      margin-bottom: 12px; 
+    }
+    .row label { 
+      display: flex; 
+      justify-content: space-between; 
+      font-size: 12px; 
+      margin-bottom: 4px;
+      color: #aaa;
+    }
+    .row label span:last-child {
+      color: #7fdbca;
+      font-family: monospace;
+    }
+    input[type="range"] { 
+      width: 100%; 
+      height: 4px;
+      -webkit-appearance: none;
+      background: #2a2a3a;
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #7fdbca;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    select:focus {
+      outline: none;
+      border-color: #7fdbca;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #7fdbca 0%, #4a9c8c 100%);
+      border: none;
+      border-radius: 8px;
+      color: #0a0a0f;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(127, 219, 202, 0.3);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .stats {
+      background: #1a1a24;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 11px;
+      font-family: monospace;
+      line-height: 1.8;
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .stats-label { color: #666; }
+    .stats-value { color: #7fdbca; }
+    .warning {
+      background: rgba(255, 180, 100, 0.1);
+      border: 1px solid rgba(255, 180, 100, 0.3);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 11px;
+      color: #ffb464;
+      margin-bottom: 16px;
+    }
+    .hypothesis {
+      background: rgba(127, 219, 202, 0.1);
+      border: 1px solid rgba(127, 219, 202, 0.2);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #aaa;
+    }
+    .hypothesis strong {
+      color: #7fdbca;
+    }
+    .canvasWrap { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      background: #0a0a0f;
+      padding: 20px;
+    }
+    .anim-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .anim-btn {
+      flex: 1;
+      padding: 10px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 6px;
+      color: #aaa;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .anim-btn:hover {
+      border-color: #7fdbca;
+      color: #7fdbca;
+    }
+    .anim-btn.active {
+      background: rgba(127, 219, 202, 0.2);
+      border-color: #7fdbca;
+      color: #7fdbca;
+    }
+    .fps-display {
+      font-family: monospace;
+      font-size: 11px;
+      color: #666;
+      text-align: right;
+      margin-top: 4px;
+    }
+    canvas { 
+      border-radius: 12px;
+      box-shadow: 0 0 60px rgba(127, 219, 202, 0.1);
+    }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .preset-btn {
+      padding: 8px;
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 6px;
+      color: #aaa;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-btn:hover {
+      border-color: #7fdbca;
+      color: #7fdbca;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="panel">
+    <h1>Flow-Field Connector</h1>
+    <div class="subtitle">HIGH-RISK VALIDATION â€” New connector paradigm</div>
+    
+    <div class="warning">
+      âš ï¸ Experimental: Paths follow a vector field, not straight lines or geodesics. 
+      May produce unexpected results.
+    </div>
+
+    <div class="section">
+      <div class="section-title">Presets</div>
+      <div class="preset-grid">
+        <button class="preset-btn" data-preset="gentle">Gentle Swirl</button>
+        <button class="preset-btn" data-preset="turbulent">Turbulent</button>
+        <button class="preset-btn" data-preset="vortex">Single Vortex</button>
+        <button class="preset-btn" data-preset="hair">Hair-like</button>
+        <button class="preset-btn" data-preset="chaos">High Chaos</button>
+        <button class="preset-btn" data-preset="compare">Field Off</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Animation</div>
+      <div class="anim-controls">
+        <button class="anim-btn" id="playBtn">â–¶ Play</button>
+        <button class="anim-btn" id="pauseBtn">â¸ Pause</button>
+        <button class="anim-btn" id="resetBtn">â†º Reset</button>
+      </div>
+      <div class="row">
+        <label>Animation Mode</label>
+        <select id="animMode">
+          <option value="none">None (static)</option>
+          <option value="evolve">Evolve Field</option>
+          <option value="orbit">Orbit Vortex</option>
+          <option value="breathe">Breathe (pulse strength)</option>
+          <option value="drift">Drift (translate field)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Speed <span id="animSpeedOut">1.0</span>x</label>
+        <input type="range" id="animSpeed" min="0.1" max="3.0" step="0.1" value="1.0">
+      </div>
+      <div class="row">
+        <label>Quality Mode</label>
+        <select id="qualityMode">
+          <option value="high">High (400 steps)</option>
+          <option value="medium">Medium (200 steps)</option>
+          <option value="fast">Fast (100 steps)</option>
+          <option value="realtime">Realtime (50 steps)</option>
+        </select>
+      </div>
+      <div class="fps-display">FPS: <span id="fpsDisplay">--</span> | Time: <span id="timeDisplay">0.00</span>s</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Generator (Phyllotaxis)</div>
+      <div class="row">
+        <label>Points N <span id="Nout">300</span></label>
+        <input type="range" id="N" min="50" max="800" step="10" value="300">
+      </div>
+      <div class="row">
+        <label>Divergence Angle <span id="angleOut">137.51Â°</span></label>
+        <input type="range" id="angle" min="90" max="180" step="0.01" value="137.51">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Pairing</div>
+      <div class="row">
+        <label>Rule</label>
+        <select id="pairingRule">
+          <option value="skip">Index Skip (i â†’ i+k)</option>
+          <option value="proximity">Proximity (distance threshold)</option>
+          <option value="knn">K-Nearest Neighbors</option>
+        </select>
+      </div>
+      <div class="row" id="skipRow">
+        <label>Skip k <span id="kOut">13</span></label>
+        <input type="range" id="k" min="1" max="89" step="1" value="13">
+      </div>
+      <div class="row" id="thresholdRow" style="display:none;">
+        <label>Threshold <span id="thresholdOut">0.12</span></label>
+        <input type="range" id="threshold" min="0.04" max="0.25" step="0.01" value="0.12">
+      </div>
+      <div class="row" id="knnRow" style="display:none;">
+        <label>Neighbors K <span id="knnOut">5</span></label>
+        <input type="range" id="knn" min="2" max="12" step="1" value="5">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Flow Field</div>
+      <div class="row">
+        <label>Field Type</label>
+        <select id="fieldType">
+          <option value="curl">Curl Noise (swirling)</option>
+          <option value="perlin">Perlin Gradient</option>
+          <option value="vortex">Analytical Vortex</option>
+          <option value="multi">Multi-Vortex</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Field Scale <span id="scaleOut">2.5</span></label>
+        <input type="range" id="fieldScale" min="0.5" max="8.0" step="0.1" value="2.5">
+      </div>
+      <div class="row">
+        <label>Field Strength <span id="strengthOut">0.65</span></label>
+        <input type="range" id="fieldStrength" min="0" max="1.0" step="0.01" value="0.65">
+      </div>
+      <div class="row">
+        <label>Turbulence <span id="turbOut">0.0</span></label>
+        <input type="range" id="turbulence" min="0" max="1.0" step="0.01" value="0.0">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Path Integration</div>
+      <div class="row">
+        <label>Step Size <span id="stepOut">0.008</span></label>
+        <input type="range" id="stepSize" min="0.002" max="0.02" step="0.001" value="0.008">
+      </div>
+      <div class="row">
+        <label>Max Steps <span id="maxStepsOut">400</span></label>
+        <input type="range" id="maxSteps" min="100" max="1000" step="50" value="400">
+      </div>
+      <div class="row">
+        <label>Steering Curve <span id="steerOut">2.0</span></label>
+        <input type="range" id="steerCurve" min="0.5" max="5.0" step="0.1" value="2.0">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Rendering</div>
+      <div class="row">
+        <label>Line Width <span id="lwOut">0.6</span></label>
+        <input type="range" id="lineWidth" min="0.2" max="2.0" step="0.1" value="0.6">
+      </div>
+      <div class="row">
+        <label>Alpha <span id="alphaOut">0.15</span></label>
+        <input type="range" id="alpha" min="0.02" max="0.5" step="0.01" value="0.15">
+      </div>
+      <div class="row">
+        <label>Color Mode</label>
+        <select id="colorMode">
+          <option value="length">By Path Length</option>
+          <option value="curvature">By Curvature</option>
+          <option value="field">By Field Strength</option>
+          <option value="solid">Solid</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Show Points</label>
+        <select id="showPoints">
+          <option value="none">None</option>
+          <option value="endpoints">Endpoints Only</option>
+          <option value="all">All Points</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Show Field</label>
+        <select id="showField">
+          <option value="none">None</option>
+          <option value="grid">Grid Arrows</option>
+          <option value="streamlines">Streamlines</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <button id="render">Render</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Stats</div>
+      <div class="stats">
+        <div class="stats-row"><span class="stats-label">Points:</span><span class="stats-value" id="statN">-</span></div>
+        <div class="stats-row"><span class="stats-label">Edges:</span><span class="stats-value" id="statE">-</span></div>
+        <div class="stats-row"><span class="stats-label">Avg Path Length:</span><span class="stats-value" id="statLen">-</span></div>
+        <div class="stats-row"><span class="stats-label">Avg Curvature:</span><span class="stats-value" id="statCurv">-</span></div>
+        <div class="stats-row"><span class="stats-label">Field Influence (V):</span><span class="stats-value" id="statV">-</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Hypothesis</div>
+      <div class="hypothesis">
+        <strong>Testing:</strong> Can paths "swim" through a vector field while still connecting endpoints?
+        <br><br>
+        <strong>Prediction:</strong> Field strength controls organic vs geometric. High strength + low steering = paths may miss targets. Curl noise should produce hair-like, flowing structures distinct from both straight and geodesic connectors.
+        <br><br>
+        <strong>Risk:</strong> Paths may not reach endpoints. Integration is iterative. Visual quality is unknown.
+      </div>
+    </div>
+  </div>
+
+  <div class="canvasWrap">
+    <canvas id="canvas" width="900" height="900"></canvas>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SIMPLEX NOISE (adapted from Stefan Gustavson's implementation)
+// ============================================================
+class SimplexNoise {
+  constructor(seed = Math.random() * 65536) {
+    this.p = new Uint8Array(256);
+    this.perm = new Uint8Array(512);
+    this.permMod12 = new Uint8Array(512);
+    
+    // Seeded random
+    const rand = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    
+    for (let i = 0; i < 256; i++) this.p[i] = i;
+    for (let i = 255; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [this.p[i], this.p[j]] = [this.p[j], this.p[i]];
+    }
+    for (let i = 0; i < 512; i++) {
+      this.perm[i] = this.p[i & 255];
+      this.permMod12[i] = this.perm[i] % 12;
+    }
+    
+    this.grad3 = [
+      [1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],
+      [1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],
+      [0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]
+    ];
+    this.F2 = 0.5 * (Math.sqrt(3) - 1);
+    this.G2 = (3 - Math.sqrt(3)) / 6;
+    this.F3 = 1/3;
+    this.G3 = 1/6;
+  }
+  
+  noise2D(x, y) {
+    const { perm, permMod12, grad3, F2, G2 } = this;
+    
+    const s = (x + y) * F2;
+    const i = Math.floor(x + s);
+    const j = Math.floor(y + s);
+    const t = (i + j) * G2;
+    const X0 = i - t;
+    const Y0 = j - t;
+    const x0 = x - X0;
+    const y0 = y - Y0;
+    
+    const i1 = x0 > y0 ? 1 : 0;
+    const j1 = x0 > y0 ? 0 : 1;
+    
+    const x1 = x0 - i1 + G2;
+    const y1 = y0 - j1 + G2;
+    const x2 = x0 - 1 + 2 * G2;
+    const y2 = y0 - 1 + 2 * G2;
+    
+    const ii = i & 255;
+    const jj = j & 255;
+    
+    let n0 = 0, n1 = 0, n2 = 0;
+    
+    let t0 = 0.5 - x0*x0 - y0*y0;
+    if (t0 >= 0) {
+      const gi0 = permMod12[ii + perm[jj]];
+      t0 *= t0;
+      n0 = t0 * t0 * (grad3[gi0][0] * x0 + grad3[gi0][1] * y0);
+    }
+    
+    let t1 = 0.5 - x1*x1 - y1*y1;
+    if (t1 >= 0) {
+      const gi1 = permMod12[ii + i1 + perm[jj + j1]];
+      t1 *= t1;
+      n1 = t1 * t1 * (grad3[gi1][0] * x1 + grad3[gi1][1] * y1);
+    }
+    
+    let t2 = 0.5 - x2*x2 - y2*y2;
+    if (t2 >= 0) {
+      const gi2 = permMod12[ii + 1 + perm[jj + 1]];
+      t2 *= t2;
+      n2 = t2 * t2 * (grad3[gi2][0] * x2 + grad3[gi2][1] * y2);
+    }
+    
+    return 70 * (n0 + n1 + n2);
+  }
+  
+  // 3D noise for time-evolution
+  noise3D(x, y, z) {
+    const { perm, permMod12, grad3, F3, G3 } = this;
+    
+    const s = (x + y + z) * F3;
+    const i = Math.floor(x + s);
+    const j = Math.floor(y + s);
+    const k = Math.floor(z + s);
+    const t = (i + j + k) * G3;
+    const X0 = i - t;
+    const Y0 = j - t;
+    const Z0 = k - t;
+    const x0 = x - X0;
+    const y0 = y - Y0;
+    const z0 = z - Z0;
+    
+    let i1, j1, k1, i2, j2, k2;
+    if (x0 >= y0) {
+      if (y0 >= z0) { i1=1; j1=0; k1=0; i2=1; j2=1; k2=0; }
+      else if (x0 >= z0) { i1=1; j1=0; k1=0; i2=1; j2=0; k2=1; }
+      else { i1=0; j1=0; k1=1; i2=1; j2=0; k2=1; }
+    } else {
+      if (y0 < z0) { i1=0; j1=0; k1=1; i2=0; j2=1; k2=1; }
+      else if (x0 < z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; }
+      else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; }
+    }
+    
+    const x1 = x0 - i1 + G3;
+    const y1 = y0 - j1 + G3;
+    const z1 = z0 - k1 + G3;
+    const x2 = x0 - i2 + 2*G3;
+    const y2 = y0 - j2 + 2*G3;
+    const z2 = z0 - k2 + 2*G3;
+    const x3 = x0 - 1 + 3*G3;
+    const y3 = y0 - 1 + 3*G3;
+    const z3 = z0 - 1 + 3*G3;
+    
+    const ii = i & 255;
+    const jj = j & 255;
+    const kk = k & 255;
+    
+    let n0=0, n1=0, n2=0, n3=0;
+    
+    let t0 = 0.6 - x0*x0 - y0*y0 - z0*z0;
+    if (t0 >= 0) {
+      const gi0 = permMod12[ii + perm[jj + perm[kk]]];
+      t0 *= t0;
+      n0 = t0*t0 * (grad3[gi0][0]*x0 + grad3[gi0][1]*y0 + grad3[gi0][2]*z0);
+    }
+    
+    let t1 = 0.6 - x1*x1 - y1*y1 - z1*z1;
+    if (t1 >= 0) {
+      const gi1 = permMod12[ii+i1 + perm[jj+j1 + perm[kk+k1]]];
+      t1 *= t1;
+      n1 = t1*t1 * (grad3[gi1][0]*x1 + grad3[gi1][1]*y1 + grad3[gi1][2]*z1);
+    }
+    
+    let t2 = 0.6 - x2*x2 - y2*y2 - z2*z2;
+    if (t2 >= 0) {
+      const gi2 = permMod12[ii+i2 + perm[jj+j2 + perm[kk+k2]]];
+      t2 *= t2;
+      n2 = t2*t2 * (grad3[gi2][0]*x2 + grad3[gi2][1]*y2 + grad3[gi2][2]*z2);
+    }
+    
+    let t3 = 0.6 - x3*x3 - y3*y3 - z3*z3;
+    if (t3 >= 0) {
+      const gi3 = permMod12[ii+1 + perm[jj+1 + perm[kk+1]]];
+      t3 *= t3;
+      n3 = t3*t3 * (grad3[gi3][0]*x3 + grad3[gi3][1]*y3 + grad3[gi3][2]*z3);
+    }
+    
+    return 32 * (n0 + n1 + n2 + n3);
+  }
+}
+
+// ============================================================
+// FLOW FIELD DEFINITIONS (with animation support)
+// ============================================================
+const noise = new SimplexNoise(42);
+
+// Animation state
+let animState = {
+  time: 0,
+  playing: false,
+  mode: 'none',
+  speed: 1.0,
+  lastFrameTime: 0,
+  frameCount: 0,
+  fps: 0
+};
+
+function curlField(x, y, scale, turbulence, time = 0, animMode = 'none') {
+  const eps = 0.001;
+  
+  // Time offset for animation
+  let tx = 0, ty = 0, tz = 0;
+  if (animMode === 'evolve') {
+    tz = time * 0.3; // Evolve through 3D noise
+  } else if (animMode === 'drift') {
+    tx = Math.sin(time * 0.5) * 0.3;
+    ty = Math.cos(time * 0.7) * 0.3;
+  }
+  
+  const n = (px, py) => {
+    let v;
+    if (animMode === 'evolve') {
+      v = noise.noise3D((px + tx) * scale, (py + ty) * scale, tz);
+    } else {
+      v = noise.noise2D((px + tx) * scale, (py + ty) * scale);
+    }
+    if (turbulence > 0) {
+      if (animMode === 'evolve') {
+        v += turbulence * noise.noise3D((px + tx) * scale * 3, (py + ty) * scale * 3, tz * 1.5) * 0.5;
+      } else {
+        v += turbulence * noise.noise2D((px + tx) * scale * 3, (py + ty) * scale * 3) * 0.5;
+      }
+    }
+    return v;
+  };
+  
+  // Curl of 2D scalar field: (-âˆ‚f/âˆ‚y, âˆ‚f/âˆ‚x)
+  const dfdx = (n(x + eps, y) - n(x - eps, y)) / (2 * eps);
+  const dfdy = (n(x, y + eps) - n(x, y - eps)) / (2 * eps);
+  
+  // Breathing animation - modulate magnitude
+  let mag = 1;
+  if (animMode === 'breathe') {
+    mag = 0.7 + 0.3 * Math.sin(time * 2);
+  }
+  
+  return [-dfdy * mag, dfdx * mag];
+}
+
+function perlinGradient(x, y, scale, turbulence, time = 0, animMode = 'none') {
+  const eps = 0.001;
+  
+  let tx = 0, ty = 0, tz = 0;
+  if (animMode === 'evolve') {
+    tz = time * 0.3;
+  } else if (animMode === 'drift') {
+    tx = Math.sin(time * 0.5) * 0.3;
+    ty = Math.cos(time * 0.7) * 0.3;
+  }
+  
+  const n = (px, py) => {
+    let v;
+    if (animMode === 'evolve') {
+      v = noise.noise3D((px + tx) * scale, (py + ty) * scale, tz);
+    } else {
+      v = noise.noise2D((px + tx) * scale, (py + ty) * scale);
+    }
+    if (turbulence > 0) {
+      v += turbulence * noise.noise2D((px + tx) * scale * 2.5, (py + ty) * scale * 2.5) * 0.4;
+    }
+    return v;
+  };
+  
+  const dfdx = (n(x + eps, y) - n(x - eps, y)) / (2 * eps);
+  const dfdy = (n(x, y + eps) - n(x, y - eps)) / (2 * eps);
+  
+  let mag = 1;
+  if (animMode === 'breathe') {
+    mag = 0.7 + 0.3 * Math.sin(time * 2);
+  }
+  
+  return [dfdx * mag, dfdy * mag];
+}
+
+function vortexField(x, y, cx, cy, strength, time = 0, animMode = 'none') {
+  // Animate vortex center position
+  let vcx = cx, vcy = cy;
+  if (animMode === 'orbit') {
+    vcx = cx + 0.3 * Math.cos(time);
+    vcy = cy + 0.3 * Math.sin(time);
+  } else if (animMode === 'drift') {
+    vcx = cx + 0.2 * Math.sin(time * 0.7);
+    vcy = cy + 0.2 * Math.cos(time * 0.5);
+  }
+  
+  const dx = x - vcx;
+  const dy = y - vcy;
+  const r2 = dx * dx + dy * dy + 0.01;
+  const r = Math.sqrt(r2);
+  
+  // Breathing - pulse strength
+  let s = strength;
+  if (animMode === 'breathe') {
+    s = strength * (0.7 + 0.3 * Math.sin(time * 2));
+  }
+  
+  // Tangential velocity (perpendicular to radial)
+  return [-dy / r * s, dx / r * s];
+}
+
+function multiVortexField(x, y, scale, turbulence, time = 0, animMode = 'none') {
+  // Multiple vortices - each can orbit independently
+  const vortices = [
+    { cx: 0.3, cy: 0.3, s: 0.3, orbit: 1.0, phase: 0 },
+    { cx: -0.3, cy: 0.3, s: -0.2, orbit: 1.3, phase: Math.PI * 0.7 },
+    { cx: 0.0, cy: -0.4, s: 0.25, orbit: 0.8, phase: Math.PI * 1.4 },
+  ];
+  
+  let vx = 0, vy = 0;
+  for (const v of vortices) {
+    let vcx = v.cx, vcy = v.cy;
+    
+    if (animMode === 'orbit') {
+      const orbitRadius = 0.15;
+      vcx = v.cx + orbitRadius * Math.cos(time * v.orbit + v.phase);
+      vcy = v.cy + orbitRadius * Math.sin(time * v.orbit + v.phase);
+    }
+    
+    const [fx, fy] = vortexField(x, y, vcx, vcy, v.s, time, animMode === 'breathe' ? 'breathe' : 'none');
+    vx += fx;
+    vy += fy;
+  }
+  
+  // Add some noise
+  if (turbulence > 0) {
+    const [nx, ny] = curlField(x, y, scale, 0, time, animMode === 'evolve' ? 'evolve' : 'none');
+    vx += nx * turbulence * 0.5;
+    vy += ny * turbulence * 0.5;
+  }
+  
+  return [vx, vy];
+}
+
+function getField(x, y, type, scale, turbulence, time = 0, animMode = 'none') {
+  switch (type) {
+    case 'curl': return curlField(x, y, scale, turbulence, time, animMode);
+    case 'perlin': return perlinGradient(x, y, scale, turbulence, time, animMode);
+    case 'vortex': return vortexField(x, y, 0, 0, 1.0, time, animMode);
+    case 'multi': return multiVortexField(x, y, scale, turbulence, time, animMode);
+    default: return curlField(x, y, scale, turbulence, time, animMode);
+  }
+}
+
+// ============================================================
+// PHYLLOTAXIS GENERATOR
+// ============================================================
+function generatePhyllotaxis(N, angle) {
+  const points = [];
+  const goldenAngle = angle * Math.PI / 180;
+  
+  for (let i = 0; i < N; i++) {
+    const r = Math.sqrt(i / N) * 0.85; // Leave margin
+    const theta = i * goldenAngle;
+    points.push({
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      r: r,
+      theta: theta
+    });
+  }
+  
+  return points;
+}
+
+// ============================================================
+// PAIRING RULES
+// ============================================================
+function pairBySkip(points, k) {
+  const edges = [];
+  const N = points.length;
+  for (let i = 0; i < N; i++) {
+    const j = (i + k) % N;
+    edges.push({ i, j });
+  }
+  return edges;
+}
+
+function pairByProximity(points, threshold) {
+  const edges = [];
+  const N = points.length;
+  for (let i = 0; i < N; i++) {
+    for (let j = i + 1; j < N; j++) {
+      const dx = points[j].x - points[i].x;
+      const dy = points[j].y - points[i].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < threshold) {
+        edges.push({ i, j });
+      }
+    }
+  }
+  return edges;
+}
+
+function pairByKNN(points, k) {
+  const edges = [];
+  const edgeSet = new Set();
+  const N = points.length;
+  
+  for (let i = 0; i < N; i++) {
+    const distances = [];
+    for (let j = 0; j < N; j++) {
+      if (i === j) continue;
+      const dx = points[j].x - points[i].x;
+      const dy = points[j].y - points[i].y;
+      distances.push({ j, d: dx * dx + dy * dy });
+    }
+    distances.sort((a, b) => a.d - b.d);
+    
+    for (let n = 0; n < Math.min(k, distances.length); n++) {
+      const j = distances[n].j;
+      const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+      if (!edgeSet.has(key)) {
+        edgeSet.add(key);
+        edges.push({ i: Math.min(i, j), j: Math.max(i, j) });
+      }
+    }
+  }
+  
+  return edges;
+}
+
+// ============================================================
+// FLOW-FIELD CONNECTOR (The new paradigm!)
+// ============================================================
+function traceFlowPath(p1, p2, params, time = 0, animMode = 'none') {
+  const { fieldType, fieldScale, fieldStrength, turbulence, stepSize, maxSteps, steerCurve } = params;
+  
+  const path = [{ x: p1.x, y: p1.y }];
+  let x = p1.x;
+  let y = p1.y;
+  
+  const targetDx = p2.x - p1.x;
+  const targetDy = p2.y - p1.y;
+  const targetDist = Math.sqrt(targetDx * targetDx + targetDy * targetDy);
+  
+  if (targetDist < 0.001) {
+    return { path, length: 0, avgCurvature: 0, avgFieldStrength: 0 };
+  }
+  
+  let totalLength = 0;
+  let totalCurvature = 0;
+  let totalFieldStrength = 0;
+  let prevDx = 0, prevDy = 0;
+  let curvatureCount = 0;
+  
+  for (let step = 0; step < maxSteps; step++) {
+    // Distance to target
+    const dx = p2.x - x;
+    const dy = p2.y - y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    
+    // Stop if close enough
+    if (dist < stepSize * 2) {
+      path.push({ x: p2.x, y: p2.y });
+      break;
+    }
+    
+    // Progress along path (0 = start, 1 = expected end)
+    const progress = totalLength / targetDist;
+    
+    // Steering factor: increases with progress (field fades, steering takes over)
+    // Using power curve for control
+    const steerFactor = Math.pow(Math.min(progress, 1), steerCurve);
+    
+    // Get field vector (with animation)
+    let [fx, fy] = getField(x, y, fieldType, fieldScale, turbulence, time, animMode);
+    
+    // Normalize field
+    const fMag = Math.sqrt(fx * fx + fy * fy) + 0.0001;
+    fx /= fMag;
+    fy /= fMag;
+    
+    totalFieldStrength += fMag;
+    
+    // Target direction (normalized)
+    const tx = dx / dist;
+    const ty = dy / dist;
+    
+    // Blend: field when steerFactor is low, target when high
+    const blendedStrength = fieldStrength * (1 - steerFactor);
+    let dirX = fx * blendedStrength + tx * (1 - blendedStrength);
+    let dirY = fy * blendedStrength + ty * (1 - blendedStrength);
+    
+    // Normalize direction
+    const dirMag = Math.sqrt(dirX * dirX + dirY * dirY) + 0.0001;
+    dirX /= dirMag;
+    dirY /= dirMag;
+    
+    // Curvature estimation (change in direction)
+    if (step > 0) {
+      const dot = prevDx * dirX + prevDy * dirY;
+      const angle = Math.acos(Math.max(-1, Math.min(1, dot)));
+      totalCurvature += angle;
+      curvatureCount++;
+    }
+    prevDx = dirX;
+    prevDy = dirY;
+    
+    // Step forward
+    x += dirX * stepSize;
+    y += dirY * stepSize;
+    totalLength += stepSize;
+    
+    path.push({ x, y });
+    
+    // Safety: don't go too far outside unit disk
+    if (x * x + y * y > 1.5) break;
+  }
+  
+  return {
+    path,
+    length: totalLength,
+    avgCurvature: curvatureCount > 0 ? totalCurvature / curvatureCount : 0,
+    avgFieldStrength: path.length > 0 ? totalFieldStrength / path.length : 0
+  };
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+function hslToRgb(h, s, l) {
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function getPathColor(pathData, colorMode, minLen, maxLen, minCurv, maxCurv, minField, maxField) {
+  let t;
+  switch (colorMode) {
+    case 'length':
+      t = (pathData.length - minLen) / (maxLen - minLen + 0.001);
+      break;
+    case 'curvature':
+      t = (pathData.avgCurvature - minCurv) / (maxCurv - minCurv + 0.001);
+      break;
+    case 'field':
+      t = (pathData.avgFieldStrength - minField) / (maxField - minField + 0.001);
+      break;
+    default:
+      return [127, 219, 202]; // Solid teal
+  }
+  
+  t = Math.max(0, Math.min(1, t));
+  
+  // Color ramp: cyan -> magenta -> gold
+  const h = 0.5 - t * 0.4; // 180Â° to 36Â°
+  const [r, g, b] = hslToRgb(h, 0.7, 0.6);
+  return [r, g, b];
+}
+
+function drawFieldVisualization(params, showField, time = 0, animMode = 'none') {
+  if (showField === 'none') return;
+  
+  const { fieldType, fieldScale, turbulence } = params;
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const scale = Math.min(W, H) / 2 - 40;
+  
+  ctx.save();
+  
+  if (showField === 'grid') {
+    const gridSize = 20;
+    const arrowLen = 12;
+    
+    ctx.strokeStyle = 'rgba(127, 219, 202, 0.15)';
+    ctx.lineWidth = 1;
+    
+    for (let gx = -1; gx <= 1; gx += 2/gridSize) {
+      for (let gy = -1; gy <= 1; gy += 2/gridSize) {
+        if (gx * gx + gy * gy > 1) continue;
+        
+        const [fx, fy] = getField(gx, gy, fieldType, fieldScale, turbulence, time, animMode);
+        const mag = Math.sqrt(fx * fx + fy * fy) + 0.001;
+        const nx = fx / mag;
+        const ny = fy / mag;
+        
+        const px = cx + gx * scale;
+        const py = cy - gy * scale;
+        
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(px + nx * arrowLen, py - ny * arrowLen);
+        ctx.stroke();
+      }
+    }
+  } else if (showField === 'streamlines') {
+    ctx.strokeStyle = 'rgba(127, 219, 202, 0.08)';
+    ctx.lineWidth = 1;
+    
+    // Trace a few streamlines
+    for (let i = 0; i < 30; i++) {
+      const startAngle = (i / 30) * Math.PI * 2;
+      const startR = 0.3 + Math.random() * 0.5;
+      let x = startR * Math.cos(startAngle);
+      let y = startR * Math.sin(startAngle);
+      
+      ctx.beginPath();
+      ctx.moveTo(cx + x * scale, cy - y * scale);
+      
+      for (let step = 0; step < 100; step++) {
+        const [fx, fy] = getField(x, y, fieldType, fieldScale, turbulence, time, animMode);
+        const mag = Math.sqrt(fx * fx + fy * fy) + 0.001;
+        x += (fx / mag) * 0.015;
+        y += (fy / mag) * 0.015;
+        
+        if (x * x + y * y > 1) break;
+        
+        ctx.lineTo(cx + x * scale, cy - y * scale);
+      }
+      ctx.stroke();
+    }
+  }
+  
+  ctx.restore();
+}
+
+function render(params, time = 0, animMode = 'none') {
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const scale = Math.min(W, H) / 2 - 40;
+  
+  // Clear
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Draw unit circle boundary
+  ctx.strokeStyle = 'rgba(127, 219, 202, 0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, scale, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  // Draw field visualization
+  drawFieldVisualization(params, params.showField, time, animMode);
+  
+  // Generate points
+  const points = generatePhyllotaxis(params.N, params.angle);
+  
+  // Generate edges
+  let edges;
+  switch (params.pairingRule) {
+    case 'skip':
+      edges = pairBySkip(points, params.k);
+      break;
+    case 'proximity':
+      edges = pairByProximity(points, params.threshold);
+      break;
+    case 'knn':
+      edges = pairByKNN(points, params.knn);
+      break;
+  }
+  
+  // Trace all paths
+  const pathsData = [];
+  for (const edge of edges) {
+    const p1 = points[edge.i];
+    const p2 = points[edge.j];
+    const pathData = traceFlowPath(p1, p2, params, time, animMode);
+    pathsData.push(pathData);
+  }
+  
+  // Compute stats for coloring
+  let minLen = Infinity, maxLen = -Infinity;
+  let minCurv = Infinity, maxCurv = -Infinity;
+  let minField = Infinity, maxField = -Infinity;
+  let totalLen = 0, totalCurv = 0;
+  
+  for (const pd of pathsData) {
+    minLen = Math.min(minLen, pd.length);
+    maxLen = Math.max(maxLen, pd.length);
+    minCurv = Math.min(minCurv, pd.avgCurvature);
+    maxCurv = Math.max(maxCurv, pd.avgCurvature);
+    minField = Math.min(minField, pd.avgFieldStrength);
+    maxField = Math.max(maxField, pd.avgFieldStrength);
+    totalLen += pd.length;
+    totalCurv += pd.avgCurvature;
+  }
+  
+  // Draw paths
+  ctx.lineWidth = params.lineWidth;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  for (const pd of pathsData) {
+    if (pd.path.length < 2) continue;
+    
+    const [r, g, b] = getPathColor(pd, params.colorMode, minLen, maxLen, minCurv, maxCurv, minField, maxField);
+    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${params.alpha})`;
+    
+    ctx.beginPath();
+    ctx.moveTo(cx + pd.path[0].x * scale, cy - pd.path[0].y * scale);
+    for (let i = 1; i < pd.path.length; i++) {
+      ctx.lineTo(cx + pd.path[i].x * scale, cy - pd.path[i].y * scale);
+    }
+    ctx.stroke();
+  }
+  
+  // Draw points
+  if (params.showPoints !== 'none') {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    for (const p of points) {
+      if (params.showPoints === 'all' || params.showPoints === 'endpoints') {
+        ctx.beginPath();
+        ctx.arc(cx + p.x * scale, cy - p.y * scale, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+  
+  // Update stats (only when not animating to avoid flickering)
+  if (!animState.playing) {
+    document.getElementById('statN').textContent = params.N;
+    document.getElementById('statE').textContent = edges.length;
+    document.getElementById('statLen').textContent = pathsData.length > 0 
+      ? (totalLen / pathsData.length).toFixed(4) 
+      : '-';
+    document.getElementById('statCurv').textContent = pathsData.length > 0 
+      ? (totalCurv / pathsData.length).toFixed(4) 
+      : '-';
+    
+    // Field influence metric: how much paths deviate from straight
+    const straightLen = edges.reduce((sum, e) => {
+      const dx = points[e.j].x - points[e.i].x;
+      const dy = points[e.j].y - points[e.i].y;
+      return sum + Math.sqrt(dx * dx + dy * dy);
+    }, 0);
+    const V = totalLen / (straightLen + 0.001) - 1; // 0 = straight, higher = more winding
+    document.getElementById('statV').textContent = V.toFixed(3);
+  }
+}
+
+// ============================================================
+// UI WIRING
+// ============================================================
+const $ = id => document.getElementById(id);
+
+// Quality mode step counts
+const qualitySteps = {
+  high: 400,
+  medium: 200,
+  fast: 100,
+  realtime: 50
+};
+
+const presets = {
+  gentle: {
+    N: 300, angle: 137.51, pairingRule: 'skip', k: 13,
+    fieldType: 'curl', fieldScale: 2.5, fieldStrength: 0.5, turbulence: 0,
+    stepSize: 0.008, maxSteps: 400, steerCurve: 2.0,
+    lineWidth: 0.6, alpha: 0.15, colorMode: 'length', showPoints: 'none', showField: 'none'
+  },
+  turbulent: {
+    N: 400, angle: 137.51, pairingRule: 'skip', k: 21,
+    fieldType: 'curl', fieldScale: 4.0, fieldStrength: 0.75, turbulence: 0.6,
+    stepSize: 0.006, maxSteps: 500, steerCurve: 2.5,
+    lineWidth: 0.5, alpha: 0.12, colorMode: 'curvature', showPoints: 'none', showField: 'none'
+  },
+  vortex: {
+    N: 300, angle: 137.51, pairingRule: 'skip', k: 34,
+    fieldType: 'vortex', fieldScale: 2.0, fieldStrength: 0.7, turbulence: 0,
+    stepSize: 0.008, maxSteps: 400, steerCurve: 1.5,
+    lineWidth: 0.7, alpha: 0.18, colorMode: 'length', showPoints: 'none', showField: 'streamlines'
+  },
+  hair: {
+    N: 500, angle: 137.51, pairingRule: 'proximity', threshold: 0.10,
+    fieldType: 'curl', fieldScale: 3.0, fieldStrength: 0.6, turbulence: 0.2,
+    stepSize: 0.005, maxSteps: 600, steerCurve: 3.0,
+    lineWidth: 0.4, alpha: 0.08, colorMode: 'length', showPoints: 'none', showField: 'none'
+  },
+  chaos: {
+    N: 250, angle: 137.51, pairingRule: 'skip', k: 55,
+    fieldType: 'multi', fieldScale: 2.0, fieldStrength: 0.85, turbulence: 0.8,
+    stepSize: 0.006, maxSteps: 500, steerCurve: 1.2,
+    lineWidth: 0.5, alpha: 0.10, colorMode: 'field', showPoints: 'none', showField: 'grid'
+  },
+  compare: {
+    N: 300, angle: 137.51, pairingRule: 'skip', k: 13,
+    fieldType: 'curl', fieldScale: 2.5, fieldStrength: 0.0, turbulence: 0,
+    stepSize: 0.008, maxSteps: 400, steerCurve: 2.0,
+    lineWidth: 0.6, alpha: 0.20, colorMode: 'solid', showPoints: 'endpoints', showField: 'none'
+  }
+};
+
+function gatherParams() {
+  const quality = $('qualityMode').value;
+  return {
+    N: +$('N').value,
+    angle: +$('angle').value,
+    pairingRule: $('pairingRule').value,
+    k: +$('k').value,
+    threshold: +$('threshold').value,
+    knn: +$('knn').value,
+    fieldType: $('fieldType').value,
+    fieldScale: +$('fieldScale').value,
+    fieldStrength: +$('fieldStrength').value,
+    turbulence: +$('turbulence').value,
+    stepSize: +$('stepSize').value,
+    maxSteps: qualitySteps[quality] || +$('maxSteps').value,
+    steerCurve: +$('steerCurve').value,
+    lineWidth: +$('lineWidth').value,
+    alpha: +$('alpha').value,
+    colorMode: $('colorMode').value,
+    showPoints: $('showPoints').value,
+    showField: $('showField').value
+  };
+}
+
+function applyParams(p) {
+  $('N').value = p.N;
+  $('angle').value = p.angle;
+  $('pairingRule').value = p.pairingRule;
+  $('k').value = p.k;
+  $('threshold').value = p.threshold || 0.12;
+  $('knn').value = p.knn || 5;
+  $('fieldType').value = p.fieldType;
+  $('fieldScale').value = p.fieldScale;
+  $('fieldStrength').value = p.fieldStrength;
+  $('turbulence').value = p.turbulence;
+  $('stepSize').value = p.stepSize;
+  $('maxSteps').value = p.maxSteps;
+  $('steerCurve').value = p.steerCurve;
+  $('lineWidth').value = p.lineWidth;
+  $('alpha').value = p.alpha;
+  $('colorMode').value = p.colorMode;
+  $('showPoints').value = p.showPoints;
+  $('showField').value = p.showField;
+  updateOutputs();
+  updatePairingUI();
+}
+
+function updateOutputs() {
+  $('Nout').textContent = $('N').value;
+  $('angleOut').textContent = Number($('angle').value).toFixed(2) + 'Â°';
+  $('kOut').textContent = $('k').value;
+  $('thresholdOut').textContent = Number($('threshold').value).toFixed(2);
+  $('knnOut').textContent = $('knn').value;
+  $('scaleOut').textContent = Number($('fieldScale').value).toFixed(1);
+  $('strengthOut').textContent = Number($('fieldStrength').value).toFixed(2);
+  $('turbOut').textContent = Number($('turbulence').value).toFixed(2);
+  $('stepOut').textContent = Number($('stepSize').value).toFixed(3);
+  $('maxStepsOut').textContent = $('maxSteps').value;
+  $('steerOut').textContent = Number($('steerCurve').value).toFixed(1);
+  $('lwOut').textContent = Number($('lineWidth').value).toFixed(1);
+  $('alphaOut').textContent = Number($('alpha').value).toFixed(2);
+  $('animSpeedOut').textContent = Number($('animSpeed').value).toFixed(1);
+}
+
+function updatePairingUI() {
+  const rule = $('pairingRule').value;
+  $('skipRow').style.display = rule === 'skip' ? 'block' : 'none';
+  $('thresholdRow').style.display = rule === 'proximity' ? 'block' : 'none';
+  $('knnRow').style.display = rule === 'knn' ? 'block' : 'none';
+}
+
+// ============================================================
+// ANIMATION LOOP
+// ============================================================
+let animFrameId = null;
+
+function animationLoop(timestamp) {
+  if (!animState.playing) return;
+  
+  // Calculate FPS
+  if (animState.lastFrameTime > 0) {
+    const delta = timestamp - animState.lastFrameTime;
+    animState.fps = Math.round(1000 / delta);
+  }
+  animState.lastFrameTime = timestamp;
+  animState.frameCount++;
+  
+  // Update time
+  const speed = +$('animSpeed').value;
+  animState.time += 0.016 * speed; // ~60fps base
+  
+  // Get animation mode
+  const animMode = $('animMode').value;
+  
+  // Render with current time
+  const params = gatherParams();
+  render(params, animState.time, animMode);
+  
+  // Update displays
+  $('fpsDisplay').textContent = animState.fps;
+  $('timeDisplay').textContent = animState.time.toFixed(2);
+  
+  // Continue loop
+  animFrameId = requestAnimationFrame(animationLoop);
+}
+
+function startAnimation() {
+  if (animState.playing) return;
+  
+  const animMode = $('animMode').value;
+  if (animMode === 'none') {
+    alert('Select an animation mode first!');
+    return;
+  }
+  
+  animState.playing = true;
+  animState.lastFrameTime = 0;
+  $('playBtn').classList.add('active');
+  $('pauseBtn').classList.remove('active');
+  
+  // Auto-switch to faster quality during animation
+  if ($('qualityMode').value === 'high') {
+    $('qualityMode').value = 'medium';
+  }
+  
+  animFrameId = requestAnimationFrame(animationLoop);
+}
+
+function stopAnimation() {
+  animState.playing = false;
+  $('playBtn').classList.remove('active');
+  $('pauseBtn').classList.add('active');
+  
+  if (animFrameId) {
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+  }
+}
+
+function resetAnimation() {
+  stopAnimation();
+  animState.time = 0;
+  animState.frameCount = 0;
+  $('timeDisplay').textContent = '0.00';
+  render(gatherParams(), 0, 'none');
+}
+
+// Animation control events
+$('playBtn').addEventListener('click', startAnimation);
+$('pauseBtn').addEventListener('click', stopAnimation);
+$('resetBtn').addEventListener('click', resetAnimation);
+$('animSpeed').addEventListener('input', updateOutputs);
+$('animMode').addEventListener('change', () => {
+  if (animState.playing) {
+    // Restart with new mode
+    stopAnimation();
+    startAnimation();
+  }
+});
+
+// Event listeners
+$('pairingRule').addEventListener('change', () => {
+  updatePairingUI();
+  if (!animState.playing) render(gatherParams());
+});
+
+$('render').addEventListener('click', () => {
+  stopAnimation();
+  render(gatherParams());
+});
+
+// Preset buttons
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const preset = presets[btn.dataset.preset];
+    if (preset) {
+      stopAnimation();
+      applyParams(preset);
+      render(gatherParams());
+    }
+  });
+});
+
+// Sliders and selects
+['N', 'angle', 'k', 'threshold', 'knn', 'fieldScale', 'fieldStrength', 'turbulence', 
+ 'stepSize', 'maxSteps', 'steerCurve', 'lineWidth', 'alpha'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    updateOutputs();
+    if (!animState.playing) render(gatherParams());
+  });
+});
+
+['fieldType', 'colorMode', 'showPoints', 'showField', 'qualityMode'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    if (!animState.playing) render(gatherParams());
+  });
+});
+
+// Initialize
+applyParams(presets.gentle);
+render(gatherParams());
+</script>
+</body>
+</html>

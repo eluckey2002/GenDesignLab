@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plumb — Information Design / Example Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --graphite: #0f1413;
+  --stone: #151a19;
+  --slate: #1d2221;
+  --mist: #252b2a;
+  --hairline: #2f3534;
+  --paper: #f5f1ed;
+  --bone: #c4beb7;
+  --ash: #8a8580;
+  --bronze: #d4a574;
+  --bronze-light: #e8c89a;
+  --bronze-dark: #b08856;
+  --oxblood: #8b3a4a;
+  --sage: #5dbb6a;
+  --clay: #e35d5d;
+  --slate-blue: #5a9bb5;
+  --amber: #e8a82e;
+  --plum: #a374d4;
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--graphite); color: var(--bone); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
+
+.layout { display: grid; grid-template-columns: 220px 1fr; max-width: 1500px; margin: 0 auto; padding: 0 48px; }
+main { padding: 80px 0 200px; max-width: 1100px; }
+
+/* TOC */
+.toc { position: sticky; top: 80px; align-self: start; padding: 80px 32px 0 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.toc-mark { font-family: var(--display); font-weight: 600; font-size: 24px; letter-spacing: -0.02em; color: var(--paper); text-transform: none; margin-bottom: 8px; display: block; text-decoration: none; }
+.toc-mark::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--bronze); transform: rotate(45deg); margin-left: 7px; position: relative; bottom: 1px; }
+.toc-sub { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-bottom: 48px; display: block; line-height: 1.5; }
+.toc-list { list-style: none; }
+.toc-list li { margin-bottom: 12px; display: flex; gap: 10px; align-items: baseline; }
+.toc-num { color: var(--bronze); min-width: 18px; }
+.toc-link { color: var(--ash); text-decoration: none; transition: color 0.2s ease; }
+.toc-link:hover { color: var(--bone); }
+.toc-link.active { color: var(--paper); }
+
+/* Section header (between slides) */
+.deck-intro { padding: 0 0 80px; }
+.section-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze); margin-bottom: 24px; display: block; }
+.section-h { font-family: var(--display); font-weight: 500; font-size: 44px; line-height: 1.1; letter-spacing: -0.02em; color: var(--paper); margin-bottom: 24px; font-variation-settings: 'opsz' 144; }
+.section-h em { font-style: italic; color: var(--bronze); }
+.section-lede { font-size: 17px; line-height: 1.55; color: var(--bone); max-width: 620px; margin-bottom: 16px; }
+.section-lede em { color: var(--paper); font-style: normal; font-weight: 500; }
+
+/* Slide wrap */
+.slide-wrap {
+  margin-bottom: 80px;
+  scroll-margin-top: 60px;
+}
+
+/* The 16:9 slide frame */
+.slide {
+  aspect-ratio: 16 / 9;
+  background: var(--graphite);
+  border: 1px solid var(--hairline);
+  padding: 56px 64px 48px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.slide-corner {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+}
+.slide-corner::after {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+  margin-left: 5px;
+  position: relative;
+  bottom: 1px;
+}
+.slide-num {
+  position: absolute;
+  bottom: 24px;
+  right: 32px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ash);
+  text-transform: uppercase;
+}
+.slide-num .of { color: var(--hairline); margin: 0 4px; }
+.slide-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 18px;
+}
+.slide-h {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  max-width: 18ch;
+}
+.slide-h em { font-style: italic; color: var(--bronze); }
+.slide-h .ox { font-style: italic; color: var(--oxblood); }
+.slide-sub {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 36;
+  margin-top: 16px;
+  font-weight: 400;
+  max-width: 26ch;
+}
+.slide-body { font-size: 15px; line-height: 1.6; color: var(--bone); margin-top: 18px; max-width: 56ch; }
+.slide-body em { color: var(--paper); font-style: normal; font-weight: 500; }
+.slide-take {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.35;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 36;
+  position: relative;
+  padding-left: 28px;
+  margin-top: 24px;
+  max-width: 36ch;
+}
+.slide-take::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--bronze);
+}
+.slide-take::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+.slide-source {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ash);
+  position: absolute;
+  bottom: 24px;
+  left: 64px;
+  padding-left: 12px;
+  border-left: 1px solid var(--hairline);
+}
+
+/* Annotation panel */
+.slide-annotation {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  border-top: none;
+  padding: 14px 24px;
+  display: grid;
+  grid-template-columns: 100px repeat(4, 1fr);
+  gap: 24px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  align-items: baseline;
+}
+.anno-label {
+  color: var(--bronze);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.anno-cell { color: var(--ash); line-height: 1.6; text-transform: uppercase; letter-spacing: 0.1em; }
+.anno-cell .key { color: var(--bronze); }
+.anno-cell .val { color: var(--bone); }
+
+/* Slide 01 — Cover */
+.slide-cover {
+  justify-content: center;
+  padding: 56px 80px;
+}
+.cover-mark {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 110px;
+  line-height: 0.95;
+  color: var(--paper);
+  letter-spacing: -0.04em;
+  font-variation-settings: 'opsz' 144;
+  margin-bottom: 18px;
+  display: inline-block;
+}
+.cover-mark em { font-style: italic; color: var(--bronze); }
+.cover-sub {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 32px;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 144;
+  font-weight: 400;
+  max-width: 24ch;
+  line-height: 1.2;
+}
+.cover-meta {
+  position: absolute;
+  bottom: 48px;
+  left: 80px;
+  right: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.cover-meta-l { display: flex; gap: 14px; }
+.cover-meta-l span:not(:first-child)::before { content: '/'; color: var(--hairline); margin-right: 14px; }
+.cover-mark-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+}
+.cover-mark-tag::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+
+/* Two-column slide layout */
+.slide-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  flex: 1;
+  margin-top: 24px;
+  align-items: stretch;
+}
+.slide-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.col-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-bottom: 14px;
+}
+.col-label.bronze { color: var(--bronze); }
+
+/* Slide 03 — Hierarchy demo */
+.h-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  flex: 1;
+  margin-top: 28px;
+  align-items: stretch;
+}
+.h-demo-card {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 24px 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.h-demo-h-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.h-demo-h { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--ash); text-transform: uppercase; }
+.h-demo-h.bronze { color: var(--bronze); }
+.h-demo-flat { color: var(--ash); font-size: 12px; line-height: 1.65; }
+.h-demo-flat span { display: block; margin-bottom: 8px; }
+.h-demo-struct .struct-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--bronze); text-transform: uppercase; margin-bottom: 6px; }
+.h-demo-struct .struct-h { font-family: var(--display); font-size: 18px; color: var(--paper); font-weight: 500; line-height: 1.25; margin-bottom: 8px; letter-spacing: -0.01em; }
+.h-demo-struct .struct-body { color: var(--bone); font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
+.h-demo-struct .struct-stat {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--paper);
+  line-height: 1;
+  font-variation-settings: 'opsz' 36;
+  letter-spacing: -0.02em;
+}
+.h-demo-struct .struct-stat em { font-style: italic; color: var(--oxblood); font-size: 12px; margin-left: 2px; }
+.h-demo-struct .struct-rule { height: 1px; background: var(--bronze); width: 50%; margin: 6px 0 6px -28px; }
+.h-demo-struct .struct-cap { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ash); text-transform: uppercase; }
+
+/* Slide 04 — Encoding ladder */
+.enc-ladder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  margin-top: 24px;
+}
+.enc-rung {
+  display: grid;
+  grid-template-columns: 30px 180px 1fr 80px;
+  gap: 18px;
+  align-items: center;
+  padding: 10px 18px;
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  position: relative;
+}
+.enc-rank { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; color: var(--bronze); }
+.enc-name { font-family: var(--display); font-size: 16px; color: var(--paper); font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; }
+.enc-eg { display: flex; align-items: center; height: 22px; }
+.enc-acc { font-family: var(--mono); font-size: 10px; color: var(--ash); text-align: right; letter-spacing: 0.04em; text-transform: uppercase; }
+.enc-rung.top { background: linear-gradient(90deg, rgba(212, 165, 116, 0.10) 0%, var(--stone) 60%); border-color: rgba(212, 165, 116, 0.4); }
+.enc-rung.bottom { background: linear-gradient(90deg, rgba(227, 93, 93, 0.06) 0%, var(--stone) 60%); }
+/* tiny inline encoding examples */
+.eg-position { display: flex; align-items: end; gap: 8px; height: 22px; }
+.eg-position .b { width: 4px; background: var(--bronze); }
+.eg-length { display: flex; flex-direction: column; gap: 3px; }
+.eg-length .b { height: 3px; background: var(--bronze); }
+.eg-angle { display: flex; gap: 12px; align-items: center; }
+.eg-angle svg { width: 22px; height: 22px; }
+.eg-angle path { stroke: var(--bronze); stroke-width: 1.5; fill: none; }
+.eg-area { display: flex; align-items: end; gap: 8px; height: 22px; }
+.eg-area .c { background: var(--bronze); border-radius: 50%; }
+.eg-color { display: flex; gap: 4px; align-items: center; }
+.eg-color .c { width: 18px; height: 14px; }
+
+/* Slide 05 — Density demo */
+.dense-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  flex: 1;
+  margin-top: 18px;
+}
+.dense-cell {
+  padding: 16px 20px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+.dense-cell:nth-child(3n) { border-right: none; }
+.dense-cell:nth-last-child(-n+3) { border-bottom: none; }
+.dense-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 6px; }
+.dense-stat {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--paper);
+  line-height: 1;
+  font-variation-settings: 'opsz' 36;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.dense-stat .unit { font-family: var(--display); font-style: italic; font-size: 12px; color: var(--oxblood); }
+.dense-stat .delta-up { font-family: var(--mono); font-size: 10px; color: var(--sage); margin-left: 4px; vertical-align: middle; }
+.dense-stat .delta-dn { font-family: var(--mono); font-size: 10px; color: var(--clay); margin-left: 4px; vertical-align: middle; }
+.dense-cap { font-family: var(--mono); font-size: 9px; color: var(--ash); letter-spacing: 0.06em; }
+.dense-spark { width: 100%; height: 18px; margin-top: 6px; }
+.dense-spark path { stroke: var(--bronze); stroke-width: 1.2; fill: none; }
+.dense-spark .area { fill: var(--bronze); opacity: 0.12; stroke: none; }
+
+/* Slide 06 — Annotation demo */
+.anno-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  flex: 1;
+  margin-top: 18px;
+  align-items: stretch;
+}
+.chart-card {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 18px 24px 14px;
+  display: flex;
+  flex-direction: column;
+}
+.chart-card-h { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--ash); text-transform: uppercase; margin-bottom: 4px; }
+.chart-card-h.bronze { color: var(--bronze); }
+.chart-card-svg { flex: 1; }
+.chart-card-legend { display: flex; gap: 14px; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+.chart-legend-item { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; color: var(--ash); letter-spacing: 0.06em; text-transform: uppercase; }
+.chart-legend-dot { width: 8px; height: 2px; }
+
+/* Slide 07 — Restraint demo */
+.restraint-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  flex: 1;
+  margin-top: 18px;
+  align-items: stretch;
+}
+
+/* Slide 08 — Truth demo */
+.truth-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  flex: 1;
+  margin-top: 18px;
+  align-items: stretch;
+}
+.truth-card {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+}
+.truth-card.lie { border-color: rgba(227, 93, 93, 0.4); }
+.truth-card.honest { border-color: rgba(93, 187, 106, 0.4); }
+.truth-h { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
+.truth-h .lie-tag { color: var(--clay); }
+.truth-h .honest-tag { color: var(--sage); }
+.truth-bar { display: flex; align-items: end; gap: 14px; padding: 8px 4px 0; flex: 1; }
+.truth-bar-cell { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.truth-bar-fill { width: 100%; max-width: 36px; background: var(--bronze); }
+.truth-bar-fill.muted { background: var(--ash); opacity: 0.5; }
+.truth-bar-cap { font-family: var(--mono); font-size: 9px; color: var(--ash); }
+.truth-axis { display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px solid var(--hairline); margin-top: 4px; font-family: var(--mono); font-size: 9px; color: var(--ash); letter-spacing: 0.06em; }
+
+/* Slide 09 — Synthesis grid */
+.synth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+  flex: 1;
+  margin-top: 24px;
+  border: 1px solid var(--hairline);
+}
+.synth-card {
+  padding: 24px 24px;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.synth-card:nth-child(3n) { border-right: none; }
+.synth-card:nth-last-child(-n+3) { border-bottom: none; }
+.synth-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.synth-h { font-family: var(--display); font-weight: 500; font-size: 18px; color: var(--paper); line-height: 1.2; letter-spacing: -0.01em; font-variation-settings: 'opsz' 36; }
+.synth-h em { font-style: italic; color: var(--bronze); }
+.synth-body { font-size: 11px; line-height: 1.5; color: var(--ash); }
+
+/* Slide 10 — Closing */
+.closing-frame { justify-content: center; }
+.closing-quote {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 44px;
+  line-height: 1.2;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  font-weight: 400;
+  position: relative;
+  padding-left: 36px;
+  max-width: 24ch;
+}
+.closing-quote em { color: var(--oxblood); }
+.closing-quote::before { content: ''; position: absolute; left: 8px; top: 14px; bottom: 24px; width: 1px; background: var(--bronze); }
+.closing-quote::after { content: ''; position: absolute; left: 3px; bottom: 8px; width: 12px; height: 12px; background: var(--bronze); transform: rotate(45deg); }
+.closing-sources { position: absolute; bottom: 24px; left: 64px; right: 64px; display: flex; justify-content: space-between; align-items: flex-end; }
+.closing-src-list {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ash);
+  line-height: 1.7;
+}
+.closing-src-list .lbl { color: var(--bronze); letter-spacing: 0.16em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.closing-src-list em { color: var(--bone); font-style: italic; font-family: var(--display); font-size: 12px; }
+.closing-pgnum { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; color: var(--ash); text-transform: uppercase; }
+
+/* Mini intro/outro */
+.intro-section, .outro-section { padding: 60px 0; }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; padding: 0 24px; }
+  .toc { display: none; }
+  main { padding: 32px 0 80px; }
+  .section-h { font-size: 28px; }
+  .slide { padding: 32px; }
+  .slide-h { font-size: 28px; }
+  .cover-mark { font-size: 56px; }
+  .cover-sub { font-size: 18px; }
+  .cover-meta { left: 32px; right: 32px; bottom: 24px; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .slide-annotation { grid-template-columns: 1fr; gap: 8px; padding: 14px 16px; }
+  .h-demo, .anno-demo, .restraint-pair, .truth-pair, .slide-cols { grid-template-columns: 1fr; gap: 16px; }
+  .dense-grid, .synth-grid { grid-template-columns: 1fr; }
+  .dense-cell, .synth-card { border-right: none; }
+  .enc-rung { grid-template-columns: 30px 1fr; }
+  .enc-rung .enc-eg, .enc-rung .enc-acc { display: none; }
+  .closing-quote { font-size: 22px; }
+  .closing-sources { left: 32px; right: 32px; flex-direction: column; gap: 18px; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <a href="#hero" class="toc-mark">Plumb</a>
+    <span class="toc-sub">Information<br>Design Deck</span>
+    <ol class="toc-list">
+      <li><span class="toc-num">01</span><a href="#s1" class="toc-link">Cover</a></li>
+      <li><span class="toc-num">02</span><a href="#s2" class="toc-link">Premise</a></li>
+      <li><span class="toc-num">03</span><a href="#s3" class="toc-link">Hierarchy</a></li>
+      <li><span class="toc-num">04</span><a href="#s4" class="toc-link">Encoding</a></li>
+      <li><span class="toc-num">05</span><a href="#s5" class="toc-link">Density</a></li>
+      <li><span class="toc-num">06</span><a href="#s6" class="toc-link">Annotation</a></li>
+      <li><span class="toc-num">07</span><a href="#s7" class="toc-link">Restraint</a></li>
+      <li><span class="toc-num">08</span><a href="#s8" class="toc-link">Truth</a></li>
+      <li><span class="toc-num">09</span><a href="#s9" class="toc-link">Synthesis</a></li>
+      <li><span class="toc-num">10</span><a href="#s10" class="toc-link">Apply</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- Intro section -->
+    <div class="intro-section" id="hero">
+      <div class="section-num">Phase 02 / Example Deck</div>
+      <h2 class="section-h">The system, on a topic that isn't us.</h2>
+      <p class="section-lede">Ten slides at 16:9, demonstrating the Composable Presentation System on a topic worth teaching. Each slide is annotated below with the composition pattern, components, narrative primitives, and visual primitives it uses — so the reader sees the system <em>and</em> the application together.</p>
+      <p class="section-lede">Topic: <em>Information Design — six principles for communicating complex things,</em> grounded in Tufte (Visual Display, Envisioning Information, Visual Explanations, Beautiful Evidence), Cleveland &amp; McGill, Stephen Few, and Gestalt foundations.</p>
+    </div>
+
+    <!-- ===== SLIDE 01 — COVER ===== -->
+    <div class="slide-wrap" id="s1">
+      <div class="slide slide-cover">
+        <div>
+          <div class="cover-mark">Information<br>Design<em>.</em></div>
+          <div class="cover-sub">Six principles for communicating complex things.</div>
+        </div>
+        <div class="cover-meta">
+          <div class="cover-meta-l"><span>Working session</span><span>May 2026</span><span>v1.0</span></div>
+          <div class="cover-mark-tag">Plumb</div>
+        </div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Cover</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Hero (claim-led)</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Claim</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Wordmark, diamond bob</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 02 — PREMISE / TENSION ===== -->
+    <div class="slide-wrap" id="s2">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">02 / Premise</div>
+        <h2 class="slide-h">Most pages tell you what they want you to know.</h2>
+        <div class="slide-sub">The good ones let you see it.</div>
+        <div class="slide-body" style="margin-top: 28px; max-width: 60ch;">A presentation has two jobs at once — carry information accurately, and let the audience absorb it without grinding gears. <em>Most decks do the first and forget the second.</em> The work that follows is six rules — Tufte's lineage, plus the perceptual research that came before and after — for closing that gap.</div>
+        <div class="slide-take">A page that respects the reader earns the read.</div>
+        <div class="slide-num">02 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Tension opener</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Insight Card</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Tension, Claim, Takeaway</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Weighted Callout</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 03 — HIERARCHY ===== -->
+    <div class="slide-wrap" id="s3">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Principle 01 / Hierarchy</div>
+        <h2 class="slide-h">Hierarchy makes <em>meaning</em> visible.</h2>
+        <div class="slide-body" style="max-width: 64ch;">The eye finds the important thing before the brain reads it. Your job as the author is to make sure those two events agree — that what the reader's eye lands on first is what you want them to remember.</div>
+
+        <div class="h-demo">
+          <div class="h-demo-card">
+            <div class="h-demo-h-row">
+              <div class="h-demo-h">Without hierarchy</div>
+              <div class="h-demo-h">A</div>
+            </div>
+            <div class="h-demo-flat">
+              <span>Triage time per ticket dropped from forty minutes to twelve minutes after the eight-week build.</span>
+              <span>The classifier handles routine triage now and the team uses the recovered time on calls that need a person.</span>
+              <span>Eval pass-rate climbed from seventy-one percent to ninety-four percent across the same window.</span>
+            </div>
+          </div>
+          <div class="h-demo-card h-demo-struct">
+            <div class="h-demo-h-row">
+              <div class="h-demo-h bronze">With hierarchy</div>
+              <div class="h-demo-h bronze">B</div>
+            </div>
+            <div class="struct-eyebrow">Triage time / per ticket</div>
+            <div class="struct-stat">12<em> min</em></div>
+            <div class="struct-rule"></div>
+            <div class="struct-cap">↓ from 40 min &middot; 8-week build</div>
+            <div class="struct-h" style="margin-top: 14px;">The team uses the recovered time on calls that need a person.</div>
+            <div class="struct-body">Eval pass-rate climbed from 71% to 94% over the same window.</div>
+          </div>
+        </div>
+
+        <div class="slide-take" style="margin-top: 16px;">Type doesn't have to shout. Hierarchy is signal.</div>
+        <div class="slide-source">Foundation &middot; Gestalt principles &middot; figure–ground, similarity, prominence</div>
+        <div class="slide-num">03 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Claim → Demonstration</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Principle Card, Before/After</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Claim, Contrast, Takeaway</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Weighted Callout, hairline rule</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 04 — ENCODING ===== -->
+    <div class="slide-wrap" id="s4">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Principle 02 / Encoding</div>
+        <h2 class="slide-h">Encoding makes <em>data</em> legible.</h2>
+        <div class="slide-body" style="max-width: 62ch; margin-bottom: 4px;">Cleveland and McGill ranked the perceptual accuracy of visual encodings. The ladder below — top to bottom, most to least accurate. <em>Position is the only encoding the eye reads precisely.</em> Use it for the comparison that matters.</div>
+
+        <div class="enc-ladder">
+          <div class="enc-rung top">
+            <div class="enc-rank">01</div>
+            <div class="enc-name">Position on common scale</div>
+            <div class="enc-eg">
+              <div class="eg-position">
+                <div class="b" style="height: 6px"></div>
+                <div class="b" style="height: 16px"></div>
+                <div class="b" style="height: 22px"></div>
+                <div class="b" style="height: 11px"></div>
+                <div class="b" style="height: 18px"></div>
+              </div>
+            </div>
+            <div class="enc-acc">most accurate</div>
+          </div>
+          <div class="enc-rung">
+            <div class="enc-rank">02</div>
+            <div class="enc-name">Position on non-aligned scales</div>
+            <div class="enc-eg">
+              <div class="eg-position">
+                <div class="b" style="height: 8px; align-self: end"></div>
+                <div class="b" style="height: 14px; align-self: center"></div>
+                <div class="b" style="height: 22px; align-self: start"></div>
+              </div>
+            </div>
+            <div class="enc-acc">accurate</div>
+          </div>
+          <div class="enc-rung">
+            <div class="enc-rank">03</div>
+            <div class="enc-name">Length</div>
+            <div class="enc-eg">
+              <div class="eg-length" style="width: 100%; max-width: 110px">
+                <div class="b" style="width: 30%"></div>
+                <div class="b" style="width: 70%"></div>
+                <div class="b" style="width: 50%"></div>
+                <div class="b" style="width: 90%"></div>
+              </div>
+            </div>
+            <div class="enc-acc">solid</div>
+          </div>
+          <div class="enc-rung">
+            <div class="enc-rank">04</div>
+            <div class="enc-name">Direction / angle</div>
+            <div class="enc-eg">
+              <div class="eg-angle">
+                <svg viewBox="0 0 22 22"><path d="M 4 18 L 18 4"/></svg>
+                <svg viewBox="0 0 22 22"><path d="M 4 14 L 18 8"/></svg>
+                <svg viewBox="0 0 22 22"><path d="M 4 11 L 18 11"/></svg>
+              </div>
+            </div>
+            <div class="enc-acc">approximate</div>
+          </div>
+          <div class="enc-rung">
+            <div class="enc-rank">05</div>
+            <div class="enc-name">Area</div>
+            <div class="enc-eg">
+              <div class="eg-area">
+                <div class="c" style="width: 6px; height: 6px"></div>
+                <div class="c" style="width: 12px; height: 12px"></div>
+                <div class="c" style="width: 18px; height: 18px"></div>
+              </div>
+            </div>
+            <div class="enc-acc">unreliable</div>
+          </div>
+          <div class="enc-rung bottom">
+            <div class="enc-rank">06</div>
+            <div class="enc-name">Color saturation / hue</div>
+            <div class="enc-eg">
+              <div class="eg-color">
+                <div class="c" style="background: var(--bronze-dark)"></div>
+                <div class="c" style="background: var(--bronze)"></div>
+                <div class="c" style="background: var(--bronze-light)"></div>
+              </div>
+            </div>
+            <div class="enc-acc">least accurate</div>
+          </div>
+        </div>
+
+        <div class="slide-source">Source &middot; Cleveland &amp; McGill &middot; "Graphical Perception," <em>JASA</em>, 1984</div>
+        <div class="slide-num">04 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Claim → Evidence</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Principle Card, Ranking</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Claim, Evidence, Implication</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Verification Glyph (source)</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 05 — DENSITY ===== -->
+    <div class="slide-wrap" id="s5">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Principle 03 / Density</div>
+        <h2 class="slide-h">Density beats simplicity. <em>When structured.</em></h2>
+        <div class="slide-body" style="max-width: 62ch;">"One point per slide" is a workaround, not a principle. A page that respects the reader can hold a great deal — the discipline is structure, not subtraction. Below: nine cells, one slide, each unit a complete thought.</div>
+
+        <div class="dense-grid">
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Eval pass-rate</div>
+            <div class="dense-stat">94<span class="unit">%</span><span class="delta-up">↑23</span></div>
+            <div class="dense-cap">vs 71% baseline</div>
+            <svg class="dense-spark" viewBox="0 0 100 18" preserveAspectRatio="none"><path class="area" d="M 2 14 L 18 13 L 36 11 L 54 8 L 72 5 L 90 3 L 98 3 L 98 18 L 2 18 Z"/><path d="M 2 14 L 18 13 L 36 11 L 54 8 L 72 5 L 90 3 L 98 3"/></svg>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">P95 latency</div>
+            <div class="dense-stat">312<span class="unit">ms</span><span class="delta-up">↓41</span></div>
+            <div class="dense-cap">in-spec / under 500ms</div>
+            <svg class="dense-spark" viewBox="0 0 100 18" preserveAspectRatio="none"><path class="area" d="M 2 6 L 18 7 L 36 9 L 54 11 L 72 12 L 90 13 L 98 13 L 98 18 L 2 18 Z"/><path d="M 2 6 L 18 7 L 36 9 L 54 11 L 72 12 L 90 13 L 98 13"/></svg>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Engagements</div>
+            <div class="dense-stat">7<span class="delta-up">↑2</span></div>
+            <div class="dense-cap">active &middot; vs Q1</div>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Tokens / day</div>
+            <div class="dense-stat">2.4<span class="unit">M</span><span class="delta-up">↑8%</span></div>
+            <div class="dense-cap">across all models</div>
+            <svg class="dense-spark" viewBox="0 0 100 18" preserveAspectRatio="none"><path class="area" d="M 2 12 L 18 11 L 36 12 L 54 9 L 72 8 L 90 6 L 98 5 L 98 18 L 2 18 Z"/><path d="M 2 12 L 18 11 L 36 12 L 54 9 L 72 8 L 90 6 L 98 5"/></svg>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Cost / inference</div>
+            <div class="dense-stat">$0.014<span class="delta-up">↓18%</span></div>
+            <div class="dense-cap">trailing 14d avg</div>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Eval coverage</div>
+            <div class="dense-stat">87<span class="unit">%</span><span class="delta-up">↑4</span></div>
+            <div class="dense-cap">pts wk-over-wk</div>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Time-to-value</div>
+            <div class="dense-stat">11<span class="unit">days</span></div>
+            <div class="dense-cap">kickoff → first ship</div>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Retry rate</div>
+            <div class="dense-stat">0.4<span class="unit">%</span><span class="delta-dn">↑0.1</span></div>
+            <div class="dense-cap">429 backoff events</div>
+          </div>
+          <div class="dense-cell">
+            <div class="dense-eyebrow">Renewals</div>
+            <div class="dense-stat">100<span class="unit">%</span></div>
+            <div class="dense-cap">on completed builds</div>
+          </div>
+        </div>
+
+        <div class="slide-source">Foundation &middot; Tufte &middot; <em>"To clarify, add detail."</em></div>
+        <div class="slide-num">05 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Claim → Demonstration</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Caveated Card, Compact Strip</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Claim, Caveat, Evidence</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Sparklines, hairline grid</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 06 — ANNOTATION ===== -->
+    <div class="slide-wrap" id="s6">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Principle 04 / Annotation</div>
+        <h2 class="slide-h">Annotation <em>finishes</em> the chart.</h2>
+        <div class="slide-body" style="max-width: 60ch;">A chart with a separate legend asks the reader to look in two places at once. Direct labels at the line's terminus put the answer where the eye is already pointing.</div>
+
+        <div class="anno-demo">
+          <div class="chart-card">
+            <div class="chart-card-h">A &middot; with legend (slower)</div>
+            <svg class="chart-card-svg" viewBox="0 0 280 130" preserveAspectRatio="xMidYMid meet">
+              <line x1="20" y1="20" x2="270" y2="20" stroke="#2f3534" stroke-width="1"/>
+              <line x1="20" y1="60" x2="270" y2="60" stroke="#2f3534" stroke-width="1"/>
+              <line x1="20" y1="100" x2="270" y2="100" stroke="#2f3534" stroke-width="1"/>
+              <path d="M 24 80 L 60 75 L 100 65 L 140 50 L 180 35 L 220 28 L 260 22" stroke="#d4a574" stroke-width="1.5" fill="none"/>
+              <path d="M 24 78 L 60 80 L 100 78 L 140 82 L 180 80 L 220 78 L 260 82" stroke="#5a9bb5" stroke-width="1.5" fill="none"/>
+            </svg>
+            <div class="chart-card-legend">
+              <div class="chart-legend-item"><span class="chart-legend-dot" style="background: var(--bronze)"></span>v2</div>
+              <div class="chart-legend-item"><span class="chart-legend-dot" style="background: var(--slate-blue)"></span>baseline</div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-h bronze">B &middot; with inline labels</div>
+            <svg class="chart-card-svg" viewBox="0 0 280 130" preserveAspectRatio="xMidYMid meet">
+              <line x1="20" y1="20" x2="240" y2="20" stroke="#2f3534" stroke-width="1"/>
+              <line x1="20" y1="60" x2="240" y2="60" stroke="#2f3534" stroke-width="1"/>
+              <line x1="20" y1="100" x2="240" y2="100" stroke="#2f3534" stroke-width="1"/>
+              <path d="M 24 80 L 60 75 L 100 65 L 140 50 L 180 35 L 220 28 L 240 24" stroke="#d4a574" stroke-width="1.5" fill="none"/>
+              <path d="M 24 78 L 60 80 L 100 78 L 140 82 L 180 80 L 220 78 L 240 80" stroke="#5a9bb5" stroke-width="1.5" fill="none"/>
+              <text x="244" y="27" font-family="Geist Mono" font-size="9" fill="#d4a574">v2</text>
+              <text x="244" y="83" font-family="Geist Mono" font-size="9" fill="#5a9bb5">baseline</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="slide-take" style="margin-top: 18px;">Tell the reader what matters. In the chart. Where they're looking.</div>
+        <div class="slide-num">06 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Before/After</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Insight Card</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Claim, Contrast, Takeaway</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Weighted Callout</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 07 — RESTRAINT ===== -->
+    <div class="slide-wrap" id="s7">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Principle 05 / Restraint</div>
+        <h2 class="slide-h">Restraint earns <em>trust</em>.</h2>
+        <div class="slide-body" style="max-width: 60ch;">Tufte's data-ink ratio: maximize the proportion of ink that <em>shows</em> data over ink that decorates it. In practice, kill gridlines that don't help reading, kill borders, kill drop shadows, kill the things you put in because the slide felt empty. <em>Empty isn't the problem. Cluttered is.</em></div>
+
+        <div class="restraint-pair">
+          <div class="chart-card">
+            <div class="chart-card-h">A &middot; cluttered</div>
+            <svg class="chart-card-svg" viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet">
+              <rect x="22" y="18" width="240" height="100" fill="#1d2221" stroke="#454b4a" stroke-width="1"/>
+              <line x1="22" y1="38" x2="262" y2="38" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="22" y1="58" x2="262" y2="58" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="22" y1="78" x2="262" y2="78" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="22" y1="98" x2="262" y2="98" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="62" y1="18" x2="62" y2="118" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="102" y1="18" x2="102" y2="118" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="142" y1="18" x2="142" y2="118" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="182" y1="18" x2="182" y2="118" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <line x1="222" y1="18" x2="222" y2="118" stroke="#454b4a" stroke-width="1" stroke-dasharray="2 2"/>
+              <rect x="32" y="80" width="20" height="38" fill="url(#g1)" stroke="#d4a574" stroke-width="0.5"/>
+              <rect x="72" y="65" width="20" height="53" fill="url(#g1)" stroke="#d4a574" stroke-width="0.5"/>
+              <rect x="112" y="50" width="20" height="68" fill="url(#g1)" stroke="#d4a574" stroke-width="0.5"/>
+              <rect x="152" y="40" width="20" height="78" fill="url(#g1)" stroke="#d4a574" stroke-width="0.5"/>
+              <rect x="192" y="34" width="20" height="84" fill="url(#g1)" stroke="#d4a574" stroke-width="0.5"/>
+              <rect x="232" y="28" width="20" height="90" fill="url(#g1)" stroke="#d4a574" stroke-width="0.5"/>
+              <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e8c89a"/><stop offset="1" stop-color="#b08856"/></linearGradient></defs>
+            </svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-h bronze">B &middot; restrained</div>
+            <svg class="chart-card-svg" viewBox="0 0 280 140" preserveAspectRatio="xMidYMid meet">
+              <line x1="22" y1="118" x2="262" y2="118" stroke="#2f3534" stroke-width="1"/>
+              <rect x="32" y="80" width="20" height="38" fill="#d4a574"/>
+              <rect x="72" y="65" width="20" height="53" fill="#d4a574"/>
+              <rect x="112" y="50" width="20" height="68" fill="#d4a574"/>
+              <rect x="152" y="40" width="20" height="78" fill="#d4a574"/>
+              <rect x="192" y="34" width="20" height="84" fill="#d4a574"/>
+              <rect x="232" y="28" width="20" height="90" fill="#d4a574"/>
+              <text x="252" y="22" font-family="Geist Mono" font-size="9" fill="#d4a574" text-anchor="end">94%</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="slide-take" style="margin-top: 18px;">Above all else, <em>show the data</em>.</div>
+        <div class="slide-source">Source &middot; Tufte &middot; <em>The Visual Display of Quantitative Information</em>, 1983</div>
+        <div class="slide-num">07 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Before/After + Quote</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Quote-Led, Insight Card</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Claim, Contrast, Takeaway</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Verification Glyph, Weighted Callout</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 08 — TRUTH ===== -->
+    <div class="slide-wrap" id="s8">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Principle 06 / Truth</div>
+        <h2 class="slide-h">Truth is the design's <em>first job</em>.</h2>
+        <div class="slide-body" style="max-width: 64ch;">Same data, two charts. The lie sits in the y-axis: a 5-point change shown on a truncated scale (60–100) looks like a tripled outcome. Defaults aren't neutral — chart software will lie for you if you let it.</div>
+
+        <div class="truth-pair">
+          <div class="truth-card lie">
+            <div class="truth-h"><span>Chart A &middot; truncated y-axis</span><span class="lie-tag">Misleading</span></div>
+            <div class="truth-bar">
+              <div class="truth-bar-cell">
+                <div class="truth-bar-fill muted" style="height: 30px"></div>
+                <div class="truth-bar-cap">71</div>
+              </div>
+              <div class="truth-bar-cell">
+                <div class="truth-bar-fill" style="height: 96px"></div>
+                <div class="truth-bar-cap">94</div>
+              </div>
+            </div>
+            <div class="truth-axis">
+              <span>60</span><span>100</span>
+            </div>
+          </div>
+          <div class="truth-card honest">
+            <div class="truth-h"><span>Chart B &middot; full y-axis</span><span class="honest-tag">Honest</span></div>
+            <div class="truth-bar">
+              <div class="truth-bar-cell">
+                <div class="truth-bar-fill muted" style="height: 76px"></div>
+                <div class="truth-bar-cap">71</div>
+              </div>
+              <div class="truth-bar-cell">
+                <div class="truth-bar-fill" style="height: 100px"></div>
+                <div class="truth-bar-cap">94</div>
+              </div>
+            </div>
+            <div class="truth-axis">
+              <span>0</span><span>100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-take" style="margin-top: 16px;">A chart that lies has a short half-life.</div>
+        <div class="slide-source">Concept &middot; Tufte &middot; "lie factor" &middot; <em>Visual Display</em>, ch. 2</div>
+        <div class="slide-num">08 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Tension → Resolution</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Caveated Card, Before/After</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Tension, Caveat, Implication</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Verification Glyph, status colors as state</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 09 — SYNTHESIS ===== -->
+    <div class="slide-wrap" id="s9">
+      <div class="slide">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Synthesis / Six lines</div>
+        <h2 class="slide-h">Six principles, six lines.</h2>
+        <div class="slide-body" style="max-width: 60ch;">If you took a single page of notes from this deck, it would look like the cells below. Each line is the rule; each subtitle is the cost of breaking it.</div>
+
+        <div class="synth-grid">
+          <div class="synth-card">
+            <div class="synth-num">01 / Hierarchy</div>
+            <div class="synth-h">Make the important thing <em>look</em> important.</div>
+            <div class="synth-body">Without it, the eye and the brain disagree about what matters.</div>
+          </div>
+          <div class="synth-card">
+            <div class="synth-num">02 / Encoding</div>
+            <div class="synth-h">Position is the only encoding the eye reads <em>precisely</em>.</div>
+            <div class="synth-body">Pick encoding by the comparison the reader needs to make.</div>
+          </div>
+          <div class="synth-card">
+            <div class="synth-num">03 / Density</div>
+            <div class="synth-h">Density beats simplicity, <em>when structured</em>.</div>
+            <div class="synth-body">"One point per slide" is a workaround, not a principle.</div>
+          </div>
+          <div class="synth-card">
+            <div class="synth-num">04 / Annotation</div>
+            <div class="synth-h">Direct labels <em>beat</em> legends.</div>
+            <div class="synth-body">Tell the reader what matters where they're already looking.</div>
+          </div>
+          <div class="synth-card">
+            <div class="synth-num">05 / Restraint</div>
+            <div class="synth-h">Every element must <em>earn</em> its place.</div>
+            <div class="synth-body">First edit: removal. Second edit: more removal.</div>
+          </div>
+          <div class="synth-card">
+            <div class="synth-num">06 / Truth</div>
+            <div class="synth-h">The chart that lies has a <em>short half-life</em>.</div>
+            <div class="synth-body">Defaults aren't neutral. Inspect every axis you didn't pick on purpose.</div>
+          </div>
+        </div>
+
+        <div class="slide-num">09 <span class="of">/</span> 10</div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">Executive Synthesis</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">6× Principle Card (compressed)</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Takeaway × 6</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Small multiples (Tufte)</span></div>
+      </div>
+    </div>
+
+    <!-- ===== SLIDE 10 — APPLY / CLOSING ===== -->
+    <div class="slide-wrap" id="s10">
+      <div class="slide closing-frame">
+        <div class="slide-corner">Plumb</div>
+        <div class="slide-eyebrow">Apply / Closing</div>
+        <div class="closing-quote">Good slides don't have <em>less</em> information. They have <em>better-structured</em> information.</div>
+        <div class="closing-sources">
+          <div class="closing-src-list">
+            <span class="lbl">Foundations</span>
+            <em>Edward Tufte</em> — Visual Display of Quantitative Information (1983) &middot; Envisioning Information (1990) &middot; Visual Explanations (1997) &middot; Beautiful Evidence (2006)<br>
+            <em>William Cleveland &amp; Robert McGill</em> — "Graphical Perception," JASA, 1984<br>
+            <em>Stephen Few</em> — Show Me the Numbers (2004); Now You See It (2009)<br>
+            <em>Gestalt</em> — figure–ground, similarity, proximity, closure
+          </div>
+          <div class="closing-pgnum">10 <span class="of" style="color: var(--hairline); margin: 0 4px;">/</span> 10</div>
+        </div>
+      </div>
+      <div class="slide-annotation">
+        <div class="anno-label">System /</div>
+        <div class="anno-cell"><span class="key">Pattern</span> &middot; <span class="val">The Teach &middot; close</span></div>
+        <div class="anno-cell"><span class="key">Components</span> &middot; <span class="val">Quote-Led closer</span></div>
+        <div class="anno-cell"><span class="key">Narrative</span> &middot; <span class="val">Synthesis, Implication</span></div>
+        <div class="anno-cell"><span class="key">Visual</span> &middot; <span class="val">Weighted Callout (xl), source citation</span></div>
+      </div>
+    </div>
+
+    <!-- Outro -->
+    <div class="outro-section">
+      <div class="section-num">End / Phase 02</div>
+      <h2 class="section-h">Ten slides. The system, in use.</h2>
+      <p class="section-lede">Every slide above declares the composition pattern, components, narrative primitives, and visual primitives it draws from. Read top-down for the deck experience; read by section to study how the system answers a particular communication job.</p>
+      <p class="section-lede"><em>The discipline is structure, not subtraction.</em></p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  const links = Array.from(document.querySelectorAll('.toc-link'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  function setActive() {
+    const y = window.scrollY + 200;
+    let active = sections[0];
+    for (const s of sections) {
+      if (!s) continue;
+      if (s.offsetTop <= y) active = s;
+    }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + active.id));
+  }
+  document.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+})();
+</script>
+</body>
+</html>

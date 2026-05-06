@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hyperbolic Flow Field â€” Confluence in Curved Space</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: #080810; 
+      color: #e0e0e0; 
+    }
+    .container { 
+      display: grid; 
+      grid-template-columns: 360px 1fr; 
+      height: 100vh; 
+    }
+    .panel { 
+      background: #0d0d14; 
+      border-right: 1px solid #2a2a3a; 
+      padding: 20px; 
+      overflow-y: auto; 
+    }
+    h1 { 
+      margin: 0 0 8px; 
+      font-size: 18px; 
+      color: #fff; 
+    }
+    .subtitle { 
+      font-size: 12px; 
+      color: #888; 
+      margin-bottom: 20px; 
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 8px;
+    }
+    .badge.novel { background: #3a2a4a; color: #c8a; }
+    .badge.experimental { background: #4a3a2a; color: #fa8; }
+    .section { 
+      margin-bottom: 20px; 
+    }
+    .section-title { 
+      font-size: 11px; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      color: #666; 
+      margin-bottom: 12px; 
+    }
+    .row { 
+      margin-bottom: 14px; 
+    }
+    .row label { 
+      display: flex; 
+      justify-content: space-between; 
+      font-size: 12px; 
+      color: #aaa; 
+      margin-bottom: 6px; 
+    }
+    .row label span { 
+      color: #8fa; 
+      font-family: monospace; 
+    }
+    input[type="range"] { 
+      width: 100%; 
+      height: 4px;
+      -webkit-appearance: none; 
+      background: #2a2a3a; 
+      border-radius: 2px; 
+      outline: none; 
+    }
+    input[type="range"]::-webkit-slider-thumb { 
+      -webkit-appearance: none; 
+      width: 14px; 
+      height: 14px; 
+      background: #8fa; 
+      border-radius: 50%; 
+      cursor: pointer; 
+    }
+    select, button { 
+      width: 100%; 
+      padding: 10px 12px; 
+      background: #1a1a24; 
+      border: 1px solid #3a3a4a; 
+      border-radius: 8px; 
+      color: #e0e0e0; 
+      font-size: 13px; 
+      cursor: pointer; 
+      margin-bottom: 8px;
+    }
+    select:hover, button:hover { 
+      background: #252530; 
+      border-color: #4a4a5a; 
+    }
+    button.primary { 
+      background: linear-gradient(135deg, #2a4a3a, #1a3a2a); 
+      border-color: #3a5a4a; 
+    }
+    button.primary:hover { 
+      background: linear-gradient(135deg, #3a5a4a, #2a4a3a); 
+    }
+    .toggle-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 8px;
+      font-size: 11px;
+      background: #1a1a24;
+      border: 1px solid #3a3a4a;
+      border-radius: 6px;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-btn.active {
+      background: #2a3a2a;
+      border-color: #4a6a4a;
+      color: #8fa;
+    }
+    .stats { 
+      background: #1a1a24; 
+      border-radius: 8px; 
+      padding: 12px; 
+      font-size: 11px; 
+      color: #888; 
+      line-height: 1.8;
+    }
+    .stats strong { 
+      color: #8fa; 
+    }
+    .divider { 
+      height: 1px; 
+      background: #2a2a3a; 
+      margin: 16px 0; 
+    }
+    .canvas-wrap { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 20px; 
+      background: #080810; 
+    }
+    canvas { 
+      border-radius: 12px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+    }
+    .hint { 
+      font-size: 11px; 
+      color: #666; 
+      line-height: 1.5; 
+      margin-top: 12px; 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel">
+      <h1>Hyperbolic Flow Field</h1>
+      <div class="subtitle">
+        <span class="badge novel">Novel</span>
+        <span class="badge experimental">Experimental</span>
+        Confluence in Curved Space
+      </div>
+      
+      <div class="section">
+        <div class="section-title">Point Generator</div>
+        <div class="row">
+          <label>Points (N) <span id="valN">120</span></label>
+          <input type="range" id="N" min="20" max="300" value="120">
+        </div>
+        <div class="row">
+          <label>Divergence Angle <span id="valAngle">137.5Â°</span></label>
+          <input type="range" id="angle" min="90" max="180" step="0.1" value="137.5">
+        </div>
+        <div class="row">
+          <label>Spread <span id="valSpread">0.85</span></label>
+          <input type="range" id="spread" min="0.3" max="0.95" step="0.01" value="0.85">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Flow Field</div>
+        <div class="row">
+          <label>Field Type</label>
+          <select id="fieldType">
+            <option value="perlin">Perlin Noise</option>
+            <option value="radialSpiral">Radial Spiral</option>
+            <option value="hyperbolicVortex">Hyperbolic Vortex</option>
+            <option value="boundaryAttract">Boundary Attractor</option>
+            <option value="centerRepel">Center Repulsion</option>
+            <option value="dual">Dual Vortex</option>
+          </select>
+        </div>
+        <div class="row">
+          <label>Field Scale <span id="valFieldScale">3.0</span></label>
+          <input type="range" id="fieldScale" min="0.5" max="10" step="0.1" value="3.0">
+        </div>
+        <div class="row">
+          <label>Field Strength <span id="valFieldStrength">1.0</span></label>
+          <input type="range" id="fieldStrength" min="0.1" max="3" step="0.1" value="1.0">
+        </div>
+        <div class="row">
+          <label>Field Rotation <span id="valFieldRotation">0Â°</span></label>
+          <input type="range" id="fieldRotation" min="0" max="360" step="5" value="0">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Path Tracing</div>
+        <div class="row">
+          <label>Path Steps <span id="valPathSteps">60</span></label>
+          <input type="range" id="pathSteps" min="10" max="150" value="60">
+        </div>
+        <div class="row">
+          <label>Step Size <span id="valStepSize">0.015</span></label>
+          <input type="range" id="stepSize" min="0.005" max="0.05" step="0.001" value="0.015">
+        </div>
+        <div class="row">
+          <label>Confluence Threshold <span id="valConfluence">0.04</span></label>
+          <input type="range" id="confluence" min="0.01" max="0.15" step="0.005" value="0.04">
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Rendering</div>
+        <div class="row">
+          <label>Line Width <span id="valLineWidth">0.8</span></label>
+          <input type="range" id="lineWidth" min="0.2" max="3" step="0.1" value="0.8">
+        </div>
+        <div class="row">
+          <label>Path Opacity <span id="valPathOpacity">0.4</span></label>
+          <input type="range" id="pathOpacity" min="0.05" max="1" step="0.05" value="0.4">
+        </div>
+        <div class="row">
+          <label>Color Mode</label>
+          <select id="colorMode">
+            <option value="pathLength">Path Length</option>
+            <option value="startAngle">Start Angle</option>
+            <option value="confluenceDepth">Confluence Depth</option>
+            <option value="fieldStrength">Field Strength</option>
+            <option value="solid">Solid</option>
+          </select>
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="showPaths">Paths</button>
+          <button class="toggle-btn active" id="showPoints">Points</button>
+          <button class="toggle-btn" id="showField">Field</button>
+          <button class="toggle-btn active" id="showConfluence">Confluence</button>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Geometry Mode</div>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="modeHyperbolic">Hyperbolic</button>
+          <button class="toggle-btn" id="modeEuclidean">Euclidean</button>
+          <button class="toggle-btn" id="modeCompare">Compare</button>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <div class="section-title">Presets</div>
+        <select id="presets">
+          <option value="">â€” Select Preset â€”</option>
+          <option value="silkRiver">Silk River</option>
+          <option value="vortexDrain">Vortex Drain</option>
+          <option value="boundaryDance">Boundary Dance</option>
+          <option value="dualSpiral">Dual Spiral</option>
+          <option value="gentleFlow">Gentle Flow</option>
+          <option value="chaosField">Chaos Field</option>
+        </select>
+      </div>
+      
+      <button class="primary" id="render">Render</button>
+      <button id="animate">Animate Field</button>
+      <button id="export">Export PNG</button>
+      
+      <div class="divider"></div>
+      
+      <div class="stats" id="stats">
+        <strong>Points:</strong> 120<br>
+        <strong>Paths:</strong> â€”<br>
+        <strong>Confluences:</strong> â€”<br>
+        <strong>Render time:</strong> â€”
+      </div>
+      
+      <div class="hint">
+        <strong>Confluence:</strong> Points emit flow paths through the vector field. 
+        Where paths pass near each other, they create connections â€” revealing natural 
+        "watersheds" in curved space. Hyperbolic geometry warps these watersheds 
+        dramatically near the boundary.
+      </div>
+    </div>
+    
+    <div class="canvas-wrap">
+      <canvas id="canvas" width="750" height="750"></canvas>
+    </div>
+  </div>
+
+<script>
+// ============================================
+// PERLIN NOISE (simplified 2D)
+// ============================================
+
+class PerlinNoise {
+  constructor(seed = 0) {
+    this.perm = [];
+    for (let i = 0; i < 256; i++) this.perm[i] = i;
+    
+    // Shuffle with seed
+    let n = seed;
+    for (let i = 255; i > 0; i--) {
+      n = (n * 1103515245 + 12345) & 0x7fffffff;
+      const j = n % (i + 1);
+      [this.perm[i], this.perm[j]] = [this.perm[j], this.perm[i]];
+    }
+    
+    this.perm = [...this.perm, ...this.perm]; // Duplicate for overflow
+  }
+  
+  fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  lerp(a, b, t) { return a + t * (b - a); }
+  
+  grad(hash, x, y) {
+    const h = hash & 3;
+    const u = h < 2 ? x : y;
+    const v = h < 2 ? y : x;
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+  }
+  
+  noise(x, y) {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    
+    const u = this.fade(x);
+    const v = this.fade(y);
+    
+    const A = this.perm[X] + Y;
+    const B = this.perm[X + 1] + Y;
+    
+    return this.lerp(
+      this.lerp(this.grad(this.perm[A], x, y), this.grad(this.perm[B], x - 1, y), u),
+      this.lerp(this.grad(this.perm[A + 1], x, y - 1), this.grad(this.perm[B + 1], x - 1, y - 1), u),
+      v
+    );
+  }
+}
+
+const perlin = new PerlinNoise(42);
+let animationTime = 0;
+
+// ============================================
+// HYPERBOLIC GEOMETRY
+// ============================================
+
+function hyperbolicDistance(p1, p2) {
+  const dx = p2.x - p1.x;
+  const dy = p2.y - p1.y;
+  const eucDist = Math.sqrt(dx * dx + dy * dy);
+  
+  const r1sq = p1.x * p1.x + p1.y * p1.y;
+  const r2sq = p2.x * p2.x + p2.y * p2.y;
+  
+  const denom = (1 - r1sq) * (1 - r2sq);
+  if (denom <= 0) return Infinity;
+  
+  const coshDist = 1 + 2 * eucDist * eucDist / denom;
+  return Math.acosh(Math.max(1, coshDist));
+}
+
+// Move point p in direction (dx, dy) by hyperbolic step
+// Using approximate exponential map
+function hyperbolicStep(p, dx, dy, stepSize, useHyperbolic) {
+  if (!useHyperbolic) {
+    // Euclidean: just add
+    return {
+      x: p.x + dx * stepSize,
+      y: p.y + dy * stepSize
+    };
+  }
+  
+  // Hyperbolic: scale step by conformal factor
+  // The metric at point z is ds = 2|dz|/(1-|z|Â²)
+  // So a unit step in direction v becomes v * (1-|z|Â²)/2
+  const r2 = p.x * p.x + p.y * p.y;
+  const conformalFactor = (1 - r2) / 2;
+  
+  const newX = p.x + dx * stepSize * conformalFactor;
+  const newY = p.y + dy * stepSize * conformalFactor;
+  
+  // Clamp to disk
+  const newR2 = newX * newX + newY * newY;
+  if (newR2 >= 0.99) {
+    const scale = 0.99 / Math.sqrt(newR2);
+    return { x: newX * scale, y: newY * scale };
+  }
+  
+  return { x: newX, y: newY };
+}
+
+// ============================================
+// FLOW FIELD
+// ============================================
+
+function getFieldVector(x, y, fieldType, fieldScale, fieldStrength, fieldRotation, time = 0) {
+  const rotRad = fieldRotation * Math.PI / 180;
+  
+  // Rotate input coordinates
+  const rx = x * Math.cos(rotRad) - y * Math.sin(rotRad);
+  const ry = x * Math.sin(rotRad) + y * Math.cos(rotRad);
+  
+  let vx = 0, vy = 0;
+  
+  switch (fieldType) {
+    case 'perlin': {
+      const nx = perlin.noise(rx * fieldScale + time, ry * fieldScale) * 2;
+      const ny = perlin.noise(rx * fieldScale + 100, ry * fieldScale + time) * 2;
+      vx = nx;
+      vy = ny;
+      break;
+    }
+    
+    case 'radialSpiral': {
+      const r = Math.sqrt(rx * rx + ry * ry) + 0.001;
+      const theta = Math.atan2(ry, rx);
+      // Spiral outward with rotation
+      const spiralAngle = theta + r * fieldScale + time;
+      vx = Math.cos(spiralAngle);
+      vy = Math.sin(spiralAngle);
+      break;
+    }
+    
+    case 'hyperbolicVortex': {
+      const r = Math.sqrt(rx * rx + ry * ry) + 0.001;
+      // Vortex that intensifies near boundary
+      const intensity = 1 / (1 - r * r + 0.1);
+      const theta = Math.atan2(ry, rx);
+      const vortexAngle = theta + Math.PI / 2 + time;
+      vx = Math.cos(vortexAngle) * intensity * 0.3;
+      vy = Math.sin(vortexAngle) * intensity * 0.3;
+      break;
+    }
+    
+    case 'boundaryAttract': {
+      const r = Math.sqrt(rx * rx + ry * ry) + 0.001;
+      // Pull toward boundary with swirl
+      const theta = Math.atan2(ry, rx);
+      const pullStrength = r * fieldScale;
+      const swirlAngle = theta + pullStrength + time;
+      vx = rx / r * 0.5 + Math.cos(swirlAngle) * 0.5;
+      vy = ry / r * 0.5 + Math.sin(swirlAngle) * 0.5;
+      break;
+    }
+    
+    case 'centerRepel': {
+      const r = Math.sqrt(rx * rx + ry * ry) + 0.001;
+      const theta = Math.atan2(ry, rx);
+      // Push from center with spiral
+      const repelAngle = theta + (1 - r) * fieldScale * 2 + time;
+      vx = Math.cos(repelAngle);
+      vy = Math.sin(repelAngle);
+      break;
+    }
+    
+    case 'dual': {
+      // Two vortex centers
+      const c1 = { x: -0.3, y: 0 };
+      const c2 = { x: 0.3, y: 0 };
+      
+      const d1 = Math.sqrt((rx - c1.x) ** 2 + (ry - c1.y) ** 2) + 0.1;
+      const d2 = Math.sqrt((rx - c2.x) ** 2 + (ry - c2.y) ** 2) + 0.1;
+      
+      const a1 = Math.atan2(ry - c1.y, rx - c1.x) + Math.PI / 2;
+      const a2 = Math.atan2(ry - c2.y, rx - c2.x) - Math.PI / 2;
+      
+      const s1 = 1 / d1;
+      const s2 = 1 / d2;
+      
+      vx = Math.cos(a1 + time) * s1 + Math.cos(a2 - time) * s2;
+      vy = Math.sin(a1 + time) * s1 + Math.sin(a2 - time) * s2;
+      break;
+    }
+  }
+  
+  // Normalize and apply strength
+  const mag = Math.sqrt(vx * vx + vy * vy) + 0.001;
+  return {
+    x: (vx / mag) * fieldStrength,
+    y: (vy / mag) * fieldStrength
+  };
+}
+
+// ============================================
+// POINT GENERATION
+// ============================================
+
+function generatePhyllotaxis(N, angleDeg, spread) {
+  const points = [];
+  const angle = angleDeg * Math.PI / 180;
+  
+  for (let i = 1; i <= N; i++) {
+    const euclideanR = Math.sqrt(i / N);
+    const r = spread * Math.tanh(euclideanR * 2);
+    const theta = i * angle;
+    
+    points.push({
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      theta: theta
+    });
+  }
+  
+  return points;
+}
+
+// ============================================
+// PATH TRACING
+// ============================================
+
+function tracePath(startPoint, fieldType, fieldScale, fieldStrength, fieldRotation, 
+                   pathSteps, stepSize, useHyperbolic, time = 0) {
+  const path = [{ ...startPoint }];
+  let current = { ...startPoint };
+  
+  for (let i = 0; i < pathSteps; i++) {
+    const field = getFieldVector(current.x, current.y, fieldType, fieldScale, 
+                                  fieldStrength, fieldRotation, time);
+    
+    current = hyperbolicStep(current, field.x, field.y, stepSize, useHyperbolic);
+    
+    // Stop if we hit the boundary
+    const r2 = current.x * current.x + current.y * current.y;
+    if (r2 >= 0.98) break;
+    
+    path.push({ ...current });
+  }
+  
+  return path;
+}
+
+// ============================================
+// CONFLUENCE DETECTION
+// ============================================
+
+function findConfluences(paths, threshold) {
+  const confluences = [];
+  
+  // For each pair of paths, find where they pass close to each other
+  for (let i = 0; i < paths.length; i++) {
+    for (let j = i + 1; j < paths.length; j++) {
+      const pathA = paths[i];
+      const pathB = paths[j];
+      
+      // Sample paths and find closest approach
+      for (let ai = 0; ai < pathA.length; ai += 3) {
+        for (let bi = 0; bi < pathB.length; bi += 3) {
+          const dx = pathA[ai].x - pathB[bi].x;
+          const dy = pathA[ai].y - pathB[bi].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < threshold) {
+            confluences.push({
+              pathA: i,
+              pathB: j,
+              pointA: pathA[ai],
+              pointB: pathB[bi],
+              stepA: ai,
+              stepB: bi,
+              distance: dist
+            });
+            // Only record first confluence per pair
+            ai = pathA.length;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  return confluences;
+}
+
+// ============================================
+// RENDERING
+// ============================================
+
+function hslToRgb(h, s, l) {
+  h /= 360;
+  let r, g, b;
+  if (s === 0) {
+    r = g = b = l;
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+  return `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
+}
+
+function render(time = 0) {
+  const startTime = performance.now();
+  
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const scale = width * 0.45;
+  
+  // Get parameters
+  const N = parseInt(document.getElementById('N').value);
+  const angle = parseFloat(document.getElementById('angle').value);
+  const spread = parseFloat(document.getElementById('spread').value);
+  const fieldType = document.getElementById('fieldType').value;
+  const fieldScale = parseFloat(document.getElementById('fieldScale').value);
+  const fieldStrength = parseFloat(document.getElementById('fieldStrength').value);
+  const fieldRotation = parseFloat(document.getElementById('fieldRotation').value);
+  const pathSteps = parseInt(document.getElementById('pathSteps').value);
+  const stepSize = parseFloat(document.getElementById('stepSize').value);
+  const confluenceThreshold = parseFloat(document.getElementById('confluence').value);
+  const lineWidth = parseFloat(document.getElementById('lineWidth').value);
+  const pathOpacity = parseFloat(document.getElementById('pathOpacity').value);
+  const colorMode = document.getElementById('colorMode').value;
+  
+  const showPaths = document.getElementById('showPaths').classList.contains('active');
+  const showPoints = document.getElementById('showPoints').classList.contains('active');
+  const showField = document.getElementById('showField').classList.contains('active');
+  const showConfluence = document.getElementById('showConfluence').classList.contains('active');
+  
+  const isHyperbolic = document.getElementById('modeHyperbolic').classList.contains('active');
+  const isEuclidean = document.getElementById('modeEuclidean').classList.contains('active');
+  const isCompare = document.getElementById('modeCompare').classList.contains('active');
+  
+  // Clear
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, width, height);
+  
+  if (isCompare) {
+    const halfWidth = Math.floor(width / 2) - 5;
+    const stats1 = renderFlowField(ctx, 0, 0, halfWidth, height, true, time);
+    const stats2 = renderFlowField(ctx, halfWidth + 10, 0, halfWidth, height, false, time);
+    
+    ctx.fillStyle = '#666';
+    ctx.font = '12px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('Hyperbolic', halfWidth / 2, height - 10);
+    ctx.fillText('Euclidean', halfWidth + 10 + halfWidth / 2, height - 10);
+    
+    updateStats(stats1.paths, stats1.confluences, performance.now() - startTime);
+  } else {
+    const stats = renderFlowField(ctx, 0, 0, width, height, isHyperbolic, time);
+    updateStats(stats.paths, stats.confluences, performance.now() - startTime);
+  }
+  
+  function renderFlowField(ctx, offsetX, offsetY, w, h, useHyperbolic, time) {
+    const cx = offsetX + w / 2;
+    const cy = offsetY + h / 2;
+    const sc = Math.min(w, h) * 0.45;
+    
+    // Draw disk boundary
+    ctx.beginPath();
+    ctx.arc(cx, cy, sc, 0, Math.PI * 2);
+    ctx.strokeStyle = '#2a2a3a';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(10, 10, 18, 0.5)';
+    ctx.fill();
+    
+    // Draw field vectors
+    if (showField) {
+      const gridSize = 20;
+      ctx.strokeStyle = 'rgba(100, 100, 150, 0.3)';
+      ctx.lineWidth = 1;
+      
+      for (let gx = -1; gx <= 1; gx += 2/gridSize) {
+        for (let gy = -1; gy <= 1; gy += 2/gridSize) {
+          if (gx*gx + gy*gy > 0.95) continue;
+          
+          const field = getFieldVector(gx, gy, fieldType, fieldScale, fieldStrength, fieldRotation, time);
+          const mag = 0.03;
+          
+          ctx.beginPath();
+          ctx.moveTo(cx + gx * sc, cy + gy * sc);
+          ctx.lineTo(cx + (gx + field.x * mag) * sc, cy + (gy + field.y * mag) * sc);
+          ctx.stroke();
+        }
+      }
+    }
+    
+    // Generate points
+    const points = generatePhyllotaxis(N, angle, spread);
+    
+    // Trace paths
+    const paths = points.map(p => 
+      tracePath(p, fieldType, fieldScale, fieldStrength, fieldRotation, 
+                pathSteps, stepSize, useHyperbolic, time)
+    );
+    
+    // Find confluences
+    const confluences = findConfluences(paths, confluenceThreshold);
+    
+    // Find max path length for coloring
+    const maxPathLen = Math.max(...paths.map(p => p.length));
+    
+    // Draw paths
+    if (showPaths) {
+      ctx.lineWidth = lineWidth;
+      ctx.lineCap = 'round';
+      ctx.globalAlpha = pathOpacity;
+      
+      paths.forEach((path, i) => {
+        if (path.length < 2) return;
+        
+        let color;
+        switch (colorMode) {
+          case 'pathLength':
+            const lenHue = (path.length / maxPathLen) * 240;
+            color = hslToRgb(240 - lenHue, 0.7, 0.5);
+            break;
+          case 'startAngle':
+            const angleHue = ((points[i].theta % (Math.PI * 2)) / (Math.PI * 2)) * 360;
+            color = hslToRgb(angleHue, 0.7, 0.5);
+            break;
+          case 'confluenceDepth':
+            const hasConfluence = confluences.some(c => c.pathA === i || c.pathB === i);
+            color = hasConfluence ? hslToRgb(120, 0.8, 0.5) : hslToRgb(0, 0.3, 0.4);
+            break;
+          case 'fieldStrength':
+            const startField = getFieldVector(points[i].x, points[i].y, fieldType, fieldScale, fieldStrength, fieldRotation, time);
+            const fMag = Math.sqrt(startField.x * startField.x + startField.y * startField.y);
+            color = hslToRgb(fMag * 120, 0.8, 0.5);
+            break;
+          default:
+            color = '#6a8';
+        }
+        
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(cx + path[0].x * sc, cy + path[0].y * sc);
+        
+        for (let j = 1; j < path.length; j++) {
+          ctx.lineTo(cx + path[j].x * sc, cy + path[j].y * sc);
+        }
+        ctx.stroke();
+      });
+      
+      ctx.globalAlpha = 1;
+    }
+    
+    // Draw confluence connections
+    if (showConfluence) {
+      ctx.strokeStyle = 'rgba(255, 200, 100, 0.6)';
+      ctx.lineWidth = lineWidth * 1.5;
+      
+      confluences.forEach(conf => {
+        ctx.beginPath();
+        ctx.moveTo(cx + conf.pointA.x * sc, cy + conf.pointA.y * sc);
+        ctx.lineTo(cx + conf.pointB.x * sc, cy + conf.pointB.y * sc);
+        ctx.stroke();
+      });
+    }
+    
+    // Draw points
+    if (showPoints) {
+      ctx.fillStyle = '#fff';
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(cx + p.x * sc, cy + p.y * sc, 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+    
+    return { paths, confluences };
+  }
+}
+
+function updateStats(paths, confluences, renderTime) {
+  const N = parseInt(document.getElementById('N').value);
+  document.getElementById('stats').innerHTML = `
+    <strong>Points:</strong> ${N}<br>
+    <strong>Paths:</strong> ${paths.length}<br>
+    <strong>Confluences:</strong> ${confluences.length}<br>
+    <strong>Render time:</strong> ${renderTime.toFixed(0)}ms
+  `;
+}
+
+// ============================================
+// ANIMATION
+// ============================================
+
+let animationId = null;
+
+function animate() {
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+    document.getElementById('animate').textContent = 'Animate Field';
+    return;
+  }
+  
+  document.getElementById('animate').textContent = 'Stop';
+  
+  function step() {
+    animationTime += 0.03;
+    render(animationTime);
+    animationId = requestAnimationFrame(step);
+  }
+  
+  step();
+}
+
+// ============================================
+// UI SETUP
+// ============================================
+
+function setupUI() {
+  const updateValues = () => {
+    document.getElementById('valN').textContent = document.getElementById('N').value;
+    document.getElementById('valAngle').textContent = parseFloat(document.getElementById('angle').value).toFixed(1) + 'Â°';
+    document.getElementById('valSpread').textContent = parseFloat(document.getElementById('spread').value).toFixed(2);
+    document.getElementById('valFieldScale').textContent = parseFloat(document.getElementById('fieldScale').value).toFixed(1);
+    document.getElementById('valFieldStrength').textContent = parseFloat(document.getElementById('fieldStrength').value).toFixed(1);
+    document.getElementById('valFieldRotation').textContent = document.getElementById('fieldRotation').value + 'Â°';
+    document.getElementById('valPathSteps').textContent = document.getElementById('pathSteps').value;
+    document.getElementById('valStepSize').textContent = parseFloat(document.getElementById('stepSize').value).toFixed(3);
+    document.getElementById('valConfluence').textContent = parseFloat(document.getElementById('confluence').value).toFixed(2);
+    document.getElementById('valLineWidth').textContent = parseFloat(document.getElementById('lineWidth').value).toFixed(1);
+    document.getElementById('valPathOpacity').textContent = parseFloat(document.getElementById('pathOpacity').value).toFixed(2);
+  };
+  
+  // All parameter inputs
+  const params = ['N', 'angle', 'spread', 'fieldScale', 'fieldStrength', 'fieldRotation',
+                  'pathSteps', 'stepSize', 'confluence', 'lineWidth', 'pathOpacity'];
+  
+  params.forEach(id => {
+    document.getElementById(id).addEventListener('input', () => {
+      updateValues();
+      render(animationTime);
+    });
+  });
+  
+  ['fieldType', 'colorMode'].forEach(id => {
+    document.getElementById(id).addEventListener('change', () => render(animationTime));
+  });
+  
+  // Toggle buttons
+  ['showPaths', 'showPoints', 'showField', 'showConfluence'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      e.target.classList.toggle('active');
+      render(animationTime);
+    });
+  });
+  
+  // Mode buttons
+  ['modeHyperbolic', 'modeEuclidean', 'modeCompare'].forEach(id => {
+    document.getElementById(id).addEventListener('click', (e) => {
+      ['modeHyperbolic', 'modeEuclidean', 'modeCompare'].forEach(m => {
+        document.getElementById(m).classList.remove('active');
+      });
+      e.target.classList.add('active');
+      render(animationTime);
+    });
+  });
+  
+  // Presets
+  document.getElementById('presets').addEventListener('change', (e) => {
+    const presets = {
+      silkRiver: { 
+        fieldType: 'perlin', fieldScale: 4, fieldStrength: 1.2, fieldRotation: 0,
+        pathSteps: 80, stepSize: 0.012, confluence: 0.035, pathOpacity: 0.3
+      },
+      vortexDrain: {
+        fieldType: 'hyperbolicVortex', fieldScale: 2, fieldStrength: 1.5, fieldRotation: 0,
+        pathSteps: 100, stepSize: 0.01, confluence: 0.04, pathOpacity: 0.4
+      },
+      boundaryDance: {
+        fieldType: 'boundaryAttract', fieldScale: 3, fieldStrength: 1, fieldRotation: 45,
+        pathSteps: 70, stepSize: 0.015, confluence: 0.05, pathOpacity: 0.35
+      },
+      dualSpiral: {
+        fieldType: 'dual', fieldScale: 1, fieldStrength: 1.3, fieldRotation: 0,
+        pathSteps: 90, stepSize: 0.012, confluence: 0.04, pathOpacity: 0.4
+      },
+      gentleFlow: {
+        fieldType: 'radialSpiral', fieldScale: 2, fieldStrength: 0.8, fieldRotation: 0,
+        pathSteps: 50, stepSize: 0.02, confluence: 0.06, pathOpacity: 0.5
+      },
+      chaosField: {
+        fieldType: 'perlin', fieldScale: 8, fieldStrength: 2, fieldRotation: 0,
+        pathSteps: 40, stepSize: 0.02, confluence: 0.03, pathOpacity: 0.25
+      }
+    };
+    
+    const preset = presets[e.target.value];
+    if (preset) {
+      document.getElementById('fieldType').value = preset.fieldType;
+      document.getElementById('fieldScale').value = preset.fieldScale;
+      document.getElementById('fieldStrength').value = preset.fieldStrength;
+      document.getElementById('fieldRotation').value = preset.fieldRotation;
+      document.getElementById('pathSteps').value = preset.pathSteps;
+      document.getElementById('stepSize').value = preset.stepSize;
+      document.getElementById('confluence').value = preset.confluence;
+      document.getElementById('pathOpacity').value = preset.pathOpacity;
+      updateValues();
+      render(animationTime);
+    }
+    e.target.value = '';
+  });
+  
+  document.getElementById('render').addEventListener('click', () => render(animationTime));
+  document.getElementById('animate').addEventListener('click', animate);
+  
+  document.getElementById('export').addEventListener('click', () => {
+    const canvas = document.getElementById('canvas');
+    const link = document.createElement('a');
+    link.download = `hyperbolic-flow-field-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+  
+  updateValues();
+}
+
+// Initialize
+setupUI();
+render(0);
+</script>
+</body>
+</html>

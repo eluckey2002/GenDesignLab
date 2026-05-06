@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Phyllotaxis Proximity Web â€” Golden Angle Networks</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#080810; color:#e0e0e0; }
+    .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
+    .panel { background:#0d0d14; border-right:1px solid #2a2a3a; padding:16px; overflow:auto; }
+    h2 { margin:0 0 10px; font-size:16px; color:#fff; }
+    .row { margin:10px 0; }
+    label { display:flex; justify-content:space-between; gap:12px; font-size:12px; color:#aaa; }
+    input[type="range"]{ width:100%; background:#2a2a3a; }
+    select, button {
+      width:100%; padding:10px; border-radius:10px; border:1px solid #3a3a4a; background:#1a1a24;
+      font-size:13px; cursor:pointer; color:#e0e0e0;
+    }
+    button:hover { background:#2a2a3a; }
+    .hint { font-size:12px; color:#777; line-height:1.45; margin-top:12px; }
+    .canvasWrap { display:flex; align-items:center; justify-content:center; padding:16px; background:#080810; }
+    canvas { background:#080810; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+    .pill { display:inline-block; padding:4px 8px; border-radius:999px; background:#2a2a3a; font-size:11px; color:#8fa; }
+    .divider { height:1px; background:#2a2a3a; margin:14px 0; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .stats { background:#1a1a24; border-radius:8px; padding:10px; margin-top:10px; font-size:11px; color:#888; }
+    .stats span { color:#8fa; }
+    .warning { color:#fa8; font-size:11px; margin-top:6px; }
+  </style>
+</head>
+<body>
+<!--
+catalogue:
+  world: PhyllotaxisProximityWeb
+  generator.object: pointset
+  generator.family: phyllotaxis
+  generator.concept: golden_angle
+  nailbed.source: generator
+  nailbed.shape: pointset
+  pairing.rule: proximity
+  edge.model: euclidean
+  edge.path: intrinsic
+  novelty: novel
+  risk: high
+-->
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Phyllotaxis Proximity Web <span class="pill">golden angle + proximity</span></h2>
+
+    <div class="row">
+      <label>Preset <span id="presetName" class="pill">â€”</span></label>
+      <select id="preset"></select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Points N <span id="NOut">500</span></label>
+      <input id="N" type="range" min="50" max="2000" step="10" value="500">
+    </div>
+
+    <div class="row">
+      <label>Divergence Angle <span id="angleOut">137.5Â°</span></label>
+      <input id="angle" type="range" min="90" max="180" step="0.1" value="137.5">
+    </div>
+    
+    <div class="hint">Golden angle â‰ˆ 137.5077Â°. Try nearby values to see structure collapse.</div>
+
+    <div class="row">
+      <label>Radial Scaling <span id="scaleOut">1.00</span></label>
+      <input id="scale" type="range" min="0.5" max="2.0" step="0.05" value="1.00">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Connection Rule <span class="pill">how points link</span></label>
+      <select id="rule">
+        <option value="proximity">Proximity (distance threshold)</option>
+        <option value="knn">K-Nearest Neighbors</option>
+        <option value="delaunay">Delaunay Triangulation</option>
+        <option value="gabriel">Gabriel Graph</option>
+      </select>
+    </div>
+
+    <div class="row" id="thresholdRow">
+      <label>Distance Threshold <span id="thresholdOut">0.08</span></label>
+      <input id="threshold" type="range" min="0.02" max="0.25" step="0.005" value="0.08">
+    </div>
+
+    <div class="row" id="knnRow" style="display:none;">
+      <label>K Neighbors <span id="knnOut">5</span></label>
+      <input id="knn" type="range" min="1" max="12" step="1" value="5">
+    </div>
+
+    <div class="row">
+      <label>Max Connections/Point <span id="maxConnOut">âˆž</span></label>
+      <input id="maxConn" type="range" min="1" max="20" step="1" value="20">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Color Mode</label>
+      <select id="colorMode">
+        <option value="length">By connection length</option>
+        <option value="angle">By connection angle</option>
+        <option value="radial">By radial position</option>
+        <option value="spiral">By spiral arm</option>
+        <option value="solid">Solid</option>
+      </select>
+    </div>
+
+    <div class="grid2">
+      <div class="row">
+        <label>Line Width <span id="lwOut">0.5</span></label>
+        <input id="lw" type="range" min="0.1" max="2.0" step="0.1" value="0.5">
+      </div>
+      <div class="row">
+        <label>Alpha <span id="alphaOut">0.25</span></label>
+        <input id="alpha" type="range" min="0.03" max="0.6" step="0.01" value="0.25">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="row">
+        <label>Show Points</label>
+        <select id="showPoints">
+          <option value="none">None</option>
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Point Alpha <span id="ptAlphaOut">0.5</span></label>
+        <input id="ptAlpha" type="range" min="0.1" max="1.0" step="0.1" value="0.5">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="grid2">
+      <button id="render">Render</button>
+      <button id="exportPng">Export PNG</button>
+    </div>
+
+    <div class="stats" id="stats">
+      Points: <span>â€”</span> | Connections: <span>â€”</span> | Avg degree: <span>â€”</span>
+    </div>
+
+    <div class="hint" style="margin-top:16px;">
+      <b>The Prediction:</b> At certain threshold values, the golden angle's irrational relationship 
+      should reveal <b>Fibonacci spirals</b> â€” 13, 21, 34 arms emerging from purely local connectivity rules.
+      <br><br>
+      <b>Risk:</b> This is a fundamentally different generator (points, not curves) and pairing rule 
+      (proximity, not index). If it produces structure, the framework generalizes far beyond curves.
+    </div>
+  </div>
+
+  <div class="canvasWrap">
+    <canvas id="c" width="900" height="900"></canvas>
+  </div>
+</div>
+
+<script>
+/** ---------- Phyllotaxis Generation ---------- **/
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+const GOLDEN_ANGLE = 360 / (PHI * PHI); // â‰ˆ 137.5077Â°
+
+function generatePhyllotaxis(N, angleDeg, scale) {
+  const angleRad = angleDeg * Math.PI / 180;
+  const pts = new Array(N);
+  
+  for (let i = 0; i < N; i++) {
+    // Vogel's model: r = c * sqrt(n), Î¸ = n * angle
+    const r = scale * Math.sqrt(i) / Math.sqrt(N); // Normalize to ~[0,1]
+    const theta = i * angleRad;
+    
+    pts[i] = {
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      r: r,
+      theta: theta
+    };
+  }
+  
+  return pts;
+}
+
+/** ---------- Connection Algorithms ---------- **/
+
+function proximityConnections(pts, threshold, maxConn) {
+  const edges = [];
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    const candidates = [];
+    
+    for (let j = i + 1; j < pts.length; j++) {
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist < threshold) {
+        candidates.push({ j, dist });
+      }
+    }
+    
+    // Sort by distance, take up to maxConn
+    candidates.sort((a, b) => a.dist - b.dist);
+    
+    for (const c of candidates) {
+      if (degree[i] >= maxConn || degree[c.j] >= maxConn) continue;
+      edges.push({ i, j: c.j, dist: c.dist });
+      degree[i]++;
+      degree[c.j]++;
+    }
+  }
+  
+  return edges;
+}
+
+function knnConnections(pts, k, maxConn) {
+  const edges = [];
+  const edgeSet = new Set();
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    const distances = [];
+    
+    for (let j = 0; j < pts.length; j++) {
+      if (i === j) continue;
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      distances.push({ j, dist });
+    }
+    
+    distances.sort((a, b) => a.dist - b.dist);
+    
+    for (let n = 0; n < Math.min(k, distances.length); n++) {
+      const j = distances[n].j;
+      const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+      
+      if (!edgeSet.has(key) && degree[i] < maxConn && degree[j] < maxConn) {
+        edgeSet.add(key);
+        edges.push({ i, j, dist: distances[n].dist });
+        degree[i]++;
+        degree[j]++;
+      }
+    }
+  }
+  
+  return edges;
+}
+
+function delaunayConnections(pts, maxConn) {
+  // Simple Bowyer-Watson would be complex; use a approximation via proximity with adaptive threshold
+  // Find average nearest-neighbor distance and use 2x that
+  let totalDist = 0;
+  for (let i = 0; i < Math.min(100, pts.length); i++) {
+    let minDist = Infinity;
+    for (let j = 0; j < pts.length; j++) {
+      if (i === j) continue;
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < minDist) minDist = dist;
+    }
+    totalDist += minDist;
+  }
+  const avgNN = totalDist / Math.min(100, pts.length);
+  
+  // Use ~2.5x average nearest neighbor for Delaunay-like connectivity
+  return proximityConnections(pts, avgNN * 2.5, maxConn);
+}
+
+function gabrielConnections(pts, maxConn) {
+  // Gabriel graph: edge (i,j) exists if no other point lies inside the circle
+  // with diameter from i to j
+  const edges = [];
+  const degree = new Array(pts.length).fill(0);
+  
+  for (let i = 0; i < pts.length; i++) {
+    for (let j = i + 1; j < pts.length; j++) {
+      if (degree[i] >= maxConn || degree[j] >= maxConn) continue;
+      
+      const mx = (pts[i].x + pts[j].x) / 2;
+      const my = (pts[i].y + pts[j].y) / 2;
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      const r2 = (dx * dx + dy * dy) / 4; // radius squared
+      
+      let empty = true;
+      for (let k = 0; k < pts.length; k++) {
+        if (k === i || k === j) continue;
+        const dkx = pts[k].x - mx;
+        const dky = pts[k].y - my;
+        if (dkx * dkx + dky * dky < r2 - 1e-10) {
+          empty = false;
+          break;
+        }
+      }
+      
+      if (empty) {
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        edges.push({ i, j, dist });
+        degree[i]++;
+        degree[j]++;
+      }
+    }
+  }
+  
+  return edges;
+}
+
+/** ---------- Rendering ---------- **/
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+function gatherParams() {
+  return {
+    N: +$('N').value,
+    angle: +$('angle').value,
+    scale: +$('scale').value,
+    rule: $('rule').value,
+    threshold: +$('threshold').value,
+    knn: +$('knn').value,
+    maxConn: +$('maxConn').value,
+    colorMode: $('colorMode').value,
+    lw: +$('lw').value,
+    alpha: +$('alpha').value,
+    showPoints: $('showPoints').value,
+    ptAlpha: +$('ptAlpha').value
+  };
+}
+
+function hsl(h, s, l) {
+  return `hsl(${h} ${s}% ${l}%)`;
+}
+
+function render(params) {
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.42;
+  
+  // Clear
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Generate points
+  const pts = generatePhyllotaxis(params.N, params.angle, params.scale);
+  
+  // Generate connections based on rule
+  let edges;
+  switch (params.rule) {
+    case 'knn':
+      edges = knnConnections(pts, params.knn, params.maxConn);
+      break;
+    case 'delaunay':
+      edges = delaunayConnections(pts, params.maxConn);
+      break;
+    case 'gabriel':
+      edges = gabrielConnections(pts, params.maxConn);
+      break;
+    default:
+      edges = proximityConnections(pts, params.threshold, params.maxConn);
+  }
+  
+  // Compute stats
+  const avgDegree = edges.length * 2 / params.N;
+  $('stats').innerHTML = `Points: <span>${params.N}</span> | Connections: <span>${edges.length}</span> | Avg degree: <span>${avgDegree.toFixed(1)}</span>`;
+  
+  // Find min/max for normalization
+  let minDist = Infinity, maxDist = 0;
+  for (const e of edges) {
+    if (e.dist < minDist) minDist = e.dist;
+    if (e.dist > maxDist) maxDist = e.dist;
+  }
+  if (maxDist - minDist < 0.001) maxDist = minDist + 0.1;
+  
+  // Draw edges
+  ctx.lineWidth = params.lw;
+  ctx.lineCap = 'round';
+  ctx.globalAlpha = params.alpha;
+  
+  for (const e of edges) {
+    const p1 = pts[e.i];
+    const p2 = pts[e.j];
+    
+    const x1 = cx + p1.x * radius;
+    const y1 = cy + p1.y * radius;
+    const x2 = cx + p2.x * radius;
+    const y2 = cy + p2.y * radius;
+    
+    // Color based on mode
+    let hue = 0;
+    switch (params.colorMode) {
+      case 'length':
+        const u = (e.dist - minDist) / (maxDist - minDist);
+        hue = (1 - u) * 120 + u * 280; // Green â†’ Purple
+        break;
+      case 'angle':
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        hue = ((angle + Math.PI) / (2 * Math.PI)) * 360;
+        break;
+      case 'radial':
+        const avgR = (p1.r + p2.r) / 2;
+        hue = avgR * 280 + 60; // Yellow (center) â†’ Magenta (edge)
+        break;
+      case 'spiral':
+        // Estimate which Fibonacci spiral arm based on index modulo
+        const armIndex = (p1.index + p2.index) % 34; // Fibonacci number
+        hue = (armIndex / 34) * 360;
+        break;
+      default:
+        hue = 160; // Cyan-ish
+    }
+    
+    ctx.strokeStyle = params.colorMode === 'solid' ? '#4a9' : hsl(hue, 70, 55);
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+  
+  // Draw points if requested
+  if (params.showPoints !== 'none') {
+    const ptSize = params.showPoints === 'small' ? 1.5 : 3;
+    ctx.globalAlpha = params.ptAlpha;
+    
+    for (const p of pts) {
+      const x = cx + p.x * radius;
+      const y = cy + p.y * radius;
+      
+      // Color by radial position
+      const hue = p.r * 280 + 60;
+      ctx.fillStyle = hsl(hue, 60, 65);
+      ctx.beginPath();
+      ctx.arc(x, y, ptSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  ctx.globalAlpha = 1;
+}
+
+/** ---------- UI Updates ---------- **/
+
+function updateOutputs() {
+  const p = gatherParams();
+  
+  $('NOut').textContent = p.N;
+  $('angleOut').textContent = p.angle.toFixed(1) + 'Â°';
+  $('scaleOut').textContent = p.scale.toFixed(2);
+  $('thresholdOut').textContent = p.threshold.toFixed(3);
+  $('knnOut').textContent = p.knn;
+  $('maxConnOut').textContent = p.maxConn >= 20 ? 'âˆž' : p.maxConn;
+  $('lwOut').textContent = p.lw.toFixed(1);
+  $('alphaOut').textContent = p.alpha.toFixed(2);
+  $('ptAlphaOut').textContent = p.ptAlpha.toFixed(1);
+  
+  // Show/hide threshold vs knn
+  $('thresholdRow').style.display = p.rule === 'proximity' ? 'block' : 'none';
+  $('knnRow').style.display = p.rule === 'knn' ? 'block' : 'none';
+}
+
+// Event listeners
+['N', 'angle', 'scale', 'threshold', 'knn', 'maxConn', 'lw', 'alpha', 'ptAlpha'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    updateOutputs();
+    render(gatherParams());
+  });
+});
+
+['rule', 'colorMode', 'showPoints'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    updateOutputs();
+    render(gatherParams());
+  });
+});
+
+$('render').addEventListener('click', () => render(gatherParams()));
+
+$('exportPng').addEventListener('click', () => {
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `phyllotaxis-web-${Date.now()}.png`;
+  a.click();
+});
+
+/** ---------- Presets ---------- **/
+
+const presets = [
+  {
+    name: "Golden Web (classic)",
+    params: { N:500, angle:137.5, scale:1.0, rule:'proximity', threshold:0.08, knn:5, maxConn:20,
+              colorMode:'length', lw:0.5, alpha:0.25, showPoints:'none', ptAlpha:0.5 }
+  },
+  {
+    name: "Fibonacci Spirals (tight)",
+    params: { N:800, angle:137.5077, scale:1.0, rule:'proximity', threshold:0.055, knn:5, maxConn:6,
+              colorMode:'spiral', lw:0.6, alpha:0.35, showPoints:'small', ptAlpha:0.3 }
+  },
+  {
+    name: "K-Nearest (k=3)",
+    params: { N:600, angle:137.5, scale:1.0, rule:'knn', threshold:0.08, knn:3, maxConn:20,
+              colorMode:'angle', lw:0.5, alpha:0.30, showPoints:'none', ptAlpha:0.5 }
+  },
+  {
+    name: "Gabriel Graph",
+    params: { N:300, angle:137.5, scale:1.0, rule:'gabriel', threshold:0.08, knn:5, maxConn:20,
+              colorMode:'radial', lw:0.7, alpha:0.40, showPoints:'small', ptAlpha:0.4 }
+  },
+  {
+    name: "Dense Mesh",
+    params: { N:1000, angle:137.5, scale:1.0, rule:'proximity', threshold:0.06, knn:5, maxConn:20,
+              colorMode:'length', lw:0.3, alpha:0.12, showPoints:'none', ptAlpha:0.5 }
+  },
+  {
+    name: "Broken Symmetry (138Â°)",
+    params: { N:500, angle:138.0, scale:1.0, rule:'proximity', threshold:0.08, knn:5, maxConn:20,
+              colorMode:'angle', lw:0.5, alpha:0.25, showPoints:'small', ptAlpha:0.5 }
+  },
+  {
+    name: "Rational Collapse (120Â°)",
+    params: { N:500, angle:120.0, scale:1.0, rule:'proximity', threshold:0.08, knn:5, maxConn:20,
+              colorMode:'radial', lw:0.6, alpha:0.30, showPoints:'small', ptAlpha:0.5 }
+  }
+];
+
+const presetSel = $('preset');
+presets.forEach((preset, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = preset.name;
+  presetSel.appendChild(opt);
+});
+
+presetSel.addEventListener('change', () => {
+  const idx = +presetSel.value;
+  const p = presets[idx].params;
+  
+  $('presetName').textContent = presets[idx].name;
+  
+  $('N').value = p.N;
+  $('angle').value = p.angle;
+  $('scale').value = p.scale;
+  $('rule').value = p.rule;
+  $('threshold').value = p.threshold;
+  $('knn').value = p.knn;
+  $('maxConn').value = p.maxConn;
+  $('colorMode').value = p.colorMode;
+  $('lw').value = p.lw;
+  $('alpha').value = p.alpha;
+  $('showPoints').value = p.showPoints;
+  $('ptAlpha').value = p.ptAlpha;
+  
+  updateOutputs();
+  render(gatherParams());
+});
+
+// Initialize
+presetSel.value = '0';
+$('presetName').textContent = presets[0].name;
+updateOutputs();
+render(gatherParams());
+</script>
+</body>
+</html>

@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plumb — Information Viz Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --graphite: #0f1413;
+  --stone: #151a19;
+  --slate: #1d2221;
+  --mist: #252b2a;
+  --hairline: #2f3534;
+  --paper: #f5f1ed;
+  --bone: #c4beb7;
+  --ash: #8a8580;
+  --bronze: #d4a574;
+  --bronze-light: #e8c89a;
+  --bronze-dark: #b08856;
+  --oxblood: #8b3a4a;
+  --sage: #5dbb6a;
+  --clay: #e35d5d;
+  --slate-blue: #5a9bb5;
+  --amber: #e8a82e;
+  --plum: #a374d4;
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--graphite);
+  color: var(--bone);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Layout */
+.layout { display: grid; grid-template-columns: 220px 1fr; max-width: 1400px; margin: 0 auto; padding: 0 48px; }
+main { max-width: 1080px; padding: 80px 0 200px; }
+
+/* TOC */
+.toc { position: sticky; top: 80px; align-self: start; padding: 80px 32px 0 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.toc-mark { font-family: var(--display); font-weight: 600; font-size: 24px; letter-spacing: -0.02em; color: var(--paper); text-transform: none; margin-bottom: 8px; display: block; text-decoration: none; }
+.toc-mark::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--bronze); transform: rotate(45deg); margin-left: 7px; position: relative; bottom: 1px; }
+.toc-sub { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-bottom: 48px; display: block; }
+.toc-list { list-style: none; }
+.toc-list li { margin-bottom: 14px; display: flex; gap: 10px; align-items: baseline; }
+.toc-num { color: var(--bronze); min-width: 18px; }
+.toc-link { color: var(--ash); text-decoration: none; transition: color 0.2s ease; }
+.toc-link:hover { color: var(--bone); }
+.toc-link.active { color: var(--paper); }
+
+/* Sections */
+section { padding: 100px 0; border-top: 1px solid var(--hairline); }
+section:first-of-type { border-top: none; padding-top: 0; }
+.section-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze); margin-bottom: 24px; display: block; }
+.section-h { font-family: var(--display); font-weight: 500; font-size: 44px; line-height: 1.1; letter-spacing: -0.02em; color: var(--paper); margin-bottom: 24px; font-variation-settings: 'opsz' 144; }
+.section-lede { font-size: 17px; line-height: 1.55; color: var(--bone); max-width: 600px; margin-bottom: 48px; }
+
+/* Hero */
+.hero { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; padding: 0; border-top: none; }
+.hero-mark { font-family: var(--display); font-weight: 600; font-size: 130px; line-height: 0.95; letter-spacing: -0.04em; color: var(--paper); font-variation-settings: 'opsz' 144; display: inline-block; }
+.hero-mark::after { content: ''; display: inline-block; width: 18px; height: 18px; background: var(--bronze); transform: rotate(45deg); margin-left: 18px; position: relative; bottom: 6px; }
+.hero-sub { font-family: var(--display); font-style: italic; font-size: 36px; color: var(--bronze); margin-top: 20px; font-variation-settings: 'opsz' 144; font-weight: 400; }
+.hero-meta { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-top: 32px; display: flex; gap: 16px; }
+.hero-meta span:not(:first-child)::before { content: '/'; color: var(--hairline); margin-right: 16px; }
+
+/* Philosophy block */
+.philosophy-row { display: grid; grid-template-columns: 1fr 220px; gap: 80px; align-items: start; }
+.philosophy-body p { font-size: 18px; line-height: 1.65; color: var(--bone); margin-bottom: 20px; max-width: 540px; }
+.philosophy-body em { color: var(--paper); font-style: normal; font-weight: 500; }
+.margin-note { position: relative; font-size: 13px; line-height: 1.55; color: var(--ash); font-style: italic; font-family: var(--display); font-variation-settings: 'opsz' 14; padding-left: 16px; margin-top: 24px; }
+.margin-note::before { content: ''; position: absolute; left: 0; top: 8px; width: 8px; height: 1px; background: var(--bronze); }
+
+/* Viz card */
+.viz {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 56px;
+  padding: 56px 0;
+  border-top: 1px solid var(--hairline);
+  align-items: start;
+}
+.viz:first-of-type { border-top: none; }
+.viz-meta { position: sticky; top: 80px; }
+.viz-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 12px; }
+.viz-name { font-family: var(--display); font-weight: 500; font-size: 24px; line-height: 1.15; letter-spacing: -0.02em; color: var(--paper); margin-bottom: 12px; font-variation-settings: 'opsz' 36; }
+.viz-desc { font-size: 13px; line-height: 1.55; color: var(--bone); margin-bottom: 14px; }
+.viz-when { font-family: var(--display); font-style: italic; font-size: 13px; line-height: 1.5; color: var(--bronze-dark); font-variation-settings: 'opsz' 14; }
+.viz-stage {
+  background: linear-gradient(180deg, var(--slate) 0%, var(--stone) 60%);
+  border: 1px solid var(--hairline);
+  padding: 36px 40px;
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+}
+.viz-stage-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-bottom: 18px; }
+
+/* ===== KPIs ===== */
+.kpi-card {
+  background: linear-gradient(180deg, var(--slate) 0%, var(--stone) 60%);
+  border: 1px solid var(--hairline);
+  padding: 32px 40px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.kpi-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); margin-bottom: 12px; }
+.kpi-stat { font-family: var(--display); font-weight: 500; font-size: 144px; line-height: 0.9; color: var(--paper); font-variation-settings: 'opsz' 144; letter-spacing: -0.04em; position: relative; }
+.kpi-stat .unit { font-family: var(--display); font-style: italic; font-weight: 400; font-size: 28px; color: var(--oxblood); font-variation-settings: 'opsz' 36; vertical-align: top; margin-left: 4px; position: relative; top: 22px; }
+.kpi-rule { height: 1px; background: var(--bronze); width: calc(60% + 56px); margin-left: -56px; margin-top: 16px; margin-bottom: 14px; }
+.kpi-foot { font-size: 12px; color: var(--bone); }
+.kpi-foot .delta { color: var(--sage); font-family: var(--mono); font-size: 11px; }
+.kpi-foot .delta.down { color: var(--clay); }
+
+.kpi-three { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 24px; }
+.kpi-three .kpi-card { border-right: none; }
+.kpi-three .kpi-card:last-child { border-right: 1px solid var(--hairline); }
+.kpi-three .kpi-card .kpi-stat { font-size: 96px; }
+.kpi-three .kpi-card .kpi-stat .unit { font-size: 20px; top: 16px; }
+.kpi-three .kpi-rule { width: calc(100% + 1px); margin-left: -40px; margin-right: -41px; }
+
+/* Mini KPI strip */
+.kpi-strip { display: flex; gap: 0; margin-top: 24px; border: 1px solid var(--hairline); }
+.kpi-strip-item { flex: 1; padding: 22px 26px; border-right: 1px solid var(--hairline); background: var(--stone); }
+.kpi-strip-item:last-child { border-right: none; }
+.kpi-strip-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ash); margin-bottom: 6px; }
+.kpi-strip-stat { font-family: var(--display); font-weight: 500; font-size: 36px; line-height: 1; color: var(--paper); font-variation-settings: 'opsz' 36; letter-spacing: -0.02em; }
+.kpi-strip-stat .unit { font-family: var(--display); font-style: italic; font-size: 14px; color: var(--oxblood); margin-left: 2px; }
+.kpi-strip-meta { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ash); margin-top: 6px; text-transform: uppercase; }
+.kpi-strip-meta .up { color: var(--sage); }
+.kpi-strip-meta .down { color: var(--clay); }
+
+/* SVG defaults */
+svg.chart { display: block; width: 100%; height: auto; }
+svg .grid-h, svg .grid-v { stroke: var(--hairline); stroke-width: 1; }
+svg .axis-text { font-family: var(--mono); font-size: 9px; fill: var(--ash); letter-spacing: 0.1em; text-transform: uppercase; }
+svg .label-text { font-family: var(--mono); font-size: 9px; fill: var(--bone); letter-spacing: 0.08em; }
+svg .value-text { font-family: var(--display); fill: var(--paper); font-weight: 500; }
+svg .threshold { stroke: var(--bronze); stroke-width: 1; stroke-dasharray: 3 4; opacity: 0.6; }
+svg .line-primary { stroke: var(--bronze); stroke-width: 2; fill: none; }
+svg .line-secondary { stroke: var(--slate-blue); stroke-width: 2; fill: none; }
+svg .line-tertiary { stroke: var(--sage); stroke-width: 2; fill: none; }
+svg .area-primary { fill: var(--bronze); opacity: 0.08; }
+svg .dot { fill: var(--bronze); }
+svg .dot-active { fill: var(--bronze); filter: drop-shadow(0 0 6px var(--bronze)); }
+svg .bar-primary { fill: var(--bronze); }
+svg .bar-secondary { fill: var(--ash); opacity: 0.6; }
+svg .bar-stack-live { fill: var(--sage); }
+svg .bar-stack-draft { fill: var(--slate-blue); }
+svg .bar-stack-amber { fill: var(--amber); }
+svg .bar-stack-blocked { fill: var(--clay); }
+svg .bar-stack-beta { fill: var(--plum); }
+svg .node-default { fill: var(--graphite); stroke: var(--bronze); stroke-width: 1.5; }
+svg .node-active { fill: var(--bronze); }
+svg .node-burgundy { fill: var(--oxblood); }
+svg .node-line { stroke: var(--bronze); stroke-width: 1; opacity: 0.5; fill: none; }
+
+/* ===== Distribution / Latency bar ===== */
+.lat-bar { position: relative; height: 64px; background: var(--graphite); border: 1px solid var(--hairline); margin-top: 14px; }
+.lat-bar-zone-spec { position: absolute; left: 0; top: 0; bottom: 0; width: 70%; background: rgba(93, 187, 106, 0.06); border-right: 1px dashed rgba(93, 187, 106, 0.4); }
+.lat-bar-zone-out { position: absolute; right: 0; top: 0; bottom: 0; width: 30%; background: rgba(227, 93, 93, 0.06); }
+.lat-marker { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--bronze); }
+.lat-marker-label { position: absolute; top: -22px; transform: translateX(-50%); font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--bronze); text-transform: uppercase; white-space: nowrap; }
+.lat-marker-value { position: absolute; bottom: -22px; transform: translateX(-50%); font-family: var(--mono); font-size: 10px; color: var(--paper); white-space: nowrap; }
+.lat-axis { display: flex; justify-content: space-between; margin-top: 38px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ash); text-transform: uppercase; }
+
+/* ===== Histogram ===== */
+.histo { display: grid; grid-template-columns: repeat(20, 1fr); gap: 2px; align-items: end; height: 160px; padding-bottom: 4px; border-bottom: 1px solid var(--hairline); }
+.histo-bar { background: var(--bronze); opacity: 0.7; min-height: 2px; transition: opacity 0.2s; }
+.histo-bar.tall { background: var(--bronze); opacity: 1; }
+.histo-axis { display: flex; justify-content: space-between; margin-top: 8px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ash); }
+
+/* ===== Comparison: Before/After bars ===== */
+.comp-pair { display: flex; align-items: flex-end; gap: 36px; height: 200px; padding: 0 20px; border-bottom: 1px solid var(--hairline); }
+.comp-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.comp-bar-stack { width: 100%; max-width: 80px; position: relative; display: flex; flex-direction: column; justify-content: flex-end; }
+.comp-bar-fill { width: 100%; background: var(--ash); opacity: 0.5; }
+.comp-bar-fill.primary { background: var(--bronze); opacity: 1; }
+.comp-bar-value { font-family: var(--display); font-size: 26px; color: var(--paper); font-weight: 500; }
+.comp-bar-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--ash); text-transform: uppercase; }
+.comp-delta { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 60px; }
+.comp-delta-arrow { color: var(--sage); font-family: var(--mono); font-size: 14px; margin-bottom: 4px; }
+.comp-delta-value { font-family: var(--display); font-size: 22px; color: var(--sage); font-weight: 500; }
+.comp-delta-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--ash); text-transform: uppercase; margin-top: 4px; }
+
+/* Horizontal bars (rankings) */
+.rank-list { display: flex; flex-direction: column; gap: 12px; }
+.rank-row { display: grid; grid-template-columns: 90px 1fr 60px; gap: 14px; align-items: center; }
+.rank-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: var(--bone); text-transform: lowercase; }
+.rank-bar { height: 8px; background: var(--graphite); border: 1px solid var(--hairline); position: relative; overflow: hidden; }
+.rank-bar-fill { height: 100%; background: var(--bronze); }
+.rank-value { font-family: var(--mono); font-size: 11px; color: var(--paper); text-align: right; }
+
+/* ===== Stacked bar (status mix) ===== */
+.stack-row { display: grid; grid-template-columns: 100px 1fr 60px; gap: 14px; align-items: center; padding: 10px 0; }
+.stack-row + .stack-row { border-top: 1px solid var(--hairline); }
+.stack-label { font-family: var(--mono); font-size: 10px; color: var(--bone); text-transform: lowercase; letter-spacing: 0.04em; }
+.stack-bar { display: flex; height: 14px; background: var(--graphite); border: 1px solid var(--hairline); overflow: hidden; }
+.stack-seg { height: 100%; }
+.stack-seg.live { background: var(--sage); }
+.stack-seg.draft { background: var(--slate-blue); }
+.stack-seg.beta { background: var(--plum); }
+.stack-seg.embargo { background: var(--oxblood); }
+.stack-seg.blocked { background: var(--clay); }
+.stack-total { font-family: var(--mono); font-size: 10px; color: var(--ash); text-align: right; }
+.stack-legend { display: flex; gap: 16px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--hairline); flex-wrap: wrap; }
+.stack-legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--ash); text-transform: uppercase; }
+.stack-legend-dot { width: 8px; height: 8px; }
+
+/* ===== Confusion matrix ===== */
+.confusion {
+  display: grid;
+  grid-template-columns: 60px 1fr 1fr;
+  grid-template-rows: 30px 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+.cm-corner { }
+.cm-axis-x { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; padding: 4px 8px; }
+.cm-axis-y { display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; writing-mode: vertical-lr; transform: rotate(180deg); }
+.cm-cell {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 110px;
+  position: relative;
+}
+.cm-cell.true-pos { background: linear-gradient(135deg, rgba(212, 165, 116, 0.18) 0%, rgba(212, 165, 116, 0.04) 100%); border-color: rgba(212, 165, 116, 0.4); }
+.cm-cell.true-neg { background: linear-gradient(135deg, rgba(212, 165, 116, 0.10) 0%, rgba(212, 165, 116, 0.02) 100%); border-color: rgba(212, 165, 116, 0.25); }
+.cm-cell.false-pos, .cm-cell.false-neg { background: linear-gradient(135deg, rgba(227, 93, 93, 0.10) 0%, rgba(227, 93, 93, 0.02) 100%); border-color: rgba(227, 93, 93, 0.25); }
+.cm-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--ash); text-transform: uppercase; }
+.cm-value { font-family: var(--display); font-size: 32px; font-weight: 500; color: var(--paper); line-height: 1; font-variation-settings: 'opsz' 36; }
+.cm-pct { font-family: var(--mono); font-size: 10px; color: var(--bronze); }
+
+/* ===== Pipeline / agent trace ===== */
+.pipeline { display: flex; align-items: stretch; gap: 0; margin-top: 16px; }
+.pipe-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 18px 12px; position: relative; }
+.pipe-link { display: flex; align-items: center; gap: 4px; padding: 0 4px; }
+.pipe-link-line { width: 14px; height: 1px; background: var(--bronze); opacity: 0.5; }
+.pipe-link-node { width: 8px; height: 8px; background: var(--graphite); border: 1.5px solid var(--bronze); transform: rotate(45deg); }
+.pipe-node {
+  width: 12px;
+  height: 12px;
+  background: var(--graphite);
+  border: 1.5px solid var(--bronze);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+.pipe-node.active { background: var(--bronze); box-shadow: 0 0 14px rgba(212, 165, 116, 0.5); }
+.pipe-node.done { background: var(--bronze); }
+.pipe-node.failed { background: var(--graphite); border-color: var(--clay); }
+.pipe-num { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.pipe-label { font-family: var(--display); font-size: 14px; color: var(--paper); font-weight: 500; text-align: center; }
+.pipe-dur { font-family: var(--mono); font-size: 9px; color: var(--ash); letter-spacing: 0.06em; }
+
+/* Agent trace (vertical) */
+.trace { background: var(--graphite); border: 1px solid var(--hairline); padding: 22px 24px; margin-top: 14px; }
+.trace-h { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--hairline); font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--ash); text-transform: uppercase; }
+.trace-h .live { color: var(--sage); display: flex; align-items: center; gap: 6px; }
+.trace-h .live::before { content: ''; width: 6px; height: 6px; background: var(--sage); border-radius: 50%; box-shadow: 0 0 8px var(--sage); }
+.trace-row { display: grid; grid-template-columns: 16px 14px 100px 1fr 80px; gap: 10px; font-family: var(--mono); font-size: 11px; line-height: 1.8; align-items: center; }
+.trace-spine { width: 1px; background: var(--hairline); position: relative; height: 100%; justify-self: center; }
+.trace-spine::before { content: ''; position: absolute; left: -2px; top: 50%; width: 5px; height: 5px; background: var(--bronze); transform: translateY(-50%) rotate(45deg); }
+.trace-prompt { color: var(--bronze); }
+.trace-step { color: var(--bone); }
+.trace-val { color: var(--paper); }
+.trace-val.sage { color: var(--sage); }
+.trace-val.plum { color: var(--plum); }
+.trace-val.clay { color: var(--clay); }
+.trace-time { color: var(--ash); text-align: right; }
+
+/* Constellation (positioned svg) */
+.constellation { position: relative; height: 320px; margin-top: 8px; }
+
+/* ===== Data table ===== */
+.dt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.dt th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--bronze);
+  text-transform: uppercase;
+  text-align: left;
+  padding: 12px 14px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--hairline);
+}
+.dt th.num { text-align: right; }
+.dt td {
+  padding: 14px 14px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--bone);
+  vertical-align: middle;
+}
+.dt td.num { text-align: right; font-family: var(--mono); color: var(--paper); }
+.dt td.label { color: var(--paper); font-weight: 500; }
+.dt tr:hover td { background: rgba(212, 165, 116, 0.03); }
+.spark { width: 80px; height: 24px; }
+.spark path { stroke: var(--bronze); stroke-width: 1.5; fill: none; }
+.spark .area { fill: var(--bronze); opacity: 0.12; stroke: none; }
+.dt-ribbon { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; display: inline-block; }
+.dt-ribbon::after { content: ' /'; opacity: 0.7; }
+.dt-ribbon.live { background: rgba(93, 187, 106, 0.16); color: var(--sage); border: 1px solid rgba(93, 187, 106, 0.35); }
+.dt-ribbon.draft { background: rgba(90, 155, 181, 0.14); color: var(--slate-blue); border: 1px solid rgba(90, 155, 181, 0.32); }
+.dt-ribbon.beta { background: rgba(163, 116, 212, 0.14); color: var(--plum); border: 1px solid rgba(163, 116, 212, 0.32); }
+.dt-ribbon.embargo { background: rgba(139, 58, 74, 0.18); color: #c97a8a; border: 1px solid rgba(139, 58, 74, 0.45); }
+
+/* ===== Implementation notes ===== */
+.impl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; margin-top: 24px; }
+.impl-item { border-top: 1px solid var(--hairline); padding: 16px 0; display: grid; grid-template-columns: 160px 1fr; gap: 16px; align-items: baseline; }
+.impl-key { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze); }
+.impl-val { font-size: 13px; line-height: 1.55; color: var(--bone); }
+.impl-val code { font-family: var(--mono); font-size: 11px; color: var(--paper); background: var(--stone); padding: 1px 6px; border-radius: 2px; }
+
+/* Closing */
+.closing { padding: 140px 0 80px; border-top: 1px solid var(--hairline); }
+.closing-quote { font-family: var(--display); font-style: italic; font-size: 32px; line-height: 1.25; font-weight: 400; color: var(--oxblood); font-variation-settings: 'opsz' 144; max-width: 620px; position: relative; padding-left: 36px; }
+.closing-quote::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 18px; width: 1px; background: var(--bronze); }
+.closing-quote::after { content: ''; position: absolute; left: 3px; bottom: 4px; width: 11px; height: 11px; background: var(--bronze); transform: rotate(45deg); }
+.closing-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-top: 56px; display: flex; justify-content: flex-end; gap: 16px; }
+.closing-meta span:not(:first-child)::before { content: '/'; color: var(--hairline); margin-right: 16px; }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; padding: 0 24px; }
+  .toc { display: none; }
+  main { padding: 40px 0 120px; }
+  .hero-mark { font-size: 80px; }
+  .hero-sub { font-size: 24px; }
+  .section-h { font-size: 30px; }
+  .viz { grid-template-columns: 1fr; gap: 24px; }
+  .viz-meta { position: static; }
+  .philosophy-row { grid-template-columns: 1fr; gap: 24px; }
+  .kpi-three { grid-template-columns: 1fr; }
+  .kpi-strip { flex-direction: column; }
+  .kpi-strip-item { border-right: none; border-bottom: 1px solid var(--hairline); }
+  .pipeline { flex-direction: column; }
+  .impl-grid { grid-template-columns: 1fr; }
+  .kpi-stat { font-size: 96px; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- TOC -->
+  <nav class="toc">
+    <a href="#hero" class="toc-mark">Plumb</a>
+    <span class="toc-sub">Viz Library</span>
+    <ol class="toc-list">
+      <li><span class="toc-num">01</span><a href="#hero" class="toc-link">Cover</a></li>
+      <li><span class="toc-num">02</span><a href="#philosophy" class="toc-link">Philosophy</a></li>
+      <li><span class="toc-num">03</span><a href="#kpis" class="toc-link">KPIs</a></li>
+      <li><span class="toc-num">04</span><a href="#timeseries" class="toc-link">Time Series</a></li>
+      <li><span class="toc-num">05</span><a href="#distribution" class="toc-link">Distribution</a></li>
+      <li><span class="toc-num">06</span><a href="#comparison" class="toc-link">Comparison</a></li>
+      <li><span class="toc-num">07</span><a href="#flow" class="toc-link">Flow</a></li>
+      <li><span class="toc-num">08</span><a href="#categorical" class="toc-link">Categorical</a></li>
+      <li><span class="toc-num">09</span><a href="#ai" class="toc-link">AI-Specific</a></li>
+      <li><span class="toc-num">10</span><a href="#tables" class="toc-link">Tables</a></li>
+      <li><span class="toc-num">11</span><a href="#impl" class="toc-link">Implementation</a></li>
+      <li><span class="toc-num">12</span><a href="#closing" class="toc-link">Closing</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- 01 — Hero -->
+    <section id="hero" class="hero">
+      <div class="hero-mark">Plumb</div>
+      <div class="hero-sub">information viz library.</div>
+      <div class="hero-meta"><span>Studio Mode</span><span>v1.0</span><span>May 2026</span></div>
+    </section>
+
+    <!-- 02 — Philosophy -->
+    <section id="philosophy">
+      <div class="section-num">02 / Philosophy</div>
+      <h2 class="section-h">Charts are documents.</h2>
+      <div class="philosophy-row">
+        <div class="philosophy-body">
+          <p>Most AI work is shown in charts that look the same as every other dashboard on the internet. Default Recharts. Default Plotly. Default everything.</p>
+          <p>Plumb's charts are different by intention. <em>Hairline grids. Bronze data lines. Mono labels. Restraint. Numbers that overflow their frames when they earn it. Status colors only as state, never as decoration.</em></p>
+          <p>The point isn't decoration. It's that a Plumb chart should be readable from across the room and trustworthy from up close. The same way the brand reads.</p>
+        </div>
+        <aside class="margin-note">A chart that requires a legend taller than itself probably wants to be a table.</aside>
+      </div>
+    </section>
+
+    <!-- 03 — KPIs -->
+    <section id="kpis">
+      <div class="section-num">03 / KPIs</div>
+      <h2 class="section-h">Numbers that overflow their frame.</h2>
+      <p class="section-lede">Display numerals in Fraunces, anchored by a hairline Bronze rule that runs <em>past</em> the card edge. The unit is a small italic Oxblood whisper, not a label. No border, no shadow — the number does the work.</p>
+
+      <!-- 03.1 Single asymmetric KPI -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">03.1 / Display KPI</div>
+          <div class="viz-name">The single number, oversized.</div>
+          <div class="viz-desc">A single statistic given the full weight of the page. Fraunces 144pt. Unit set tiny in italic Oxblood. Hairline Bronze rule extends past the card's left edge to anchor without enclosing.</div>
+          <div class="viz-when">Use for the headline metric on a case study, a proposal cover, or a section opener.</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Eval pass-rate &middot; post-integration</div>
+          <div class="kpi-stat">94<span class="unit">%</span></div>
+          <div class="kpi-rule"></div>
+          <div class="kpi-foot"><span class="delta">↑ 23 pts</span> &nbsp; from 71% baseline &middot; 8-week build</div>
+        </div>
+      </div>
+
+      <!-- 03.2 Three-up KPI -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">03.2 / Three-up KPI</div>
+          <div class="viz-name">Three to a row, never four.</div>
+          <div class="viz-desc">Three statistics in a horizontal strip, each anchored by the same continuous Bronze rule. Asymmetric within each cell — left-aligned, room to breathe.</div>
+          <div class="viz-when">Use to summarize an engagement: outcome, time-to-value, scale. Three numbers a reader can hold in their head at once.</div>
+        </div>
+        <div style="width:100%;">
+          <div class="kpi-three">
+            <div class="kpi-card">
+              <div class="kpi-label">Eval pass-rate</div>
+              <div class="kpi-stat">94<span class="unit">%</span></div>
+              <div class="kpi-rule"></div>
+              <div class="kpi-foot"><span class="delta">↑</span> from 71% baseline</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Time-to-first-value</div>
+              <div class="kpi-stat">11<span class="unit">days</span></div>
+              <div class="kpi-rule"></div>
+              <div class="kpi-foot">From kickoff to first shipped flow</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Engagements that ship</div>
+              <div class="kpi-stat">100<span class="unit">%</span></div>
+              <div class="kpi-rule"></div>
+              <div class="kpi-foot">Across 14 builds since 2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03.3 Compact KPI strip -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">03.3 / Compact strip</div>
+          <div class="viz-name">A row of small statements.</div>
+          <div class="viz-desc">Smaller numerals (Fraunces 36pt) for in-line metrics inside a denser surface — a dashboard, a status email, a header. Mono trend indicators for direction.</div>
+          <div class="viz-when">Use when you need many metrics visible at once without giving any of them main-stage weight.</div>
+        </div>
+        <div style="width:100%;">
+          <div class="kpi-strip">
+            <div class="kpi-strip-item">
+              <div class="kpi-strip-label">Active engagements</div>
+              <div class="kpi-strip-stat">7</div>
+              <div class="kpi-strip-meta"><span class="up">↑ 2</span> &middot; vs Q1</div>
+            </div>
+            <div class="kpi-strip-item">
+              <div class="kpi-strip-label">P95 latency</div>
+              <div class="kpi-strip-stat">312<span class="unit">ms</span></div>
+              <div class="kpi-strip-meta"><span class="down">↓ 41ms</span> &middot; vs target</div>
+            </div>
+            <div class="kpi-strip-item">
+              <div class="kpi-strip-label">Tokens / day</div>
+              <div class="kpi-strip-stat">2.4<span class="unit">M</span></div>
+              <div class="kpi-strip-meta"><span class="up">↑ 8%</span> &middot; vs avg</div>
+            </div>
+            <div class="kpi-strip-item">
+              <div class="kpi-strip-label">Eval coverage</div>
+              <div class="kpi-strip-stat">87<span class="unit">%</span></div>
+              <div class="kpi-strip-meta"><span class="up">↑ 4</span> &middot; pts wk-over-wk</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 — Time Series -->
+    <section id="timeseries">
+      <div class="section-num">04 / Time Series</div>
+      <h2 class="section-h">Hairline grids. Bronze lines.</h2>
+      <p class="section-lede">Most defaults make the grid as loud as the data. Plumb does the opposite. The grid is barely there; the data is the only thing that earns weight.</p>
+
+      <!-- 04.1 Single line -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">04.1 / Single line</div>
+          <div class="viz-name">One series, traced.</div>
+          <div class="viz-desc">One Bronze line over a hairline grid. A faint Bronze fill below the line gives shape without competing. Y-axis labels in mono on the left; x-axis on the bottom.</div>
+          <div class="viz-when">Use for a single metric over time — token cost, eval pass-rate, request volume.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Token cost &middot; last 12 weeks</div>
+          <svg class="chart" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <!-- horizontal grid -->
+            <line class="grid-h" x1="44" y1="40" x2="586" y2="40"/>
+            <line class="grid-h" x1="44" y1="90" x2="586" y2="90"/>
+            <line class="grid-h" x1="44" y1="140" x2="586" y2="140"/>
+            <line class="grid-h" x1="44" y1="190" x2="586" y2="190"/>
+            <!-- y axis -->
+            <text class="axis-text" x="38" y="44" text-anchor="end">200K</text>
+            <text class="axis-text" x="38" y="94" text-anchor="end">150K</text>
+            <text class="axis-text" x="38" y="144" text-anchor="end">100K</text>
+            <text class="axis-text" x="38" y="194" text-anchor="end">50K</text>
+            <!-- area + line -->
+            <path class="area-primary" d="M 60 165 L 105 150 L 150 152 L 195 130 L 240 110 L 285 118 L 330 92 L 375 78 L 420 85 L 465 64 L 510 56 L 555 48 L 555 190 L 60 190 Z"/>
+            <path class="line-primary" d="M 60 165 L 105 150 L 150 152 L 195 130 L 240 110 L 285 118 L 330 92 L 375 78 L 420 85 L 465 64 L 510 56 L 555 48"/>
+            <!-- dots -->
+            <circle class="dot" cx="60" cy="165" r="2.5"/>
+            <circle class="dot" cx="285" cy="118" r="2.5"/>
+            <circle class="dot-active" cx="555" cy="48" r="3.5"/>
+            <!-- annotation on last point -->
+            <text class="value-text" x="555" y="34" text-anchor="end" font-size="10" fill="#d4a574">189K</text>
+            <!-- x axis -->
+            <text class="axis-text" x="60" y="215">Wk 01</text>
+            <text class="axis-text" x="195" y="215">Wk 04</text>
+            <text class="axis-text" x="330" y="215">Wk 07</text>
+            <text class="axis-text" x="465" y="215">Wk 10</text>
+            <text class="axis-text" x="555" y="215" text-anchor="end">Wk 12</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 04.2 Multi-line -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">04.2 / Multi-line</div>
+          <div class="viz-name">Two or three series, in dialogue.</div>
+          <div class="viz-desc">Bronze for the headline series. Slate-blue for the comparator. Sage for the threshold or target line. Never more than three. The legend is inline at each line's end, not a separate block.</div>
+          <div class="viz-when">Use for before/after over time, baseline vs. shipped, or model A vs. model B.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Eval pass-rate &middot; v2 vs baseline</div>
+          <svg class="chart" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <line class="grid-h" x1="44" y1="40" x2="586" y2="40"/>
+            <line class="grid-h" x1="44" y1="90" x2="586" y2="90"/>
+            <line class="grid-h" x1="44" y1="140" x2="586" y2="140"/>
+            <line class="grid-h" x1="44" y1="190" x2="586" y2="190"/>
+            <text class="axis-text" x="38" y="44" text-anchor="end">100%</text>
+            <text class="axis-text" x="38" y="94" text-anchor="end">85%</text>
+            <text class="axis-text" x="38" y="144" text-anchor="end">70%</text>
+            <text class="axis-text" x="38" y="194" text-anchor="end">55%</text>
+            <!-- threshold -->
+            <line class="threshold" x1="44" y1="65" x2="556" y2="65"/>
+            <text class="axis-text" x="556" y="62" text-anchor="end" fill="#d4a574">Target 92%</text>
+            <!-- baseline (slate-blue) -->
+            <path class="line-secondary" d="M 60 130 L 105 132 L 150 128 L 195 134 L 240 130 L 285 130 L 330 132 L 375 128 L 420 130 L 465 132 L 510 128 L 555 130"/>
+            <!-- v2 (bronze) -->
+            <path class="line-primary" d="M 60 134 L 105 128 L 150 116 L 195 104 L 240 92 L 285 80 L 330 70 L 375 64 L 420 58 L 465 56 L 510 54 L 555 52"/>
+            <circle class="dot-active" cx="555" cy="52" r="3.5"/>
+            <!-- inline labels -->
+            <text class="value-text" x="558" y="56" font-size="10" fill="#d4a574">v2</text>
+            <text class="value-text" x="558" y="134" font-size="10" fill="#5a9bb5">baseline</text>
+            <text class="axis-text" x="60" y="215">Wk 01</text>
+            <text class="axis-text" x="285" y="215" text-anchor="middle">Wk 06</text>
+            <text class="axis-text" x="555" y="215" text-anchor="end">Wk 12</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 — Distribution -->
+    <section id="distribution">
+      <div class="section-num">05 / Distribution</div>
+      <h2 class="section-h">Where the long tail lives.</h2>
+      <p class="section-lede">Latency distributions, response-time histograms, anything where the <em>shape</em> of the data matters more than the average. The default visualization treatment overweights the median; Plumb's makes the tail visible.</p>
+
+      <!-- 05.1 Latency markers -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">05.1 / Latency markers</div>
+          <div class="viz-name">P50, p95, p99 — at a glance.</div>
+          <div class="viz-desc">A horizontal track with three Bronze markers showing where the percentiles land. Sage zone marks "in spec," Clay zone marks "out of spec" — both as low-opacity background fills. Mono labels above and below.</div>
+          <div class="viz-when">Use to summarize latency at a glance — in a status email, at the top of an SLO report, on a contract page.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Inference latency &middot; production traffic</div>
+          <div class="lat-bar">
+            <div class="lat-bar-zone-spec"></div>
+            <div class="lat-bar-zone-out"></div>
+            <div class="lat-marker" style="left:18%">
+              <div class="lat-marker-label">p50</div>
+              <div class="lat-marker-value">182ms</div>
+            </div>
+            <div class="lat-marker" style="left:48%">
+              <div class="lat-marker-label">p95</div>
+              <div class="lat-marker-value">312ms</div>
+            </div>
+            <div class="lat-marker" style="left:78%">
+              <div class="lat-marker-label">p99</div>
+              <div class="lat-marker-value">740ms</div>
+            </div>
+          </div>
+          <div class="lat-axis">
+            <span>0ms</span>
+            <span style="color:var(--sage)">in-spec &lt; 500ms</span>
+            <span style="color:var(--clay)">out-of-spec</span>
+            <span>1000ms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 05.2 Histogram -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">05.2 / Histogram</div>
+          <div class="viz-name">The shape of the response.</div>
+          <div class="viz-desc">Bronze bars on a hairline baseline. Tall bars get full opacity, shorter bars step down. The taller-than-most-bars are emphasized to show where requests cluster.</div>
+          <div class="viz-when">Use when distribution shape matters — finding bimodality, surfacing edge cases, debunking "the average is fine" claims.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Response time distribution &middot; n=14,287</div>
+          <div class="histo">
+            <div class="histo-bar" style="height:8%"></div>
+            <div class="histo-bar" style="height:18%"></div>
+            <div class="histo-bar" style="height:34%"></div>
+            <div class="histo-bar tall" style="height:62%"></div>
+            <div class="histo-bar tall" style="height:88%"></div>
+            <div class="histo-bar tall" style="height:96%"></div>
+            <div class="histo-bar tall" style="height:78%"></div>
+            <div class="histo-bar" style="height:54%"></div>
+            <div class="histo-bar" style="height:38%"></div>
+            <div class="histo-bar" style="height:28%"></div>
+            <div class="histo-bar" style="height:22%"></div>
+            <div class="histo-bar" style="height:16%"></div>
+            <div class="histo-bar" style="height:13%"></div>
+            <div class="histo-bar" style="height:11%"></div>
+            <div class="histo-bar" style="height:10%"></div>
+            <div class="histo-bar" style="height:8%"></div>
+            <div class="histo-bar" style="height:6%"></div>
+            <div class="histo-bar" style="height:5%"></div>
+            <div class="histo-bar" style="height:4%"></div>
+            <div class="histo-bar" style="height:6%"></div>
+          </div>
+          <div class="histo-axis">
+            <span>0ms</span>
+            <span>250ms</span>
+            <span>500ms</span>
+            <span>750ms</span>
+            <span>1000ms+</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 — Comparison -->
+    <section id="comparison">
+      <div class="section-num">06 / Comparison</div>
+      <h2 class="section-h">Two states, one frame.</h2>
+      <p class="section-lede">Before and after. A and B. Baseline and shipped. The point of comparison viz is to make the delta the headline — not to be even-handed about both sides.</p>
+
+      <!-- 06.1 Before/After bars -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">06.1 / Before / After</div>
+          <div class="viz-name">Two bars, one delta.</div>
+          <div class="viz-desc">Baseline bar in Ash (faded). Shipped bar in Bronze (full). The delta lives in the middle — Sage arrow if we improved, Clay if we regressed, with a Fraunces percentage. The bars are small; the change is the point.</div>
+          <div class="viz-when">Use in case studies. The single most-used comparison shape Plumb produces.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Triage time per ticket &middot; before vs after integration</div>
+          <div class="comp-pair">
+            <div class="comp-bar">
+              <div class="comp-bar-stack">
+                <div class="comp-bar-fill" style="height:160px"></div>
+              </div>
+              <div class="comp-bar-value">40<span style="font-style:italic;color:var(--ash);font-size:14px"> min</span></div>
+              <div class="comp-bar-label">Baseline</div>
+            </div>
+            <div class="comp-delta">
+              <div class="comp-delta-arrow">↓</div>
+              <div class="comp-delta-value">−70%</div>
+              <div class="comp-delta-label">delta</div>
+            </div>
+            <div class="comp-bar">
+              <div class="comp-bar-stack">
+                <div class="comp-bar-fill primary" style="height:48px"></div>
+              </div>
+              <div class="comp-bar-value">12<span style="font-style:italic;color:var(--bone);font-size:14px"> min</span></div>
+              <div class="comp-bar-label">After Wk 8</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 06.2 Horizontal rankings -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">06.2 / Ranking bars</div>
+          <div class="viz-name">A list, weighted.</div>
+          <div class="viz-desc">Mono labels left-aligned. Bronze bars proportional to value. Numeric value right-aligned in mono. Hairline-thin tracks.</div>
+          <div class="viz-when">Use for cost breakdowns, model comparisons, time-spent-on-step lists. Anywhere you'd be tempted to write a numbered list.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Time spent &middot; per pipeline step</div>
+          <div class="rank-list">
+            <div class="rank-row"><div class="rank-label">retrieve</div><div class="rank-bar"><div class="rank-bar-fill" style="width:14%"></div></div><div class="rank-value">0.12s</div></div>
+            <div class="rank-row"><div class="rank-label">k-rerank</div><div class="rank-bar"><div class="rank-bar-fill" style="width:36%"></div></div><div class="rank-value">0.31s</div></div>
+            <div class="rank-row"><div class="rank-label">synthesize</div><div class="rank-bar"><div class="rank-bar-fill" style="width:100%"></div></div><div class="rank-value">0.88s</div></div>
+            <div class="rank-row"><div class="rank-label">cite-check</div><div class="rank-bar"><div class="rank-bar-fill" style="width:26%"></div></div><div class="rank-value">0.22s</div></div>
+            <div class="rank-row"><div class="rank-label">format</div><div class="rank-bar"><div class="rank-bar-fill" style="width:6%"></div></div><div class="rank-value">0.05s</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 — Flow -->
+    <section id="flow">
+      <div class="section-num">07 / Flow</div>
+      <h2 class="section-h">Pipelines, drawn quietly.</h2>
+      <p class="section-lede">Default flow charts use boxes and arrows. Plumb uses the Hairline Bridge primitive — diamond nodes connected by Bronze hairlines. No boxes. No arrows. The active node glows.</p>
+
+      <!-- 07.1 Linear pipeline -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">07.1 / Linear pipeline</div>
+          <div class="viz-name">A process, marked by stops.</div>
+          <div class="viz-desc">Diamond nodes mark each step. Bronze hairlines connect them. Active node glows. Done nodes filled. Failed nodes outlined in Clay. Step number, label, and duration stack vertically below each node.</div>
+          <div class="viz-when">Use for engagement phases, agent loops, build steps — any process you'd otherwise visualize with boxes and arrows.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Engagement timeline &middot; week 6 of 10</div>
+          <div class="pipeline">
+            <div class="pipe-step">
+              <div class="pipe-node done"></div>
+              <div class="pipe-num">01 / Read</div>
+              <div class="pipe-label">Diagnose</div>
+              <div class="pipe-dur">2 weeks</div>
+            </div>
+            <div class="pipe-link">
+              <div class="pipe-link-line"></div>
+              <div class="pipe-link-node"></div>
+              <div class="pipe-link-line"></div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-node done"></div>
+              <div class="pipe-num">02 / Map</div>
+              <div class="pipe-label">Architect</div>
+              <div class="pipe-dur">1 week</div>
+            </div>
+            <div class="pipe-link">
+              <div class="pipe-link-line"></div>
+              <div class="pipe-link-node"></div>
+              <div class="pipe-link-line"></div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-node active"></div>
+              <div class="pipe-num">03 / Build</div>
+              <div class="pipe-label">In Progress</div>
+              <div class="pipe-dur">5 weeks</div>
+            </div>
+            <div class="pipe-link">
+              <div class="pipe-link-line"></div>
+              <div class="pipe-link-node"></div>
+              <div class="pipe-link-line"></div>
+            </div>
+            <div class="pipe-step">
+              <div class="pipe-node"></div>
+              <div class="pipe-num">04 / Hand off</div>
+              <div class="pipe-label">Pending</div>
+              <div class="pipe-dur">2 weeks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07.2 Agent trace -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">07.2 / Agent trace</div>
+          <div class="viz-name">An engineer's read-out.</div>
+          <div class="viz-desc">Vertical mono key/value rows with Bronze cursor and step indicators. Status colors only on values, never on prompts. Reads as serious tooling — not a chatbot bubble.</div>
+          <div class="viz-when">Use for streaming model output, agent tool-use traces, eval runs — anywhere the work is happening live.</div>
+        </div>
+        <div class="viz-stage" style="padding: 24px 28px;">
+          <div class="trace">
+            <div class="trace-h">
+              <span>plumb &middot; agent-v2 &middot; trace #2417</span>
+              <span class="live">live</span>
+            </div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">tool</span><span class="trace-val">vector_search</span><span class="trace-time">+ 0.12s</span></div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">k-results</span><span class="trace-val sage">8 / 8</span><span class="trace-time">+ 0.04s</span></div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">rerank</span><span class="trace-val">cross-encoder</span><span class="trace-time">+ 0.31s</span></div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">policy</span><span class="trace-val plum">guardrail-v3</span><span class="trace-time">+ 0.18s</span></div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">retry</span><span class="trace-val clay">429 &middot; backoff 2s</span><span class="trace-time">+ 2.04s</span></div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">synthesize</span><span class="trace-val">streaming</span><span class="trace-time">+ 0.88s</span></div>
+            <div class="trace-row"><span class="trace-prompt">▸</span><span class="trace-spine"></span><span class="trace-step">grounded</span><span class="trace-val sage">true &middot; 4 citations</span><span class="trace-time">+ 1.21s</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 07.3 Constellation -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">07.3 / Constellation</div>
+          <div class="viz-name">A graph, drawn like a star chart.</div>
+          <div class="viz-desc">Hairline Bronze paths connect nodes positioned on a non-linear grid. Active nodes glow. Past nodes are filled Bronze. Future nodes are hairline-only. Use for systems that don't move in a straight line.</div>
+          <div class="viz-when">Use for stakeholder maps, system architectures, agent decision graphs, anything that branches or loops.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Agent decision graph &middot; query handler</div>
+          <svg class="chart" viewBox="0 0 600 280" preserveAspectRatio="xMidYMid meet">
+            <!-- paths -->
+            <path class="node-line" d="M 80 140 Q 160 80 220 100"/>
+            <path class="node-line" d="M 80 140 Q 160 200 220 180"/>
+            <path class="node-line" d="M 220 100 Q 320 80 380 130"/>
+            <path class="node-line" d="M 220 180 Q 320 200 380 130"/>
+            <path class="node-line" d="M 380 130 Q 460 80 520 100"/>
+            <path class="node-line" d="M 380 130 Q 460 180 520 160"/>
+            <!-- nodes (rotated rects = diamonds) -->
+            <g transform="translate(80 140) rotate(45)"><rect x="-8" y="-8" width="16" height="16" class="node-active"/></g>
+            <g transform="translate(220 100) rotate(45)"><rect x="-7" y="-7" width="14" height="14" class="node-burgundy"/></g>
+            <g transform="translate(220 180) rotate(45)"><rect x="-7" y="-7" width="14" height="14" class="node-default"/></g>
+            <g transform="translate(380 130) rotate(45)"><rect x="-8" y="-8" width="16" height="16" class="node-burgundy"/></g>
+            <g transform="translate(520 100) rotate(45)"><rect x="-7" y="-7" width="14" height="14" class="node-default"/></g>
+            <g transform="translate(520 160) rotate(45)"><rect x="-7" y="-7" width="14" height="14" class="node-default"/></g>
+            <!-- labels -->
+            <text class="label-text" x="80" y="170" text-anchor="middle">query</text>
+            <text class="label-text" x="220" y="84" text-anchor="middle">retrieve</text>
+            <text class="label-text" x="220" y="200" text-anchor="middle">tool-use</text>
+            <text class="label-text" x="380" y="160" text-anchor="middle">synthesize</text>
+            <text class="label-text" x="520" y="84" text-anchor="middle">stream</text>
+            <text class="label-text" x="520" y="180" text-anchor="middle">cite</text>
+            <!-- axis-text style for active label -->
+            <text class="axis-text" x="80" y="184" text-anchor="middle" fill="#d4a574">active</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 — Categorical -->
+    <section id="categorical">
+      <div class="section-num">08 / Categorical</div>
+      <h2 class="section-h">Status mix, at a glance.</h2>
+      <p class="section-lede">Stacked bars where each segment is a status color. The legend uses the Status Ribbon primitive's color set. The viewer reads the proportions in one pass.</p>
+
+      <!-- 08.1 Status mix bars -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">08.1 / Status stack</div>
+          <div class="viz-name">Project portfolio, by state.</div>
+          <div class="viz-desc">One row per project. Horizontal stacked bar showing how time has been distributed across states (Live, Beta, Draft, Embargo, Blocked). Total weeks anchored on the right.</div>
+          <div class="viz-when">Use to show portfolio health on a quarterly review. Or to show how much of an engagement has been "blocked vs. building."</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Engagement state &middot; current quarter</div>
+          <div class="stack-row">
+            <div class="stack-label">gradient</div>
+            <div class="stack-bar">
+              <div class="stack-seg live" style="width:78%"></div>
+              <div class="stack-seg beta" style="width:14%"></div>
+              <div class="stack-seg draft" style="width:8%"></div>
+            </div>
+            <div class="stack-total">Wk 14</div>
+          </div>
+          <div class="stack-row">
+            <div class="stack-label">northwind</div>
+            <div class="stack-bar">
+              <div class="stack-seg draft" style="width:32%"></div>
+              <div class="stack-seg beta" style="width:48%"></div>
+              <div class="stack-seg live" style="width:20%"></div>
+            </div>
+            <div class="stack-total">Wk 16</div>
+          </div>
+          <div class="stack-row">
+            <div class="stack-label">project alder</div>
+            <div class="stack-bar">
+              <div class="stack-seg embargo" style="width:62%"></div>
+              <div class="stack-seg blocked" style="width:8%"></div>
+              <div class="stack-seg draft" style="width:30%"></div>
+            </div>
+            <div class="stack-total">Wk 09</div>
+          </div>
+          <div class="stack-row">
+            <div class="stack-label">vector ops</div>
+            <div class="stack-bar">
+              <div class="stack-seg live" style="width:54%"></div>
+              <div class="stack-seg beta" style="width:32%"></div>
+              <div class="stack-seg draft" style="width:14%"></div>
+            </div>
+            <div class="stack-total">Wk 22</div>
+          </div>
+          <div class="stack-legend">
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background:var(--sage)"></span>Live</div>
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background:var(--plum)"></span>Beta</div>
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background:var(--slate-blue)"></span>Draft</div>
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background:var(--oxblood)"></span>Embargo</div>
+            <div class="stack-legend-item"><span class="stack-legend-dot" style="background:var(--clay)"></span>Blocked</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 — AI-Specific -->
+    <section id="ai">
+      <div class="section-num">09 / AI-Specific</div>
+      <h2 class="section-h">Where the work actually lives.</h2>
+      <p class="section-lede">Charts that exist because Plumb does AI work. Confusion matrices, eval-rate-over-time, token cost by model, citation grounding. The defaults are ugly — these are not.</p>
+
+      <!-- 09.1 Confusion matrix -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">09.1 / Confusion matrix</div>
+          <div class="viz-name">2×2 truth check.</div>
+          <div class="viz-desc">Predicted on the X-axis, actual on the Y-axis. True diagonal in Bronze tones (lighter for true negatives, darker for true positives). False diagonal in Clay tones. Each cell shows count and percent.</div>
+          <div class="viz-when">Use for classifier evaluation. Always show both raw count and percent — one without the other lies.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Triage classifier &middot; eval set n=2,400</div>
+          <div class="confusion">
+            <div class="cm-corner"></div>
+            <div class="cm-axis-x">Pred &middot; positive</div>
+            <div class="cm-axis-x">Pred &middot; negative</div>
+            <div class="cm-axis-y">Actual &middot; positive</div>
+            <div class="cm-cell true-pos">
+              <div class="cm-label">True positive</div>
+              <div>
+                <div class="cm-value">1,108</div>
+                <div class="cm-pct">46.2%</div>
+              </div>
+            </div>
+            <div class="cm-cell false-neg">
+              <div class="cm-label">False negative</div>
+              <div>
+                <div class="cm-value">82</div>
+                <div class="cm-pct">3.4%</div>
+              </div>
+            </div>
+            <div class="cm-axis-y">Actual &middot; negative</div>
+            <div class="cm-cell false-pos">
+              <div class="cm-label">False positive</div>
+              <div>
+                <div class="cm-value">64</div>
+                <div class="cm-pct">2.7%</div>
+              </div>
+            </div>
+            <div class="cm-cell true-neg">
+              <div class="cm-label">True negative</div>
+              <div>
+                <div class="cm-value">1,146</div>
+                <div class="cm-pct">47.7%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 09.2 Eval pass-rate -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">09.2 / Eval pass-rate</div>
+          <div class="viz-name">A pass line, traced.</div>
+          <div class="viz-desc">Eval pass-rate over time, with a Bronze threshold marking "ship-quality." Periods above the threshold filled Sage; periods below filled Clay. Releases marked as small Bronze diamonds on the line.</div>
+          <div class="viz-when">Use as the heartbeat chart for any AI system in production. Should be visible in every status review.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Eval pass-rate &middot; daily, last 28 days</div>
+          <svg class="chart" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <line class="grid-h" x1="44" y1="40" x2="586" y2="40"/>
+            <line class="grid-h" x1="44" y1="90" x2="586" y2="90"/>
+            <line class="grid-h" x1="44" y1="140" x2="586" y2="140"/>
+            <line class="grid-h" x1="44" y1="190" x2="586" y2="190"/>
+            <text class="axis-text" x="38" y="44" text-anchor="end">100%</text>
+            <text class="axis-text" x="38" y="94" text-anchor="end">90%</text>
+            <text class="axis-text" x="38" y="144" text-anchor="end">80%</text>
+            <text class="axis-text" x="38" y="194" text-anchor="end">70%</text>
+            <!-- threshold at 90% -->
+            <line class="threshold" x1="44" y1="90" x2="556" y2="90"/>
+            <text class="axis-text" x="556" y="86" text-anchor="end" fill="#d4a574">Ship line 90%</text>
+            <!-- area + line: 28 weeks, sample data -->
+            <path class="area-primary" d="M 60 110 L 78 105 L 96 102 L 114 95 L 132 92 L 150 87 L 168 82 L 186 88 L 204 95 L 222 102 L 240 105 L 258 100 L 276 88 L 294 80 L 312 76 L 330 72 L 348 76 L 366 70 L 384 65 L 402 62 L 420 58 L 438 60 L 456 55 L 474 52 L 492 48 L 510 50 L 528 46 L 546 48 L 546 190 L 60 190 Z"/>
+            <path class="line-primary" d="M 60 110 L 78 105 L 96 102 L 114 95 L 132 92 L 150 87 L 168 82 L 186 88 L 204 95 L 222 102 L 240 105 L 258 100 L 276 88 L 294 80 L 312 76 L 330 72 L 348 76 L 366 70 L 384 65 L 402 62 L 420 58 L 438 60 L 456 55 L 474 52 L 492 48 L 510 50 L 528 46 L 546 48"/>
+            <!-- release markers -->
+            <g transform="translate(168 82) rotate(45)"><rect x="-4" y="-4" width="8" height="8" class="node-active"/></g>
+            <g transform="translate(312 76) rotate(45)"><rect x="-4" y="-4" width="8" height="8" class="node-active"/></g>
+            <g transform="translate(456 55) rotate(45)"><rect x="-4" y="-4" width="8" height="8" class="node-active"/></g>
+            <text class="axis-text" x="168" y="74" text-anchor="middle">v2.1</text>
+            <text class="axis-text" x="312" y="68" text-anchor="middle">v2.2</text>
+            <text class="axis-text" x="456" y="47" text-anchor="middle">v2.3</text>
+            <!-- x axis -->
+            <text class="axis-text" x="60" y="215">D 01</text>
+            <text class="axis-text" x="294" y="215" text-anchor="middle">D 14</text>
+            <text class="axis-text" x="546" y="215" text-anchor="end">D 28</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 09.3 Token cost stacked area -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">09.3 / Token cost</div>
+          <div class="viz-name">Spend, stacked by model.</div>
+          <div class="viz-desc">Stacked area chart with Bronze tones for primary models (Bronze, Bronze Light, Bronze Dark) and a Plum band for experimental. Mono labels inside the bands at the right edge. Total in big Fraunces overlay.</div>
+          <div class="viz-when">Use in monthly cost reports and on any contract page where the spend is the question.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Inference cost &middot; last 12 weeks &middot; $ per week</div>
+          <svg class="chart" viewBox="0 0 600 240" preserveAspectRatio="xMidYMid meet">
+            <line class="grid-h" x1="44" y1="40" x2="586" y2="40"/>
+            <line class="grid-h" x1="44" y1="90" x2="586" y2="90"/>
+            <line class="grid-h" x1="44" y1="140" x2="586" y2="140"/>
+            <line class="grid-h" x1="44" y1="190" x2="586" y2="190"/>
+            <text class="axis-text" x="38" y="44" text-anchor="end">$8K</text>
+            <text class="axis-text" x="38" y="94" text-anchor="end">$6K</text>
+            <text class="axis-text" x="38" y="144" text-anchor="end">$4K</text>
+            <text class="axis-text" x="38" y="194" text-anchor="end">$2K</text>
+            <!-- stacked areas (bottom up) -->
+            <!-- primary model band -->
+            <path d="M 60 165 L 105 158 L 150 160 L 195 152 L 240 148 L 285 142 L 330 138 L 375 132 L 420 128 L 465 122 L 510 118 L 555 112 L 555 190 L 60 190 Z" fill="#d4a574" opacity="0.7"/>
+            <!-- secondary model band -->
+            <path d="M 60 145 L 105 140 L 150 138 L 195 132 L 240 128 L 285 122 L 330 116 L 375 108 L 420 102 L 465 96 L 510 92 L 555 86 L 555 112 L 510 118 L 465 122 L 420 128 L 375 132 L 330 138 L 285 142 L 240 148 L 195 152 L 150 160 L 105 158 L 60 165 Z" fill="#b08856" opacity="0.6"/>
+            <!-- experimental band -->
+            <path d="M 60 138 L 105 132 L 150 128 L 195 122 L 240 116 L 285 110 L 330 102 L 375 94 L 420 88 L 465 82 L 510 76 L 555 70 L 555 86 L 510 92 L 465 96 L 420 102 L 375 108 L 330 116 L 285 122 L 240 128 L 195 132 L 150 138 L 105 140 L 60 145 Z" fill="#a374d4" opacity="0.5"/>
+            <!-- inline labels -->
+            <text class="value-text" x="558" y="116" font-size="10" fill="#d4a574">primary</text>
+            <text class="value-text" x="558" y="90" font-size="10" fill="#b08856">secondary</text>
+            <text class="value-text" x="558" y="74" font-size="10" fill="#a374d4">exp</text>
+            <text class="axis-text" x="60" y="215">Wk 01</text>
+            <text class="axis-text" x="285" y="215" text-anchor="middle">Wk 06</text>
+            <text class="axis-text" x="555" y="215" text-anchor="end">Wk 12</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 — Tables -->
+    <section id="tables">
+      <div class="section-num">10 / Tables</div>
+      <h2 class="section-h">Tabular, with sparklines.</h2>
+      <p class="section-lede">When the data is too many things to chart, it's a table — but a table styled like a Plumb document. Mono headers in Bronze caps. Hairline rows. Sparklines inline. Status ribbons embedded.</p>
+
+      <!-- 10.1 Engagements table -->
+      <div class="viz">
+        <div class="viz-meta">
+          <div class="viz-num">10.1 / Engagements table</div>
+          <div class="viz-name">Many things, at a glance.</div>
+          <div class="viz-desc">Each row is an engagement. Mono caps headers in Bronze. Hairline rules between rows. Sparklines for trend. Status Ribbons for state. Numbers right-aligned in mono.</div>
+          <div class="viz-when">Use as the master view in a portfolio dashboard, a status email, or a quarterly review.</div>
+        </div>
+        <div class="viz-stage">
+          <div class="viz-stage-label">Active engagements &middot; current quarter</div>
+          <table class="dt">
+            <thead>
+              <tr>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Eval trend</th>
+                <th class="num">Pass rate</th>
+                <th class="num">Wk</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="label">Gradient — eval harness</td>
+                <td><span class="dt-ribbon live">Live</span></td>
+                <td>
+                  <svg class="spark" viewBox="0 0 80 24"><path class="area" d="M 2 18 L 12 16 L 22 14 L 32 10 L 42 8 L 52 6 L 62 4 L 72 4 L 78 4 L 78 22 L 2 22 Z"/><path d="M 2 18 L 12 16 L 22 14 L 32 10 L 42 8 L 52 6 L 62 4 L 72 4 L 78 4"/></svg>
+                </td>
+                <td class="num">94%</td>
+                <td class="num" style="color:var(--ash)">14</td>
+              </tr>
+              <tr>
+                <td class="label">Northwind — agent v2</td>
+                <td><span class="dt-ribbon beta">Beta</span></td>
+                <td>
+                  <svg class="spark" viewBox="0 0 80 24"><path class="area" d="M 2 14 L 12 12 L 22 16 L 32 14 L 42 12 L 52 8 L 62 10 L 72 6 L 78 6 L 78 22 L 2 22 Z"/><path d="M 2 14 L 12 12 L 22 16 L 32 14 L 42 12 L 52 8 L 62 10 L 72 6 L 78 6"/></svg>
+                </td>
+                <td class="num">87%</td>
+                <td class="num" style="color:var(--ash)">16</td>
+              </tr>
+              <tr>
+                <td class="label">Project Alder</td>
+                <td><span class="dt-ribbon embargo">Embargo</span></td>
+                <td>
+                  <svg class="spark" viewBox="0 0 80 24"><path class="area" d="M 2 12 L 12 10 L 22 12 L 32 14 L 42 12 L 52 10 L 62 8 L 72 8 L 78 8 L 78 22 L 2 22 Z"/><path d="M 2 12 L 12 10 L 22 12 L 32 14 L 42 12 L 52 10 L 62 8 L 72 8 L 78 8"/></svg>
+                </td>
+                <td class="num">—</td>
+                <td class="num" style="color:var(--ash)">9</td>
+              </tr>
+              <tr>
+                <td class="label">Vector Ops — RAG</td>
+                <td><span class="dt-ribbon live">Live</span></td>
+                <td>
+                  <svg class="spark" viewBox="0 0 80 24"><path class="area" d="M 2 16 L 12 14 L 22 12 L 32 10 L 42 8 L 52 6 L 62 5 L 72 4 L 78 4 L 78 22 L 2 22 Z"/><path d="M 2 16 L 12 14 L 22 12 L 32 10 L 42 8 L 52 6 L 62 5 L 72 4 L 78 4"/></svg>
+                </td>
+                <td class="num">96%</td>
+                <td class="num" style="color:var(--ash)">22</td>
+              </tr>
+              <tr>
+                <td class="label">Helios — classifier</td>
+                <td><span class="dt-ribbon draft">Draft</span></td>
+                <td>
+                  <svg class="spark" viewBox="0 0 80 24"><path class="area" d="M 2 14 L 12 12 L 22 14 L 32 12 L 42 14 L 52 12 L 62 10 L 72 12 L 78 12 L 78 22 L 2 22 Z"/><path d="M 2 14 L 12 12 L 22 14 L 32 12 L 42 14 L 52 12 L 62 10 L 72 12 L 78 12"/></svg>
+                </td>
+                <td class="num">79%</td>
+                <td class="num" style="color:var(--ash)">04</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 — Implementation -->
+    <section id="impl">
+      <div class="section-num">11 / Implementation</div>
+      <h2 class="section-h">Defaults, axes, restraint.</h2>
+      <p class="section-lede">A small set of rules that make every chart in this library feel like part of one system. Hand off with the file.</p>
+
+      <div class="impl-grid">
+        <div class="impl-item"><div class="impl-key">Grid lines</div><div class="impl-val">Hairline color, <code>1px</code>. Horizontal grids only — vertical grids appear only when categorical x-axis demands it. Never both.</div></div>
+        <div class="impl-item"><div class="impl-key">Data lines</div><div class="impl-val">Bronze (primary), Slate Blue (comparator), Sage (target/threshold). <code>2px</code> stroke. Never more than three series.</div></div>
+        <div class="impl-item"><div class="impl-key">Axis labels</div><div class="impl-val">Geist Mono, <code>9px</code>, Ash color, <code>0.1em</code> letter-spacing, all caps for units. Never lower-case.</div></div>
+        <div class="impl-item"><div class="impl-key">Annotations</div><div class="impl-val">Inline at the line's terminus, never in a separate legend. Mono, color-matched to the series.</div></div>
+        <div class="impl-item"><div class="impl-key">Numerals</div><div class="impl-val">Fraunces variable, <code>opsz</code> 144 for display KPIs, <code>opsz</code> 36 for table cells. Tabular figures on (<code>tnum</code>) for alignment.</div></div>
+        <div class="impl-item"><div class="impl-key">KPI rule</div><div class="impl-val">Hairline Bronze rule extends 56px past the card's left edge. Anchors without enclosing.</div></div>
+        <div class="impl-item"><div class="impl-key">Status colors</div><div class="impl-val">Sage / Slate Blue / Plum / Oxblood / Clay only as state. Never as decoration. The legend uses the Status Ribbon's color set.</div></div>
+        <div class="impl-item"><div class="impl-key">Active emphasis</div><div class="impl-val">Single radial Bronze glow on the most recent / active data point. <code>filter: drop-shadow(0 0 6px Bronze)</code>. Never animated unless the chart is live.</div></div>
+        <div class="impl-item"><div class="impl-key">Threshold lines</div><div class="impl-val">Bronze, <code>1px</code>, dashed (<code>3 4</code>), <code>0.6</code> opacity. Inline label at the right end.</div></div>
+        <div class="impl-item"><div class="impl-key">Sparklines</div><div class="impl-val">No axes. No labels. No grids. Just a Bronze line with optional <code>0.12</code> opacity Bronze fill below. <code>80×24px</code> default.</div></div>
+        <div class="impl-item"><div class="impl-key">Padding</div><div class="impl-val">Card surfaces use <code>40px</code> horizontal, <code>32px</code> vertical. Charts breathe inside that padding; never bleed to the edges except the KPI rule.</div></div>
+        <div class="impl-item"><div class="impl-key">Legend rule</div><div class="impl-val">If the legend would be taller than the chart, the chart wants to be a table.</div></div>
+      </div>
+    </section>
+
+    <!-- 12 — Closing -->
+    <section id="closing" class="closing">
+      <div class="section-num">12 / Closing</div>
+      <div class="closing-quote">A chart that hides the truth is just decoration.</div>
+      <div class="closing-meta">
+        <span>Plumb Viz Library v1.0</span>
+        <span>May 2026</span>
+        <span>Build in confidence</span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  const links = Array.from(document.querySelectorAll('.toc-link'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  function setActive() {
+    const y = window.scrollY + 160;
+    let active = sections[0];
+    for (const s of sections) {
+      if (!s) continue;
+      if (s.offsetTop <= y) active = s;
+    }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + active.id));
+  }
+  document.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+})();
+</script>
+</body>
+</html>

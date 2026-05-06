@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plumb — Brand System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Surfaces */
+  --graphite: #0f1413;
+  --stone: #151a19;
+  --slate: #1d2221;
+  --mist: #252b2a;
+  --hairline: #2f3534;
+  /* Text */
+  --paper: #f5f1ed;
+  --bone: #c4beb7;
+  --ash: #8a8580;
+  /* Brand */
+  --bronze: #d4a574;
+  --bronze-light: #e8c89a;
+  --bronze-dark: #b08856;
+  --oxblood: #8b3a4a;
+  /* Operational */
+  --sage: #5dbb6a;
+  --clay: #e35d5d;
+  --slate-blue: #5a9bb5;
+  --amber: #e8a82e;
+  --plum: #a374d4;
+  /* Type */
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--graphite);
+  color: var(--bone);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01', 'ss02';
+  overflow-x: hidden;
+}
+
+/* ----- Layout ----- */
+.layout {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+main {
+  max-width: 1000px;
+  padding: 80px 0 200px;
+}
+
+/* ----- TOC (sticky left rail) ----- */
+.toc {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  padding: 80px 32px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.toc-mark {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  text-transform: none;
+  margin-bottom: 48px;
+  display: block;
+  text-decoration: none;
+}
+.toc-mark::after {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+  margin-left: 7px;
+  position: relative;
+  bottom: 1px;
+}
+.toc-list { list-style: none; }
+.toc-list li {
+  margin-bottom: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.toc-num { color: var(--bronze); min-width: 18px; }
+.toc-link {
+  color: var(--ash);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.toc-link:hover { color: var(--bone); }
+.toc-link.active { color: var(--paper); }
+
+/* ----- Section primitives ----- */
+section {
+  padding: 120px 0;
+  border-top: 1px solid var(--hairline);
+}
+section:first-of-type { border-top: none; padding-top: 0; }
+
+.section-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 24px;
+  display: block;
+}
+.section-h {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 24px;
+  font-variation-settings: 'opsz' 144;
+}
+.section-lede {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--bone);
+  max-width: 580px;
+  margin-bottom: 48px;
+}
+
+/* ----- Hero ----- */
+.hero {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  border-top: none;
+}
+.hero-mark {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 180px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  position: relative;
+  display: inline-block;
+}
+.hero-mark::after {
+  content: '';
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+  margin-left: 22px;
+  vertical-align: baseline;
+  position: relative;
+  bottom: 8px;
+}
+.hero-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-top: 32px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.hero-meta span:nth-child(2)::before,
+.hero-meta span:nth-child(3)::before {
+  content: '/';
+  color: var(--hairline);
+  margin-right: 16px;
+}
+.hero-rail {
+  position: absolute;
+  left: -32px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent 0%, var(--hairline) 20%, var(--hairline) 80%, transparent 100%);
+}
+.hero-rail::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 33%;
+  width: 7px;
+  height: 1px;
+  background: var(--bronze);
+}
+.hero-rail::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 66%;
+  width: 7px;
+  height: 1px;
+  background: var(--bronze);
+}
+
+/* ----- Logo Directions ----- */
+.logos-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-top: 32px;
+}
+.logo-card {
+  background: var(--stone);
+  background: radial-gradient(ellipse at top, var(--slate) 0%, var(--stone) 60%);
+  border: 1px solid var(--hairline);
+  padding: 80px 48px 40px;
+  position: relative;
+}
+.logo-card-num {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--bronze);
+  text-transform: uppercase;
+}
+.logo-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  margin-bottom: 32px;
+}
+.logo-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--paper);
+  margin-bottom: 8px;
+}
+.logo-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ash);
+}
+
+/* Direction A — Plumb Line Actualized */
+.mark-a {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+}
+.mark-a-line {
+  width: 5px;
+  height: 110px;
+  background: linear-gradient(to bottom, var(--bronze) 0%, var(--bronze-dark) 100%);
+  position: relative;
+  margin-bottom: 12px;
+  border-radius: 1px;
+  clip-path: polygon(0 0, 100% 0, 60% 100%, 40% 100%);
+}
+.mark-a-bob {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  width: 14px;
+  height: 14px;
+  background: var(--bronze);
+  transform: translateX(-50%) rotate(45deg);
+}
+.mark-a-word {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+}
+
+/* Direction B — Vertical Operator */
+.mark-b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mark-b-bar {
+  width: 6px;
+  height: 56px;
+  background: var(--bronze);
+}
+.mark-b-word {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+}
+
+/* ----- Philosophy ----- */
+.philosophy-row {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 80px;
+  align-items: start;
+}
+.philosophy-body p {
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--bone);
+  margin-bottom: 20px;
+  max-width: 520px;
+}
+.philosophy-body em {
+  color: var(--paper);
+  font-style: normal;
+  font-weight: 500;
+}
+.margin-note {
+  position: relative;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ash);
+  font-style: italic;
+  font-family: var(--display);
+  font-variation-settings: 'opsz' 14;
+  padding-left: 16px;
+  margin-top: 24px;
+}
+.margin-note::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 1px;
+  background: var(--bronze);
+}
+
+/* ----- The Plumb Test ----- */
+.test-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 24px;
+}
+.test-card {
+  background: linear-gradient(180deg, var(--slate) 0%, var(--stone) 60%);
+  border: 1px solid var(--hairline);
+  padding: 36px 32px 32px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.test-card::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  width: 7px;
+  height: 7px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+.test-card-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--bronze);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.test-card-q {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--paper);
+  margin-bottom: 14px;
+  font-variation-settings: 'opsz' 36;
+}
+.test-card-a {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--bone);
+}
+.test-footer {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ash);
+  margin-top: 28px;
+  padding-left: 22px;
+  position: relative;
+  font-variation-settings: 'opsz' 24;
+}
+.test-footer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 12px;
+  height: 1px;
+  background: var(--bronze);
+}
+
+/* ----- How We Work ----- */
+.how-flow {
+  display: grid;
+  grid-template-columns: 1fr 36px 1fr 36px 1fr;
+  gap: 0;
+  align-items: stretch;
+  margin-top: 32px;
+}
+.how-phase {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+}
+.how-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--bronze);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.how-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--ash);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.how-h {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 14px;
+  font-variation-settings: 'opsz' 36;
+}
+.how-body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--bone);
+}
+.how-bridge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.how-bridge-line {
+  width: 14px;
+  height: 1px;
+  background: var(--bronze);
+  opacity: 0.5;
+}
+.how-bridge-node {
+  width: 8px;
+  height: 8px;
+  background: var(--graphite);
+  border: 1.5px solid var(--bronze);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* ----- Honest Translation primitive ----- */
+.ht-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+.ht-formal {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--bone);
+}
+.ht-divider {
+  width: 100%;
+  height: 1px;
+  position: relative;
+}
+.ht-divider::before {
+  content: '';
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: var(--bronze);
+  opacity: 0.5;
+}
+.ht-plain {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 24;
+}
+.ht-label {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--bronze);
+  text-transform: uppercase;
+  margin-right: 10px;
+  font-variation-settings: normal;
+  font-weight: 500;
+}
+
+/* ----- Primitives Catalog ----- */
+.primitive {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 64px;
+  padding: 64px 0;
+  border-top: 1px solid var(--hairline);
+  align-items: start;
+}
+.primitive:first-of-type { border-top: none; }
+.primitive-meta { position: sticky; top: 80px; }
+.primitive-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--bronze);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.primitive-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 14px;
+  font-variation-settings: 'opsz' 36;
+}
+.primitive-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--bone);
+  margin-bottom: 18px;
+}
+.primitive-origin {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--bronze-dark);
+  font-variation-settings: 'opsz' 14;
+}
+
+.primitive-stage {
+  background: var(--stone);
+  background: linear-gradient(180deg, var(--slate) 0%, var(--stone) 50%);
+  border: 1px solid var(--hairline);
+  padding: 40px;
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Primitive 1 — Depth Marker */
+.dm-doc {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 32px;
+  height: 100%;
+  min-height: 220px;
+}
+.dm-rail-wrap {
+  position: relative;
+  height: 100%;
+}
+.dm-rail {
+  position: absolute;
+  left: 12px;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--hairline);
+}
+.dm-rail::before, .dm-rail::after, .dm-rail span {
+  content: '';
+  position: absolute;
+  left: -3px;
+  width: 7px;
+  height: 1px;
+  background: var(--bronze);
+}
+.dm-rail::before { top: 0; }
+.dm-rail span { top: 50%; background: var(--bronze); }
+.dm-rail::after { bottom: 0; }
+.dm-labels {
+  position: absolute;
+  inset: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ash);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.dm-label-1 { position: absolute; top: 0; left: 28px; }
+.dm-label-2 { position: absolute; top: 50%; left: 28px; transform: translateY(-50%); color: var(--bronze); }
+.dm-label-3 { position: absolute; bottom: 0; left: 28px; }
+.dm-content {
+  padding-top: 4px;
+  align-self: center;
+}
+.dm-content h4 {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+  margin-bottom: 10px;
+}
+.dm-content p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--bone);
+}
+
+/* Primitive 2 — Verification Glyph */
+.vg-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: center;
+}
+.vg-line {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--bone);
+}
+.vg-line strong {
+  color: var(--paper);
+  font-weight: 500;
+}
+.vg-glyph {
+  display: inline-block;
+  margin-left: 4px;
+  color: var(--bronze);
+  transform: rotate(-8deg);
+  font-size: 11px;
+  position: relative;
+  top: -1px;
+}
+.vg-source {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ash);
+  text-transform: uppercase;
+  margin-top: 6px;
+  padding-left: 12px;
+  border-left: 1px solid var(--hairline);
+}
+
+/* Primitive 3 — Tension Line */
+.tl-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+}
+.tl-block p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--bone);
+}
+.tl-block p em {
+  font-style: italic;
+  font-family: var(--display);
+  color: var(--paper);
+  font-variation-settings: 'opsz' 14;
+}
+.tl-rule {
+  width: 100%;
+  position: relative;
+  height: 1px;
+}
+.tl-rule::before {
+  content: '';
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: var(--bronze);
+  opacity: 0.6;
+}
+
+/* Primitive 4 — Status Ribbon */
+.sr-stage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+.ribbon {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 6px 10px 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 2px;
+  position: relative;
+}
+.ribbon::after {
+  content: '/';
+  margin-left: 2px;
+  opacity: 0.7;
+}
+.ribbon-live { background: rgba(93, 187, 106, 0.16); color: var(--sage); border: 1px solid rgba(93, 187, 106, 0.35); }
+.ribbon-draft { background: rgba(90, 155, 181, 0.14); color: var(--slate-blue); border: 1px solid rgba(90, 155, 181, 0.32); }
+.ribbon-embargo { background: rgba(139, 58, 74, 0.18); color: #c97a8a; border: 1px solid rgba(139, 58, 74, 0.45); }
+.ribbon-beta { background: rgba(163, 116, 212, 0.14); color: var(--plum); border: 1px solid rgba(163, 116, 212, 0.32); }
+.ribbon-blocked { background: rgba(227, 93, 93, 0.14); color: var(--clay); border: 1px solid rgba(227, 93, 93, 0.32); }
+
+/* Primitive 5 — Weighted Callout */
+.wc-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.weighted-callout {
+  position: relative;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.4;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 36;
+  max-width: 380px;
+  padding-left: 28px;
+}
+/* The plumb line itself — vertical hairline running the height */
+.weighted-callout::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  bottom: 16px;
+  width: 1px;
+  background: var(--bronze);
+}
+/* The weighted bob at the bottom — diamond */
+.weighted-callout::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+
+/* Primitive 6 — Hairline Bridge */
+.hb-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bridge {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+.bridge-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+.bridge-node {
+  width: 10px;
+  height: 10px;
+  background: var(--graphite);
+  border: 1.5px solid var(--bronze);
+  transform: rotate(45deg);
+}
+.bridge-node.active {
+  background: var(--bronze);
+  box-shadow: 0 0 16px rgba(212, 165, 116, 0.5);
+}
+.bridge-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ash);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.bridge-label .num { color: var(--bronze); }
+.bridge-line {
+  flex: 1;
+  height: 1px;
+  background: var(--bronze);
+  opacity: 0.4;
+  margin: 0 -2px;
+  position: relative;
+  top: -8px;
+}
+
+/* Primitive 7 — Margin Note */
+.mn-stage {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 32px;
+  align-items: start;
+  padding-top: 16px;
+}
+.mn-body {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--bone);
+}
+.mn-body strong { color: var(--paper); font-weight: 500; }
+.mn-anchor {
+  position: relative;
+  background: rgba(212, 165, 116, 0.08);
+  padding: 0 2px;
+  color: var(--paper);
+}
+.mn-side {
+  position: relative;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ash);
+  font-variation-settings: 'opsz' 14;
+  padding-left: 14px;
+  margin-top: 22px;
+}
+.mn-side::before {
+  content: '';
+  position: absolute;
+  left: -32px;
+  top: 8px;
+  width: 38px;
+  height: 1px;
+  background: var(--bronze);
+  opacity: 0.5;
+}
+.mn-side::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 1px;
+  background: var(--bronze);
+}
+
+/* ----- Typography ----- */
+.type-set {
+  border-top: 1px solid var(--hairline);
+  padding: 56px 0;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.type-set:first-of-type { border-top: none; padding-top: 0; }
+.type-meta { padding-top: 4px; }
+.type-name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 24px;
+  color: var(--paper);
+  margin-bottom: 8px;
+}
+.type-role {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 12px;
+}
+.type-desc {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ash);
+}
+.type-specimen {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.specimen-display {
+  font-family: var(--display);
+  font-size: 96px;
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+}
+.specimen-display em {
+  font-style: italic;
+  color: var(--oxblood);
+}
+.specimen-body {
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--bone);
+  max-width: 540px;
+}
+.specimen-body strong { color: var(--paper); font-weight: 500; }
+.specimen-mono {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  line-height: 1.7;
+  color: var(--bone);
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 16px 20px;
+}
+.specimen-mono .key { color: var(--bronze); }
+.specimen-mono .val { color: var(--paper); }
+.specimen-mono .sage { color: var(--sage); }
+.specimen-mono .ash { color: var(--ash); }
+
+/* ----- Color Palette ----- */
+.palette-grids {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 24px;
+}
+.palette-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.palette-group h4 {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.swatch {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 16px;
+  padding: 10px 14px;
+  align-items: center;
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  margin-bottom: -1px;
+}
+.swatch-color {
+  width: 32px;
+  height: 32px;
+  border-radius: 2px;
+  border: 1px solid rgba(245, 241, 237, 0.06);
+}
+.swatch-info { display: flex; flex-direction: column; gap: 2px; }
+.swatch-name {
+  font-size: 13px;
+  color: var(--paper);
+  font-weight: 500;
+}
+.swatch-role {
+  font-size: 11px;
+  color: var(--ash);
+  line-height: 1.3;
+}
+.swatch-hex {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+  text-transform: uppercase;
+}
+
+/* ----- Application Sketches ----- */
+.apps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 32px;
+}
+.app {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 28px;
+  position: relative;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.app-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 20px;
+}
+
+/* App: Talk deck slide */
+.app-deck {
+  background: linear-gradient(135deg, var(--graphite) 0%, var(--stone) 100%);
+  justify-content: center;
+}
+.app-deck-h {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  margin-bottom: 18px;
+}
+.app-deck-h em {
+  font-style: italic;
+  color: var(--oxblood);
+}
+.app-deck-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+}
+.app-deck-meta .num { color: var(--bronze); }
+
+/* App: Case study */
+.app-case {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 16px;
+}
+.app-case-rail {
+  position: relative;
+  width: 1px;
+  background: var(--hairline);
+  margin-left: 8px;
+}
+.app-case-rail::before, .app-case-rail::after, .app-case-rail span {
+  content: '';
+  position: absolute;
+  left: -3px;
+  width: 7px;
+  height: 1px;
+  background: var(--bronze);
+}
+.app-case-rail::before { top: 0; }
+.app-case-rail span { top: 50%; }
+.app-case-rail::after { top: 100%; }
+.app-case-content { padding-left: 16px; }
+.app-case-title {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--paper);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.app-case-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 14px;
+}
+.app-case-body {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--bone);
+}
+.app-case-callout {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--oxblood);
+  margin: 14px 0 14px 0;
+  padding-left: 14px;
+  position: relative;
+}
+.app-case-callout::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  bottom: 10px;
+  width: 1px;
+  background: var(--bronze);
+}
+.app-case-callout::after {
+  content: '';
+  position: absolute;
+  left: 1px;
+  bottom: 4px;
+  width: 7px;
+  height: 7px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+
+/* App: Contract */
+.app-contract { padding: 24px 28px; }
+.app-contract-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  margin-bottom: 6px;
+}
+.app-contract-sub {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--paper);
+  margin-bottom: 18px;
+  line-height: 1.15;
+}
+.app-contract-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 12px;
+}
+.app-contract-row:last-of-type { border-bottom: none; }
+.app-contract-key {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+.app-contract-val {
+  color: var(--paper);
+  font-weight: 500;
+}
+.app-contract-foot {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.app-contract-sig {
+  font-family: var(--display);
+  font-size: 13px;
+  color: var(--bone);
+  font-style: italic;
+  font-variation-settings: 'opsz' 14;
+}
+
+/* App: Social card */
+.app-social {
+  background: linear-gradient(160deg, var(--slate) 0%, var(--graphite) 100%);
+  justify-content: space-between;
+}
+.app-social-quote {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  margin: 24px 0 0;
+  position: relative;
+  padding-left: 22px;
+}
+.app-social-quote::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  bottom: 12px;
+  width: 1px;
+  background: var(--bronze);
+}
+.app-social-quote::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 4px;
+  width: 9px;
+  height: 9px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+.app-social-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+}
+.app-social-mark {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+}
+.app-social-mark::after {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+  margin-left: 5px;
+  position: relative;
+  bottom: 1px;
+}
+.app-social-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+}
+
+/* App: Landing hero */
+.app-landing {
+  justify-content: space-between;
+}
+.app-landing-h {
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  margin-top: 20px;
+  margin-bottom: 14px;
+}
+.app-landing-h em {
+  font-style: italic;
+  color: var(--bronze);
+}
+.app-landing-sub {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--bone);
+  max-width: 320px;
+  margin-bottom: 24px;
+}
+.app-landing-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  padding: 10px 16px;
+  border: 1px solid var(--bronze);
+  background: rgba(212, 165, 116, 0.06);
+  width: fit-content;
+}
+.app-landing-cta::after {
+  content: '→';
+  font-size: 14px;
+}
+
+/* App: Email signature */
+.app-email { padding: 28px; justify-content: center; }
+.app-email-name {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--paper);
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+.app-email-title {
+  font-size: 12px;
+  color: var(--bone);
+  margin-bottom: 20px;
+}
+.app-email-rule {
+  width: 24px;
+  height: 1px;
+  background: var(--bronze);
+  margin: 12px 0;
+}
+.app-email-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ash);
+  line-height: 1.7;
+}
+.app-email-meta .label { color: var(--bronze); }
+.app-email-mark {
+  position: absolute;
+  bottom: 24px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--paper);
+  letter-spacing: -0.02em;
+  opacity: 0.6;
+}
+.app-email-mark::before {
+  content: '';
+  width: 3px;
+  height: 18px;
+  background: var(--bronze);
+}
+
+/* ----- Color in Context ----- */
+.context-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin-top: 32px;
+}
+.context-card {
+  background: var(--stone);
+  border: 1px solid var(--hairline);
+  padding: 22px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+.context-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--bronze);
+  margin-bottom: 16px;
+}
+
+/* Context: UI card */
+.ctx-ui-h {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--paper);
+  margin-bottom: 4px;
+}
+.ctx-ui-sub {
+  font-size: 11px;
+  color: var(--ash);
+  margin-bottom: 16px;
+}
+.ctx-ui-stat {
+  font-family: var(--display);
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--paper);
+  font-variation-settings: 'opsz' 144;
+  margin: 8px 0;
+}
+.ctx-ui-stat .unit {
+  font-size: 16px;
+  color: var(--oxblood);
+  font-style: italic;
+}
+.ctx-ui-rule {
+  height: 1px;
+  background: var(--bronze);
+  width: 60%;
+  margin: 12px 0 8px;
+}
+.ctx-ui-foot {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--bronze);
+  text-transform: uppercase;
+  margin-top: auto;
+}
+
+/* Context: Form states */
+.ctx-form { gap: 10px; }
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--slate);
+  border-left: 2px solid;
+  font-size: 11px;
+}
+.form-row.success { border-color: var(--sage); }
+.form-row.warn { border-color: var(--amber); }
+.form-row.error { border-color: var(--clay); }
+.form-row.info { border-color: var(--slate-blue); }
+.form-row.exp { border-color: var(--plum); }
+.form-icon {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  width: 50px;
+}
+.form-row.success .form-icon { color: var(--sage); }
+.form-row.warn .form-icon { color: var(--amber); }
+.form-row.error .form-icon { color: var(--clay); }
+.form-row.info .form-icon { color: var(--slate-blue); }
+.form-row.exp .form-icon { color: var(--plum); }
+.form-text { color: var(--bone); }
+
+/* Context: Terminal */
+.ctx-term { padding: 18px; background: var(--graphite); }
+.term-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ash);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hairline);
+}
+.term-header .live {
+  color: var(--sage);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.term-header .live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--sage);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--sage);
+}
+.term-row {
+  display: grid;
+  grid-template-columns: 16px 80px 1fr;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.term-prompt { color: var(--bronze); }
+.term-key { color: var(--bone); }
+.term-val { color: var(--paper); }
+.term-val.sage { color: var(--sage); }
+.term-val.plum { color: var(--plum); }
+.term-val.clay { color: var(--clay); }
+
+/* ----- Implementation Notes ----- */
+.impl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 56px;
+  margin-top: 24px;
+}
+.impl-item {
+  border-top: 1px solid var(--hairline);
+  padding: 16px 0;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  align-items: baseline;
+}
+.impl-key {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bronze);
+}
+.impl-val {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--bone);
+}
+.impl-val code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper);
+  background: var(--stone);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+
+/* ----- Closing ----- */
+.closing {
+  padding: 160px 0 80px;
+  border-top: 1px solid var(--hairline);
+}
+.closing-quote {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 36px;
+  line-height: 1.25;
+  font-weight: 400;
+  color: var(--oxblood);
+  font-variation-settings: 'opsz' 144;
+  max-width: 620px;
+  position: relative;
+  padding-left: 36px;
+}
+/* Plumb line */
+.closing-quote::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 12px;
+  bottom: 18px;
+  width: 1px;
+  background: var(--bronze);
+}
+/* Weighted bob */
+.closing-quote::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  bottom: 4px;
+  width: 11px;
+  height: 11px;
+  background: var(--bronze);
+  transform: rotate(45deg);
+}
+.closing-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+  margin-top: 64px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+.closing-meta span:not(:first-child)::before {
+  content: '/';
+  color: var(--hairline);
+  margin-right: 16px;
+}
+
+/* ----- Mobile ----- */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; padding: 0 24px; }
+  .toc { display: none; }
+  main { padding: 40px 0 120px; }
+  .hero-mark { font-size: 96px; }
+  .section-h { font-size: 32px; }
+  .logos-grid, .apps-grid, .palette-grids, .impl-grid, .test-grid { grid-template-columns: 1fr; gap: 20px; }
+  .how-flow { grid-template-columns: 1fr; gap: 16px; }
+  .how-bridge { padding: 8px 0; transform: rotate(90deg); }
+  .hero-mark::after { width: 14px; height: 14px; margin-left: 14px; }
+  .context-grid { grid-template-columns: 1fr; }
+  .primitive { grid-template-columns: 1fr; gap: 24px; }
+  .primitive-meta { position: static; }
+  .philosophy-row { grid-template-columns: 1fr; gap: 32px; }
+  .type-set { grid-template-columns: 1fr; gap: 24px; }
+  .specimen-display { font-size: 56px; }
+  .closing-quote { font-size: 26px; padding-left: 24px; }
+}
+
+/* Fade-in on load */
+section { opacity: 0; transform: translateY(8px); animation: fade 0.6s ease forwards; }
+section:nth-of-type(1) { animation-delay: 0s; }
+section:nth-of-type(2) { animation-delay: 0.05s; }
+@keyframes fade { to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ===== Sticky Left Rail TOC ===== -->
+  <nav class="toc" aria-label="Table of contents">
+    <a href="#hero" class="toc-mark">Plumb</a>
+    <ol class="toc-list">
+      <li><span class="toc-num">01</span><a href="#hero" class="toc-link">The Mark</a></li>
+      <li><span class="toc-num">02</span><a href="#logos" class="toc-link">Directions</a></li>
+      <li><span class="toc-num">03</span><a href="#philosophy" class="toc-link">Philosophy</a></li>
+      <li><span class="toc-num">04</span><a href="#plumb-test" class="toc-link">The Plumb Test</a></li>
+      <li><span class="toc-num">05</span><a href="#how-we-work" class="toc-link">How We Work</a></li>
+      <li><span class="toc-num">06</span><a href="#primitives" class="toc-link">Primitives</a></li>
+      <li><span class="toc-num">07</span><a href="#typography" class="toc-link">Typography</a></li>
+      <li><span class="toc-num">08</span><a href="#palette" class="toc-link">Palette</a></li>
+      <li><span class="toc-num">09</span><a href="#applications" class="toc-link">Applications</a></li>
+      <li><span class="toc-num">10</span><a href="#color-context" class="toc-link">Color in Use</a></li>
+      <li><span class="toc-num">11</span><a href="#impl" class="toc-link">Implementation</a></li>
+      <li><span class="toc-num">12</span><a href="#closing" class="toc-link">Closing</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ===== 01 — Hero ===== -->
+    <section id="hero" class="hero">
+      <div class="hero-rail" aria-hidden="true"></div>
+      <div class="hero-mark">Plumb</div>
+      <div class="hero-meta">
+        <span>Brand System</span>
+        <span>May 2026</span>
+        <span>v1.0</span>
+      </div>
+    </section>
+
+    <!-- ===== 02 — Logo Directions ===== -->
+    <section id="logos">
+      <div class="section-num">02 / Directions</div>
+      <h2 class="section-h">Two takes on the mark.</h2>
+      <p class="section-lede">Both directions are geometric, type-forward, and rooted in the brand's three meanings — vertical truth, depth, aplomb. One is literal. One is typographic. Pick the swing or pick the steady; we'll commit fully either way.</p>
+
+      <div class="logos-grid">
+        <div class="logo-card">
+          <div class="logo-card-num">A / The Plumb Line</div>
+          <div class="logo-stage">
+            <div class="mark-a">
+              <div class="mark-a-line">
+                <div class="mark-a-bob"></div>
+              </div>
+              <div class="mark-a-word">Plumb</div>
+            </div>
+          </div>
+          <div class="logo-name">The Plumb Line, actualized.</div>
+          <div class="logo-desc">A weighted Bronze line, slightly tapered toward a diamond bob. The literal tool, made unmistakable. Reads as timeless precision.</div>
+        </div>
+
+        <div class="logo-card">
+          <div class="logo-card-num">B / The Vertical Operator</div>
+          <div class="logo-stage">
+            <div class="mark-b">
+              <div class="mark-b-bar"></div>
+              <div class="mark-b-word">Plumb</div>
+            </div>
+          </div>
+          <div class="logo-name">The Vertical Operator.</div>
+          <div class="logo-desc">A heavy bar set on the same axis as the "l" — mark and word fuse. Maximum minimal. The kind of move that ages well.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 03 — Philosophy ===== -->
+    <section id="philosophy">
+      <div class="section-num">03 / Philosophy</div>
+      <h2 class="section-h">Vertical truth as a design primitive.</h2>
+      <div class="philosophy-row">
+        <div class="philosophy-body">
+          <p>The system is built from one idea, repeated thoughtfully. The plumb line — the oldest tool for measuring true vertical — appears across the brand as marks, dividers, callouts, status indicators, and document wayfinding.</p>
+          <p>Less decoration. More clarity. <em>The constraint is the point.</em></p>
+          <p>What follows is a catalog of seven primitives. They are not ornament. Each one earns its place by doing a job — wayfinding, verification, hierarchy, status. Together they make Plumb's pages feel considered without being precious.</p>
+        </div>
+        <aside class="margin-note">A brand that has ideas in the details earns trust faster than a brand that performs them.</aside>
+      </div>
+    </section>
+
+    <!-- ===== 04 — The Plumb Test ===== -->
+    <section id="plumb-test">
+      <div class="section-num">04 / The Plumb Test</div>
+      <h2 class="section-h">Four questions, run in order.</h2>
+      <p class="section-lede">Before anything goes out — a deck, a model, a recommendation, a paragraph — it passes through these. Fail one, it goes back. Pass all four, ship it.</p>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <div class="test-card-num">01 / Truth</div>
+          <h3 class="test-card-q">Is it true?</h3>
+          <p class="test-card-a">We can back it with data — and we have. Sourced. Verifiable. If we're guessing, we say so. If we're hedging, we name what we don't know yet.</p>
+        </div>
+        <div class="test-card">
+          <div class="test-card-num">02 / Use</div>
+          <h3 class="test-card-q">Is it useful?</h3>
+          <p class="test-card-a">It changes what you decide, not just what you read. If removing it doesn't change a single decision your team will make, it doesn't go in.</p>
+        </div>
+        <div class="test-card">
+          <div class="test-card-num">03 / Operability</div>
+          <h3 class="test-card-q">Is it operable?</h3>
+          <p class="test-card-a">Someone else could run with this without us in the room. Hand-off ready. No tribal knowledge required, no "ask Evan" footnote.</p>
+        </div>
+        <div class="test-card">
+          <div class="test-card-num">04 / Clarity</div>
+          <h3 class="test-card-q">Is it clear?</h3>
+          <p class="test-card-a">A first-time reader gets it without translation. If we needed to be there to explain, we didn't write it well enough. Try again.</p>
+        </div>
+      </div>
+
+      <div class="test-footer">If it doesn't pass all four, it isn't done.</div>
+    </section>
+
+    <!-- ===== 05 — How We Work ===== -->
+    <section id="how-we-work">
+      <div class="section-num">05 / How We Work</div>
+      <h2 class="section-h">Diagnose. Build. Hand off.</h2>
+      <p class="section-lede">Three phases, each with its own discipline. The hand-off is the deliverable — if your team can't run it without us, we didn't finish the job.</p>
+
+      <div class="how-flow">
+        <div class="how-phase">
+          <div class="how-num">Phase 01</div>
+          <div class="how-meta">Wk 1–2 &middot; Diagnose</div>
+          <h3 class="how-h">Read the room.</h3>
+          <p class="how-body">We start by understanding what you're actually solving. We read your data. We ask the uncomfortable questions because the comfortable ones rarely surface real constraints. Most of the value of an engagement is decided here, before anyone touches code.</p>
+        </div>
+        <div class="how-bridge" aria-hidden="true">
+          <div class="how-bridge-line"></div>
+          <div class="how-bridge-node"></div>
+          <div class="how-bridge-line"></div>
+        </div>
+        <div class="how-phase">
+          <div class="how-num">Phase 02</div>
+          <div class="how-meta">Wk 3–8 &middot; Build</div>
+          <h3 class="how-h">Build for production.</h3>
+          <p class="how-body">We engineer for the real environment from day one — your messy data, your legacy systems, your latency budget. We document tradeoffs as we make them. By week six, your team is in the loop. By week eight, the integration is moving a number you already report on.</p>
+        </div>
+        <div class="how-bridge" aria-hidden="true">
+          <div class="how-bridge-line"></div>
+          <div class="how-bridge-node"></div>
+          <div class="how-bridge-line"></div>
+        </div>
+        <div class="how-phase">
+          <div class="how-num">Phase 03</div>
+          <div class="how-meta">Wk 8–10 &middot; Hand off</div>
+          <h3 class="how-h">Step out of the room.</h3>
+          <p class="how-body">We're not load-bearing forever. We finish with your team owning the eval harness, the deployment, the on-call rotation. We stay close, but we step back. The deliverable is what works after we leave.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 06 — Primitives Catalog ===== -->
+    <section id="primitives">
+      <div class="section-num">06 / Primitives</div>
+      <h2 class="section-h">Eight small moves.</h2>
+      <p class="section-lede">Each primitive is born from one of the brand's three meanings — vertical truth, plumbing the depths, aplomb. They appear across talk decks, case studies, contracts, the site, and email. Same DNA, different surface.</p>
+
+      <!-- Primitive 1 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.1 / Wayfinding</div>
+          <div class="primitive-name">The Depth Marker</div>
+          <div class="primitive-desc">A vertical hairline running flush-left on long-form content, divided into thirds. As the reader scrolls, they see how deep into the analysis they've gone.</div>
+          <div class="primitive-origin">Born from <em>plumb the depths</em>.</div>
+        </div>
+        <div class="primitive-stage">
+          <div class="dm-doc">
+            <div class="dm-rail-wrap" aria-hidden="true">
+              <div class="dm-rail"><span></span></div>
+              <div class="dm-labels">
+                <div class="dm-label-1">Surface</div>
+                <div class="dm-label-2">Depth</div>
+                <div class="dm-label-3">Substrate</div>
+              </div>
+            </div>
+            <div class="dm-content">
+              <h4>Why this engagement is structured in three phases.</h4>
+              <p>Most AI integrations fail at the seam between proof-of-concept and production. Halfway through this analysis is where that seam shows up — and where the work either earns its keep or doesn't.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primitive 2 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.2 / Provenance</div>
+          <div class="primitive-name">The Verification Glyph</div>
+          <div class="primitive-desc">A small rotated checkmark in Bronze, set inline after any sourced claim. Hover or click reveals the source. A visual commitment to "we don't claim what we can't back up."</div>
+          <div class="primitive-origin">Born from <em>vertical truth</em>.</div>
+        </div>
+        <div class="primitive-stage vg-stage">
+          <div class="vg-line">Eval pass-rate climbed from <strong>71%</strong> to <strong>94%</strong><span class="vg-glyph">✓</span> after the eight-week build.</div>
+          <div class="vg-source">Source / engagement #14, gradient-rag-v3 harness</div>
+          <div class="vg-line" style="margin-top: 8px;">Time-to-first-value averaged <strong>11 days</strong><span class="vg-glyph">✓</span> across the last six engagements.</div>
+          <div class="vg-source">Source / internal benchmarks, 2024–2026</div>
+        </div>
+      </div>
+
+      <!-- Primitive 3 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.3 / Hierarchy</div>
+          <div class="primitive-name">The Tension Line</div>
+          <div class="primitive-desc">A horizontal hairline that doesn't run margin to margin — it starts at 20% and ends at 80%, leaving deliberate gaps. A divider that signals "section break" without the deadness of a full rule.</div>
+          <div class="primitive-origin">Born from the <em>incompleteness</em> of working systems.</div>
+        </div>
+        <div class="primitive-stage tl-stage">
+          <div class="tl-block"><p>The first phase is diagnostic. We spend two weeks asking uncomfortable questions, because the comfortable ones never reveal the real constraints. <em>This is not consulting theater</em> — it's the difference between a system that ships and a system that gets shelved.</p></div>
+          <div class="tl-rule" aria-hidden="true"></div>
+          <div class="tl-block"><p>The second phase is the build. Here, the work compresses — by week six, your team is the one running the model in CI. By week eight, the integration moves a number you already report on.</p></div>
+        </div>
+      </div>
+
+      <!-- Primitive 4 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.4 / Status</div>
+          <div class="primitive-name">The Status Ribbon</div>
+          <div class="primitive-desc">A Berkeley Mono label with a trailing slash — <code style="font-family: var(--mono); font-size: 11px; color: var(--paper);">LIVE /</code>, <code style="font-family: var(--mono); font-size: 11px; color: var(--paper);">DRAFT /</code>, <code style="font-family: var(--mono); font-size: 11px; color: var(--paper);">EMBARGO /</code>. The slash is a filesystem nod. Reads as serious tooling, not a SaaS chip.</div>
+          <div class="primitive-origin">Born from the <em>language of production</em>.</div>
+        </div>
+        <div class="primitive-stage sr-stage">
+          <span class="ribbon ribbon-live">Live</span>
+          <span class="ribbon ribbon-draft">Draft</span>
+          <span class="ribbon ribbon-beta">Beta</span>
+          <span class="ribbon ribbon-embargo">Embargo</span>
+          <span class="ribbon ribbon-blocked">Blocked</span>
+        </div>
+      </div>
+
+      <!-- Primitive 5 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.5 / Emphasis</div>
+          <div class="primitive-name">The Weighted Callout</div>
+          <div class="primitive-desc">A pull-quote in Fraunces italic, set in Oxblood, anchored by a small Bronze dot at the bottom-left of the opening quote — an inverted plumb bob. The weight is at the start: <em>this matters; read from here</em>.</div>
+          <div class="primitive-origin">Born from the <em>plumb bob itself</em>.</div>
+        </div>
+        <div class="primitive-stage wc-stage">
+          <div class="weighted-callout">An integration you can't operate is a demo with a longer shelf life.</div>
+        </div>
+      </div>
+
+      <!-- Primitive 6 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.6 / Flow</div>
+          <div class="primitive-name">The Hairline Bridge</div>
+          <div class="primitive-desc">A Bronze hairline punctuated by small rotated diamond nodes. Replaces flowchart arrows and boxy diagrams. The diamonds are callbacks to the plumb mark; the active node glows.</div>
+          <div class="primitive-origin">Born from <em>connections that don't shout</em>.</div>
+        </div>
+        <div class="primitive-stage hb-stage">
+          <div class="bridge">
+            <div class="bridge-step"><div class="bridge-node active"></div><div class="bridge-label"><span class="num">01</span> Read</div></div>
+            <div class="bridge-line"></div>
+            <div class="bridge-step"><div class="bridge-node"></div><div class="bridge-label"><span class="num">02</span> Map</div></div>
+            <div class="bridge-line"></div>
+            <div class="bridge-step"><div class="bridge-node"></div><div class="bridge-label"><span class="num">03</span> Build</div></div>
+            <div class="bridge-line"></div>
+            <div class="bridge-step"><div class="bridge-node"></div><div class="bridge-label"><span class="num">04</span> Hand-off</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primitive 7 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.7 / Annotation</div>
+          <div class="primitive-name">The Margin Note</div>
+          <div class="primitive-desc">Secondary commentary in PP Neue Montreal Bone, set in the outer margin, connected to its parent text by a hairline that breaks from the column and rejoins. Like footnotes in a well-designed book — but visual.</div>
+          <div class="primitive-origin">Born from <em>respect for the reader</em>.</div>
+        </div>
+        <div class="primitive-stage">
+          <div class="mn-stage">
+            <div class="mn-body">The hand-off is the deliverable. By the end of week eight, your team owns the <span class="mn-anchor">eval harness</span>, the deployment, and the on-call rotation. We stay close, but we stop being load-bearing.</div>
+            <aside class="mn-side">An eval harness is the regression suite for AI — the thing that tells you the new model didn't quietly get worse.</aside>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primitive 8 -->
+      <div class="primitive">
+        <div class="primitive-meta">
+          <div class="primitive-num">06.8 / Voice</div>
+          <div class="primitive-name">The Honest Translation</div>
+          <div class="primitive-desc">A polished statement, paired with its plain-English version. Used to ground formal language without losing the substance. The brand's quiet sense of humor — a small refusal to take ourselves too seriously.</div>
+          <div class="primitive-origin">Born from <em>same person at work and at the bar</em>.</div>
+        </div>
+        <div class="primitive-stage">
+          <div class="ht-pair">
+            <p class="ht-formal">We build eval harnesses that become part of the deployment gate, ensuring every model change is regressed against ground truth before any release moves to production.</p>
+            <div class="ht-divider" aria-hidden="true"></div>
+            <div class="ht-plain"><span class="ht-label">Plainly /</span>the system has to prove it still works before anyone ships a change.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 07 — Typography ===== -->
+    <section id="typography">
+      <div class="section-num">07 / Typography</div>
+      <h2 class="section-h">Three voices in dialogue.</h2>
+      <p class="section-lede">A display serif for moments that earn the space. A geometric sans that does the work of prose. A matched mono that carries everything operational. All three are open-source and freely available.</p>
+
+      <div class="type-set">
+        <div class="type-meta">
+          <div class="type-role">Display</div>
+          <div class="type-name">Fraunces</div>
+          <div class="type-desc">Headlines, italic pull-quotes, oversized numerals, the wordmark. Earns its space; never the body.</div>
+        </div>
+        <div class="type-specimen">
+          <div class="specimen-display">A system <em>built</em><br>to be used.</div>
+          <div class="specimen-body" style="font-family: var(--display); font-size: 22px; line-height: 1.4; font-style: italic; color: var(--oxblood); font-variation-settings: 'opsz' 36;">An integration you can't operate is a demo with a longer shelf life.</div>
+        </div>
+      </div>
+
+      <div class="type-set">
+        <div class="type-meta">
+          <div class="type-role">Body</div>
+          <div class="type-name">Geist</div>
+          <div class="type-desc">The backbone. Body copy, UI labels, navigation. Geometric, technical, restrained — built for product surfaces. Open-source.</div>
+        </div>
+        <div class="type-specimen">
+          <div class="specimen-body"><strong>Most AI in production looks nothing like the demo.</strong> Plumb starts with a diagnosis — what your data actually looks like, where the legacy systems are brittle, what success means to your team in numbers you already report on. We don't promise latencies we haven't hit with your data. We don't ship systems that only work when everything goes right.</div>
+        </div>
+      </div>
+
+      <div class="type-set">
+        <div class="type-meta">
+          <div class="type-role">Mono</div>
+          <div class="type-name">Geist Mono</div>
+          <div class="type-desc">Status, terminal output, metadata, small caps. Pairs with Geist by design. Used sparingly, it stays high-signal.</div>
+        </div>
+        <div class="type-specimen">
+          <div class="specimen-mono">
+<span class="ash">▸ eval &middot; gradient-rag-v3 &middot;</span> <span class="sage">live</span><br>
+&nbsp;&nbsp;<span class="key">step</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="val">retrieve</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ash">+ 0.12s</span><br>
+&nbsp;&nbsp;<span class="key">k</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="val">8 / 8</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ash">+ 0.04s</span><br>
+&nbsp;&nbsp;<span class="key">step</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="val">rerank</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ash">+ 0.31s</span><br>
+&nbsp;&nbsp;<span class="key">grounded</span>&nbsp;<span class="sage">true &middot; 4 citations</span>&nbsp;<span class="ash">+ 1.21s</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 08 — Palette ===== -->
+    <section id="palette">
+      <div class="section-num">08 / Palette</div>
+      <h2 class="section-h">Sixteen colors. Each with a role.</h2>
+      <p class="section-lede">Studio Mode is dark-native — the surface a coder lives in. Surfaces step quietly through five tones; text steps from Paper to Ash; brand and operational colors do specific jobs. No color is decorative.</p>
+
+      <div class="palette-grids">
+        <div class="palette-group">
+          <h4>Surfaces &amp; Text</h4>
+          <div class="swatch"><div class="swatch-color" style="background:#0f1413"></div><div class="swatch-info"><div class="swatch-name">Graphite</div><div class="swatch-role">Canvas / page background</div></div><div class="swatch-hex">#0F1413</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#151a19"></div><div class="swatch-info"><div class="swatch-name">Stone</div><div class="swatch-role">Surface 1 — cards</div></div><div class="swatch-hex">#151A19</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#1d2221"></div><div class="swatch-info"><div class="swatch-name">Slate</div><div class="swatch-role">Surface 2 — raised</div></div><div class="swatch-hex">#1D2221</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#252b2a"></div><div class="swatch-info"><div class="swatch-name">Mist</div><div class="swatch-role">Surface 3 — modals, hover</div></div><div class="swatch-hex">#252B2A</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#2f3534"></div><div class="swatch-info"><div class="swatch-name">Hairline</div><div class="swatch-role">Borders, dividers</div></div><div class="swatch-hex">#2F3534</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#f5f1ed"></div><div class="swatch-info"><div class="swatch-name">Paper</div><div class="swatch-role">Primary text</div></div><div class="swatch-hex">#F5F1ED</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#c4beb7"></div><div class="swatch-info"><div class="swatch-name">Bone</div><div class="swatch-role">Body text, secondary</div></div><div class="swatch-hex">#C4BEB7</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#8a8580"></div><div class="swatch-info"><div class="swatch-name">Ash</div><div class="swatch-role">Tertiary, metadata</div></div><div class="swatch-hex">#8A8580</div></div>
+        </div>
+
+        <div class="palette-group">
+          <h4>Brand &amp; Operational</h4>
+          <div class="swatch"><div class="swatch-color" style="background:#d4a574"></div><div class="swatch-info"><div class="swatch-name">Bronze</div><div class="swatch-role">Primary accent — mark, hairlines</div></div><div class="swatch-hex">#D4A574</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#e8c89a"></div><div class="swatch-info"><div class="swatch-name">Bronze Light</div><div class="swatch-role">Hover, active states</div></div><div class="swatch-hex">#E8C89A</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#b08856"></div><div class="swatch-info"><div class="swatch-name">Bronze Dark</div><div class="swatch-role">Pressed states</div></div><div class="swatch-hex">#B08856</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#8b3a4a"></div><div class="swatch-info"><div class="swatch-name">Oxblood</div><div class="swatch-role">Italic pull-quotes, emotional voice</div></div><div class="swatch-hex">#8B3A4A</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#5dbb6a"></div><div class="swatch-info"><div class="swatch-name">Sage</div><div class="swatch-role">Live / active / shipped</div></div><div class="swatch-hex">#5DBB6A</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#e35d5d"></div><div class="swatch-info"><div class="swatch-name">Clay</div><div class="swatch-role">Error / blocked</div></div><div class="swatch-hex">#E35D5D</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#5a9bb5"></div><div class="swatch-info"><div class="swatch-name">Slate Blue</div><div class="swatch-role">Info / pending</div></div><div class="swatch-hex">#5A9BB5</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#e8a82e"></div><div class="swatch-info"><div class="swatch-name">Amber</div><div class="swatch-role">Warning / draft</div></div><div class="swatch-hex">#E8A82E</div></div>
+          <div class="swatch"><div class="swatch-color" style="background:#a374d4"></div><div class="swatch-info"><div class="swatch-name">Plum</div><div class="swatch-role">Experimental / beta</div></div><div class="swatch-hex">#A374D4</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 09 — Application Sketches ===== -->
+    <section id="applications">
+      <div class="section-num">09 / Applications</div>
+      <h2 class="section-h">The system, in situ.</h2>
+      <p class="section-lede">Six contexts. Same DNA, different expression. The primitives, the type, and the palette do their respective jobs without anyone tying them too tightly together.</p>
+
+      <div class="apps-grid">
+
+        <div class="app app-deck">
+          <div class="app-label">Talk Deck Slide</div>
+          <h3 class="app-deck-h">An integration you can't operate <em>is a demo</em> with a longer shelf life.</h3>
+          <div class="app-deck-meta"><span><span class="num">04</span> &middot; Hand-off as deliverable</span><span>Plumb / 2026</span></div>
+        </div>
+
+        <div class="app">
+          <div class="app-label">Case Study Spread</div>
+          <div class="app-case">
+            <div class="app-case-rail" aria-hidden="true"><span></span></div>
+            <div class="app-case-content">
+              <div class="app-case-title">Gradient — eval harness</div>
+              <div class="app-case-meta">Shipped &middot; Wk 14 &middot; 8-week build</div>
+              <div class="app-case-body">A regression suite for the team's RAG pipeline, plugged into the deploy gate. Pass-rate went from 71% to 94%; time-to-detection dropped from days to minutes.</div>
+              <div class="app-case-callout">The harness is now load-bearing for every model swap they do.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="app app-contract">
+          <div class="app-label">Proposal &middot; One-Pager</div>
+          <div class="app-contract-title">Engagement</div>
+          <div class="app-contract-sub">Northwind — agent v2.</div>
+          <div class="app-contract-row"><span class="app-contract-key">Phase</span><span class="app-contract-val">Build &middot; Wk 16</span></div>
+          <div class="app-contract-row"><span class="app-contract-key">Status</span><span class="ribbon ribbon-draft" style="font-size:9px; padding:3px 8px;">Review</span></div>
+          <div class="app-contract-row"><span class="app-contract-key">Owner</span><span class="app-contract-val">e. luckey ✓</span></div>
+          <div class="app-contract-foot">
+            <div class="app-contract-sig">Counter-signed in good faith.</div>
+          </div>
+        </div>
+
+        <div class="app app-social">
+          <div class="app-label">Social Card</div>
+          <div class="app-social-quote">AI engineers, not AI salespeople.</div>
+          <div class="app-social-foot">
+            <div class="app-social-mark">Plumb</div>
+            <div class="app-social-tag">@ plumb &middot; 2026</div>
+          </div>
+        </div>
+
+        <div class="app app-landing">
+          <div class="app-label">Landing Hero</div>
+          <h3 class="app-landing-h">AI systems that <em>work</em><br>in production.</h3>
+          <p class="app-landing-sub">Diagnosis-first AI engineering. We design, build, and integrate systems that survive contact with your real data and your real team.</p>
+          <a href="#" class="app-landing-cta">See engagements</a>
+        </div>
+
+        <div class="app app-email">
+          <div class="app-label">Email Signature</div>
+          <div class="app-email-name">Evan Luckey</div>
+          <div class="app-email-title">Founder &middot; Plumb</div>
+          <div class="app-email-rule"></div>
+          <div class="app-email-meta">
+            <span class="label">e</span>&nbsp;&nbsp;evan@plumb.work<br>
+            <span class="label">w</span>&nbsp;&nbsp;plumb.work<br>
+            <span class="label">s</span>&nbsp;&nbsp;<span style="color:var(--sage)">accepting Q3 work</span>
+          </div>
+          <div class="app-email-mark">Plumb</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== 10 — Color in Context ===== -->
+    <section id="color-context">
+      <div class="section-num">10 / Color in Use</div>
+      <h2 class="section-h">Three quick tests.</h2>
+      <p class="section-lede">Proof that the operational palette holds up in real surfaces — a KPI card, a state-driven form, a live terminal stream.</p>
+
+      <div class="context-grid">
+        <div class="context-card">
+          <div class="context-label">KPI Card</div>
+          <div class="ctx-ui-h">Eval pass-rate</div>
+          <div class="ctx-ui-sub">post-integration / 8-week build</div>
+          <div class="ctx-ui-stat">94<span class="unit">%</span></div>
+          <div class="ctx-ui-rule"></div>
+          <div class="ctx-ui-foot">↑ from 71% baseline</div>
+        </div>
+
+        <div class="context-card ctx-form">
+          <div class="context-label">State-driven form</div>
+          <div class="form-row success"><span class="form-icon">live /</span><span class="form-text">Deploy gate green &middot; ready to ship</span></div>
+          <div class="form-row warn"><span class="form-icon">draft /</span><span class="form-text">Eval set incomplete &middot; needs review</span></div>
+          <div class="form-row error"><span class="form-icon">fail /</span><span class="form-text">Latency over budget &middot; rerank step</span></div>
+          <div class="form-row info"><span class="form-icon">info /</span><span class="form-text">Awaiting client data &middot; Wed 3pm</span></div>
+          <div class="form-row exp"><span class="form-icon">beta /</span><span class="form-text">Tool-use loop &middot; sandboxed only</span></div>
+        </div>
+
+        <div class="context-card ctx-term">
+          <div class="term-header">
+            <span>plumb &middot; agent-v2 &middot; trace</span>
+            <span class="live">live</span>
+          </div>
+          <div class="term-row"><span class="term-prompt">▸</span><span class="term-key">tool</span><span class="term-val">vector_search</span></div>
+          <div class="term-row"><span class="term-prompt">▸</span><span class="term-key">tokens</span><span class="term-val sage">streaming</span></div>
+          <div class="term-row"><span class="term-prompt">▸</span><span class="term-key">policy</span><span class="term-val plum">guardrail-v3</span></div>
+          <div class="term-row"><span class="term-prompt">▸</span><span class="term-key">retry</span><span class="term-val clay">429 &middot; backoff 2s</span></div>
+          <div class="term-row"><span class="term-prompt">▸</span><span class="term-key">grounded</span><span class="term-val sage">true &middot; 4 citations</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 11 — Implementation Notes ===== -->
+    <section id="impl">
+      <div class="section-num">11 / Implementation</div>
+      <h2 class="section-h">Notes for whoever picks this up.</h2>
+      <p class="section-lede">Specs, defaults, and the quiet decisions that make the system feel like a system. Hand this off with the file.</p>
+
+      <div class="impl-grid">
+        <div class="impl-item"><div class="impl-key">Baseline grid</div><div class="impl-val">8 px. All vertical rhythm and component padding rounds to multiples.</div></div>
+        <div class="impl-item"><div class="impl-key">Hairline weight</div><div class="impl-val"><code>0.5px</code> on Retina, <code>1px</code> otherwise. Use Hairline color for borders; Bronze for marks.</div></div>
+        <div class="impl-item"><div class="impl-key">Depth marker</div><div class="impl-val">Three equal divisions. Active third in Bronze; surrounding ticks in Hairline.</div></div>
+        <div class="impl-item"><div class="impl-key">Tension line</div><div class="impl-val">Horizontal hairline starts at <code>20%</code>, ends at <code>80%</code>. Never margin-to-margin.</div></div>
+        <div class="impl-item"><div class="impl-key">Bronze accent budget</div><div class="impl-val">No more than <code>3%</code> of any composition. Bronze loses meaning at higher density.</div></div>
+        <div class="impl-item"><div class="impl-key">Operational colors</div><div class="impl-val">Only as state. Never decorative. Sage = live; Clay = failed; Slate Blue = info; Amber = draft; Plum = experimental.</div></div>
+        <div class="impl-item"><div class="impl-key">Fraunces axes</div><div class="impl-val"><code>opsz</code> 144 for display, <code>opsz</code> 14 for inline italics. Weights: 400 / 500 / 600.</div></div>
+        <div class="impl-item"><div class="impl-key">Mono use</div><div class="impl-val">Status, metadata, terminal output. Never body. <code>0.12em</code> letter-spacing on small caps.</div></div>
+        <div class="impl-item"><div class="impl-key">Gradients · allowed</div><div class="impl-val">Value gradients within a single color family (Slate→Stone, Bronze→Bronze Dark). Soft surface gradients (≤15% value shift). Active-state radial glows. Hairline fades.</div></div>
+        <div class="impl-item"><div class="impl-key">Gradients · banned</div><div class="impl-val">Hue gradients across families. Saturated rainbow gradients. Sunset/sky gradients. Anything decorative.</div></div>
+        <div class="impl-item"><div class="impl-key">Gradient direction</div><div class="impl-val">Default top-to-bottom or top-center radial (gravity-aware). Diagonal (135° / 160°) only on full-bleed app cards.</div></div>
+        <div class="impl-item"><div class="impl-key">Gradient test</div><div class="impl-val">A viewer should sense depth without consciously perceiving the gradient. If you can <em>name</em> it, it's too loud.</div></div>
+        <div class="impl-item"><div class="impl-key">Oxblood discipline</div><div class="impl-val"><strong>Italic Fraunces only.</strong> Never on status, labels, or mono. Never adjacent to Clay in the same composition. Never naked — always lives inside prose or a callout.</div></div>
+        <div class="impl-item"><div class="impl-key">Motion easing</div><div class="impl-val"><code>cubic-bezier(0.4, 0, 0.2, 1)</code>. 200–400 ms. No bounce. Hairline reveals over fades.</div></div>
+        <div class="impl-item"><div class="impl-key">Type stack</div><div class="impl-val"><strong>Fraunces</strong> (display) + <strong>Geist</strong> (body) + <strong>Geist Mono</strong> (mono). All three are open-source and freely available via Google Fonts. No commercial licensing required.</div></div>
+        <div class="impl-item"><div class="impl-key">Mark construction</div><div class="impl-val">Direction A: tapered Bronze stroke + diamond bob at lower third. Direction B: bar weight = Fraunces 600's heaviest hairline.</div></div>
+      </div>
+    </section>
+
+    <!-- ===== 12 — Closing ===== -->
+    <section id="closing" class="closing">
+      <div class="section-num">12 / Closing</div>
+      <div class="closing-quote">Built to be used. The constraint is the point.</div>
+      <div class="closing-meta">
+        <span>Plumb Brand System v1.0</span>
+        <span>May 2026</span>
+        <span>Build in confidence</span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// Scroll-spy for the TOC
+(function () {
+  const links = Array.from(document.querySelectorAll('.toc-link'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  function setActive() {
+    const y = window.scrollY + 160;
+    let active = sections[0];
+    for (const s of sections) {
+      if (!s) continue;
+      if (s.offsetTop <= y) active = s;
+    }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + active.id));
+  }
+  document.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+})();
+</script>
+
+</body>
+</html>

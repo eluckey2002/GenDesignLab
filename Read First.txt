@@ -1,0 +1,234 @@
+Using memory: I’m grounding this in your UMAT framework, but I’m intentionally stripping out the “generative art tool” framing.
+
+# Working One-Pager: Emergent Design Framework
+
+## What this is
+
+This is **not a generative art tool**.
+
+It is a framework for building and porting **emergent design systems**.
+
+The framework breaks complex visual systems into reusable parts: the thing that creates a pattern, the world that pattern lives in, the pressure acting on it, and the way we observe the result.
+
+The goal is simple:
+
+> Build reusable system behaviors once, then port, recombine, and observe them across many different contexts.
+
+This lets designers, researchers, engineers, and AI agents ask a much more powerful question:
+
+> What happens when this pattern-maker lives in this world under this pressure?
+
+## What it does
+
+The framework makes generative systems modular.
+
+Instead of building every artifact as a one-off, it separates the system into reusable building blocks:
+
+| Friendly term     | Technical term                 | Meaning                                                                      |
+| ----------------- | ------------------------------ | ---------------------------------------------------------------------------- |
+| **Pattern-maker** | Generator                      | The thing that creates form, motion, growth, or structure                    |
+| **World**         | Substrate                      | The space or surface the pattern lives on                                    |
+| **Pressure**      | Operation / Field / Constraint | The force that changes behavior: scarcity, attraction, selection, flow, etc. |
+| **Readout**       | Diagnostics / Visualization    | The way we observe what happened                                             |
+| **Outcome**       | Artifact / System behavior     | The visible result, pattern, structure, or discovery                         |
+
+The basic recipe:
+
+> **Pattern-maker + World + Pressure + Readout = Observable emergent behavior**
+
+That means the framework is not just producing outputs. It is creating conditions where behaviors can be discovered.
+
+## Why this matters
+
+The important breakthrough is **portability**.
+
+A behavior built for one system was successfully moved into a very different system with very little adjustment. That matters because it suggests the building blocks are not trapped inside one artifact.
+
+Once a behavior can be reused, it becomes a framework component.
+
+Once multiple components exist across multiple categories, the combinations multiply quickly.
+
+Example:
+
+| Category       | Example building blocks                                             |
+| -------------- | ------------------------------------------------------------------- |
+| Pattern-makers | Branching growth, swarms, cellular tiles, attractor trails          |
+| Worlds         | Flat planes, curved surfaces, terrain, networks                     |
+| Pressures      | Energy/scarcity, flow, attraction/repulsion, inheritance/adaptation |
+| Readouts       | Heatmaps, lineage maps, motion trails, structural forms             |
+
+Even a small catalog creates a large possibility space.
+
+With only 4 options in each category:
+
+> **4 × 4 × 4 × 4 = 256 possible system combinations**
+
+But the point is not just quantity.
+
+The real value is that each combination can reveal a different behavior.
+
+## The core discovery
+
+The framework enables specialists to **visually observe behaviors that were previously hard to see**.
+
+A designer can see how a pattern changes when placed on a curved surface.
+
+An architect can see how a facade pattern responds to simulated light, heat, or density.
+
+A researcher can see how scarcity changes growth.
+
+A data storyteller can see collapse, recovery, concentration, drift, or adaptation unfold visually.
+
+An AI agent can use the framework as a structured build target instead of starting from vague creative prompts.
+
+This is the major shift:
+
+> The system makes hidden dynamics visible.
+
+It gives people a way to observe interaction effects between form, space, pressure, and time.
+
+## What “pressure” means
+
+“Pressure” is the friendlier word for the technical operation layer.
+
+A pressure is anything that changes what grows, survives, moves, fades, branches, or adapts.
+
+Examples:
+
+| Friendly pressure            | Technical version              | What it reveals                                      |
+| ---------------------------- | ------------------------------ | ---------------------------------------------------- |
+| **Energy / scarcity**        | Metabolism / EnergyField       | What survives, starves, recovers, or collapses       |
+| **Attraction / repulsion**   | Force field                    | What clusters, separates, or flows                   |
+| **Inheritance / adaptation** | Lineage / mutation / selection | What traits persist or diverge over time             |
+| **Flow / circulation**       | Vector field / transport logic | Where motion concentrates, bottlenecks, or disperses |
+
+Energy and metabolism are especially important because they make patterns behave less like static drawings and more like living systems.
+
+They allow a system to show:
+
+* growth
+* depletion
+* survival
+* collapse
+* recovery
+* foraging
+* adaptation pressure
+
+## What “world” means
+
+“World” is the friendly version of substrate.
+
+A world is the environment the pattern lives inside.
+
+It could be:
+
+* a flat surface
+* a curved surface
+* a dome
+* a shell
+* a terrain
+* a city grid
+* a building facade
+* a textile surface
+* a product shell
+* a network
+
+The same pattern behaves differently in different worlds.
+
+That is one of the framework’s most important ideas.
+
+> Change the world, and the behavior changes — even if the pattern-maker stays the same.
+
+## Cross-industry potential
+
+This is not limited to one domain.
+
+The same framework can support many industries because the underlying question is universal:
+
+> How do patterns behave under different conditions?
+
+| Industry                    | Possible use                                                                 |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| **Architecture**            | Facades, circulation, shading, ornament, adaptive spatial patterns           |
+| **Urban design**            | Street networks, crowd flow, density, constraint-based growth                |
+| **Landscape design**        | Drainage, ecological spread, terrain-responsive systems                      |
+| **Product design**          | Lightweight structures, adaptive surfaces, 3D-printed forms                  |
+| **Fashion / textiles**      | Evolving motifs, lace systems, surface pattern families                      |
+| **Installations / museums** | Interactive artificial ecosystems and living visual systems                  |
+| **Data visualization**      | Showing pressure, flow, collapse, recovery, and change                       |
+| **Science communication**   | Making complex systems visible and intuitive                                 |
+| **AI design tooling**       | Giving agents reusable components for building systems, not isolated outputs |
+
+## Example use-case chain
+
+A practical use case should be described like this:
+
+> Take **this pattern-maker**, place it in **this world**, apply **this pressure**, observe **this behavior**, and turn it into **this outcome**.
+
+Example:
+
+| Step              | Example                                                                      |
+| ----------------- | ---------------------------------------------------------------------------- |
+| Pattern-maker     | Branching growth                                                             |
+| World             | Curved architectural facade                                                  |
+| Pressure          | Sunlight / heat exposure                                                     |
+| Readout           | Density and survival map                                                     |
+| Behavior observed | Pattern grows denser where shading is needed and opens where light is useful |
+| Outcome           | Adaptive facade concept or ornamental shading system                         |
+| Industry          | Architecture                                                                 |
+
+Another example:
+
+| Step              | Example                                                 |
+| ----------------- | ------------------------------------------------------- |
+| Pattern-maker     | Swarm movement                                          |
+| World             | Public plaza or retail floor plan                       |
+| Pressure          | Attraction, congestion, and friction                    |
+| Readout           | Movement trails and clustering map                      |
+| Behavior observed | Desire paths, dead zones, bottlenecks, dispersal points |
+| Outcome           | Circulation study or spatial planning concept           |
+| Industry          | Architecture, retail, events                            |
+
+## What the framework enables
+
+The framework enables four primary things:
+
+1. **Portability**
+   A behavior can be reused across very different systems.
+
+2. **Combinatorial expansion**
+   A small catalog of reusable components creates hundreds of possible systems.
+
+3. **Visual discovery**
+   Specialists can observe dynamics that are usually hidden, abstract, or hard to reason about.
+
+4. **Build handoff**
+   A human or AI agent can take a defined combination and build, port, test, or extend it.
+
+## Primary goal
+
+The primary goal is not to make isolated visuals.
+
+The primary goal is to create a framework where someone can say:
+
+> “Take this pattern-maker, place it in this world, apply this pressure, and give me the readout.”
+
+That instruction should be enough for a human developer, designer, or AI agent to build the next experiment.
+
+The framework becomes valuable when every new build does two things:
+
+1. Produces a compelling visible outcome.
+2. Adds another reusable behavior back into the catalog.
+
+That is the flywheel.
+
+> Build a behavior.
+> Prove it ports.
+> Add it to the catalog.
+> Recombine it.
+> Observe what emerges.
+> Repeat.
+
+## One-sentence definition
+
+> This is an emergent design framework for composing pattern-makers, worlds, pressures, and readouts so specialists can visually discover how complex systems behave across different contexts.

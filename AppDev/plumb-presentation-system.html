@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plumb — Presentation Component &amp; Communication Pattern System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --graphite: #0f1413; --stone: #151a19; --slate: #1d2221; --mist: #252b2a; --hairline: #2f3534;
+  --paper: #f5f1ed; --bone: #c4beb7; --ash: #8a8580;
+  --bronze: #d4a574; --bronze-light: #e8c89a; --bronze-dark: #b08856;
+  --oxblood: #8b3a4a;
+  --sage: #5dbb6a; --clay: #e35d5d; --slate-blue: #5a9bb5; --amber: #e8a82e; --plum: #a374d4;
+  --display: 'Fraunces', Georgia, serif;
+  --body: 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--graphite); color: var(--bone); font-family: var(--body); font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; overflow-x: hidden; }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: 240px 1fr; max-width: 1500px; margin: 0 auto; padding: 0 48px; }
+main { max-width: 1080px; padding: 80px 0 200px; }
+
+/* TOC */
+.toc { position: sticky; top: 80px; align-self: start; padding: 80px 32px 0 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+.toc-mark { font-family: var(--display); font-weight: 600; font-size: 24px; letter-spacing: -0.02em; color: var(--paper); text-transform: none; margin-bottom: 8px; display: block; text-decoration: none; }
+.toc-mark::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--bronze); transform: rotate(45deg); margin-left: 7px; position: relative; bottom: 1px; }
+.toc-sub { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-bottom: 32px; display: block; line-height: 1.5; }
+.toc-list { list-style: none; }
+.toc-list li { margin-bottom: 10px; display: flex; gap: 10px; align-items: baseline; line-height: 1.4; }
+.toc-list li.indent { padding-left: 28px; margin-bottom: 6px; font-size: 9px; }
+.toc-num { color: var(--bronze); min-width: 22px; font-size: 10px; }
+.toc-link { color: var(--ash); text-decoration: none; transition: color 0.2s ease; }
+.toc-link:hover { color: var(--bone); }
+.toc-link.active { color: var(--paper); }
+
+/* Sections */
+section { padding: 100px 0; border-top: 1px solid var(--hairline); }
+section:first-of-type { border-top: none; padding-top: 0; }
+.section-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze); margin-bottom: 24px; display: block; }
+.section-h { font-family: var(--display); font-weight: 500; font-size: 44px; line-height: 1.1; letter-spacing: -0.02em; color: var(--paper); margin-bottom: 24px; font-variation-settings: 'opsz' 144; }
+.section-h em { font-style: italic; color: var(--bronze); }
+.section-lede { font-size: 17px; line-height: 1.55; color: var(--bone); max-width: 660px; margin-bottom: 16px; }
+.section-lede em { color: var(--paper); font-style: normal; font-weight: 500; }
+.section-lede + .section-lede { margin-top: 0; }
+
+/* Hero */
+.hero { min-height: 64vh; display: flex; flex-direction: column; justify-content: center; padding: 0; border-top: none; }
+.hero-mark { font-family: var(--display); font-weight: 600; font-size: 110px; line-height: 0.95; letter-spacing: -0.04em; color: var(--paper); font-variation-settings: 'opsz' 144; display: inline-block; margin-bottom: 4px; }
+.hero-mark::after { content: ''; display: inline-block; width: 16px; height: 16px; background: var(--bronze); transform: rotate(45deg); margin-left: 16px; position: relative; bottom: 4px; }
+.hero-sub { font-family: var(--display); font-style: italic; font-size: 32px; color: var(--bronze); margin-top: 14px; font-variation-settings: 'opsz' 144; font-weight: 400; max-width: 24ch; line-height: 1.18; }
+.hero-meta { font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-top: 32px; display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-meta span:not(:first-child)::before { content: '/'; color: var(--hairline); margin-right: 16px; }
+
+/* Why / philosophy */
+.phil-row { display: grid; grid-template-columns: 1fr 240px; gap: 64px; align-items: start; }
+.phil-body p { font-size: 18px; line-height: 1.65; color: var(--bone); margin-bottom: 22px; max-width: 580px; }
+.phil-body em { color: var(--paper); font-style: normal; font-weight: 500; }
+.margin-note { position: relative; font-size: 13px; line-height: 1.55; color: var(--ash); font-style: italic; font-family: var(--display); font-variation-settings: 'opsz' 14; padding-left: 16px; margin-top: 24px; }
+.margin-note::before { content: ''; position: absolute; left: 0; top: 8px; width: 8px; height: 1px; background: var(--bronze); }
+
+/* Science cards */
+.sci-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--hairline); margin-top: 24px; }
+.sci-card { padding: 24px 28px; border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); background: var(--stone); position: relative; }
+.sci-card:nth-child(2n) { border-right: none; }
+.sci-card:nth-last-child(-n+2):not(:nth-last-child(odd)) { border-bottom: none; }
+.sci-card:last-child:nth-child(odd) { grid-column: span 2; border-right: none; border-bottom: none; }
+.sci-card:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+.sci-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 8px; }
+.sci-name { font-family: var(--display); font-size: 22px; font-weight: 500; color: var(--paper); letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 4px; font-variation-settings: 'opsz' 36; }
+.sci-cite { font-family: var(--mono); font-size: 10px; color: var(--ash); letter-spacing: 0.04em; margin-bottom: 12px; }
+.sci-tells { font-size: 13px; line-height: 1.55; color: var(--bone); margin-bottom: 12px; }
+.sci-tells em { color: var(--paper); font-style: normal; font-weight: 500; }
+.sci-shows { font-family: var(--display); font-style: italic; font-size: 12px; line-height: 1.5; color: var(--bronze-dark); padding-left: 14px; position: relative; font-variation-settings: 'opsz' 14; }
+.sci-shows::before { content: ''; position: absolute; left: 0; top: 7px; width: 8px; height: 1px; background: var(--bronze); }
+
+/* Architecture stack */
+.arch-stack { display: flex; flex-direction: column; gap: 0; margin-top: 24px; border: 1px solid var(--hairline); }
+.arch-layer { display: grid; grid-template-columns: 80px 220px 1fr; gap: 0; align-items: stretch; border-bottom: 1px solid var(--hairline); }
+.arch-layer:last-child { border-bottom: none; }
+.arch-num { background: var(--stone); padding: 22px 24px; font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--bronze); display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--hairline); }
+.arch-name { padding: 22px 24px; border-right: 1px solid var(--hairline); display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.arch-name-label { font-family: var(--display); font-size: 22px; font-weight: 500; color: var(--paper); letter-spacing: -0.02em; line-height: 1.1; }
+.arch-name-role { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.arch-desc { padding: 22px 28px; font-size: 13px; line-height: 1.55; color: var(--bone); display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+.arch-desc strong { color: var(--paper); font-weight: 500; }
+
+/* Primitive grid */
+.np-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--hairline); margin-top: 24px; }
+.np-card { padding: 22px 26px; border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); background: var(--stone); }
+.np-card:nth-child(2n) { border-right: none; }
+.np-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 8px; }
+.np-name { font-family: var(--display); font-size: 22px; font-weight: 500; color: var(--paper); letter-spacing: -0.02em; margin-bottom: 6px; line-height: 1.1; font-variation-settings: 'opsz' 36; }
+.np-def { font-size: 13px; line-height: 1.55; color: var(--bone); margin-bottom: 10px; }
+.np-job { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--bronze); text-transform: uppercase; margin-bottom: 8px; }
+.np-eg { font-family: var(--display); font-style: italic; font-size: 13px; line-height: 1.45; color: var(--bronze-dark); position: relative; padding-left: 14px; font-variation-settings: 'opsz' 14; }
+.np-eg::before { content: ''; position: absolute; left: 0; top: 7px; width: 8px; height: 1px; background: var(--bronze); }
+
+/* Visual primitive grid */
+.vp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--hairline); margin-top: 24px; }
+.vp-card { padding: 22px 26px; border-right: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); background: var(--stone); display: grid; grid-template-columns: 1fr 90px; gap: 18px; align-items: start; }
+.vp-card:nth-child(2n) { border-right: none; }
+.vp-info { }
+.vp-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 6px; }
+.vp-name { font-family: var(--display); font-size: 18px; font-weight: 500; color: var(--paper); letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 6px; font-variation-settings: 'opsz' 36; }
+.vp-def { font-size: 12px; line-height: 1.5; color: var(--bone); margin-bottom: 8px; }
+.vp-variants { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; color: var(--ash); text-transform: lowercase; }
+.vp-render { background: var(--graphite); border: 1px solid var(--hairline); height: 64px; display: flex; align-items: center; justify-content: center; padding: 8px; }
+
+/* Visual primitive renderings */
+.r-flag { display: inline-block; width: 0; height: 0; border-top: 9px solid transparent; border-bottom: 9px solid transparent; border-left: 14px solid var(--bronze); }
+.r-chip { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 7px; border-radius: 2px; background: rgba(212, 165, 116, 0.16); color: var(--bronze); border: 1px solid rgba(212, 165, 116, 0.4); }
+.r-rail { width: 1px; height: 40px; background: var(--hairline); position: relative; }
+.r-rail::before, .r-rail::after, .r-rail span { content: ''; position: absolute; left: -3px; width: 7px; height: 1px; background: var(--bronze); }
+.r-rail::before { top: 0; } .r-rail::after { bottom: 0; } .r-rail span { top: 50%; }
+.r-node { width: 12px; height: 12px; background: var(--bronze); transform: rotate(45deg); }
+.r-conn { display: flex; align-items: center; }
+.r-conn .l { width: 22px; height: 1px; background: var(--bronze); opacity: 0.6; }
+.r-conn .n { width: 8px; height: 8px; background: var(--graphite); border: 1.5px solid var(--bronze); transform: rotate(45deg); margin: 0 -1px; }
+.r-badge { width: 22px; height: 22px; background: rgba(212, 165, 116, 0.16); border: 1px solid var(--bronze); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--bronze); font-size: 11px; }
+.r-marker { font-family: var(--mono); font-size: 9px; color: var(--bronze); letter-spacing: 0.14em; text-transform: uppercase; padding: 0 6px 0 0; }
+.r-marker::before { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--bronze); border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.r-label { font-family: var(--mono); font-size: 9px; color: var(--bronze); letter-spacing: 0.14em; text-transform: uppercase; }
+.r-anno { display: flex; align-items: center; gap: 6px; }
+.r-anno .l { width: 16px; height: 1px; background: var(--bronze); }
+.r-anno .t { font-family: var(--mono); font-size: 9px; color: var(--bronze); letter-spacing: 0.06em; }
+.r-divider { width: 60px; height: 1px; position: relative; }
+.r-divider::before { content: ''; position: absolute; left: 20%; right: 20%; top: 0; height: 1px; background: var(--bronze); opacity: 0.6; }
+.r-bracket { width: 40px; height: 26px; border: 1px solid transparent; border-left: 1px solid var(--bronze); border-top: 1px solid var(--bronze); border-bottom: 1px solid var(--bronze); }
+.r-glyph { color: var(--bronze); font-size: 14px; transform: rotate(-8deg); }
+.r-ribbon { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; padding: 3px 7px; border-radius: 2px; background: rgba(93, 187, 106, 0.16); color: var(--sage); border: 1px solid rgba(93, 187, 106, 0.4); }
+.r-ribbon::after { content: '/'; opacity: 0.7; margin-left: 2px; }
+.r-source { font-family: var(--mono); font-size: 9px; color: var(--ash); letter-spacing: 0.04em; padding-left: 8px; border-left: 1px solid var(--hairline); }
+
+/* Component recipe section */
+.recipe { padding: 64px 0; border-top: 1px solid var(--hairline); }
+.recipe:first-of-type { border-top: none; padding-top: 32px; }
+.recipe-head { display: grid; grid-template-columns: 1fr 320px; gap: 48px; align-items: start; margin-bottom: 36px; }
+.recipe-num { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 10px; }
+.recipe-name { font-family: var(--display); font-size: 36px; font-weight: 500; color: var(--paper); line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 10px; font-variation-settings: 'opsz' 144; }
+.recipe-name em { font-style: italic; color: var(--bronze); }
+.recipe-tagline { font-family: var(--display); font-style: italic; font-size: 17px; color: var(--bronze); line-height: 1.4; max-width: 36ch; font-variation-settings: 'opsz' 24; }
+.recipe-render { background: linear-gradient(180deg, var(--slate) 0%, var(--stone) 60%); border: 1px solid var(--hairline); padding: 28px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
+
+/* Anatomy table */
+.anatomy { display: grid; grid-template-columns: 200px 1fr; gap: 0; border: 1px solid var(--hairline); margin-bottom: 36px; }
+.anatomy-row { display: contents; }
+.anatomy-key, .anatomy-val { padding: 16px 22px; border-bottom: 1px solid var(--hairline); }
+.anatomy-row:last-child .anatomy-key, .anatomy-row:last-child .anatomy-val { border-bottom: none; }
+.anatomy-key { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; background: var(--stone); border-right: 1px solid var(--hairline); display: flex; align-items: center; gap: 8px; }
+.anatomy-key .num { color: var(--ash); font-size: 9px; }
+.anatomy-val { font-size: 13px; line-height: 1.6; color: var(--bone); background: var(--stone); }
+.anatomy-val strong { color: var(--paper); font-weight: 500; }
+.anatomy-val em { color: var(--bronze); font-style: normal; font-weight: 500; }
+.anatomy-val .pill { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; padding: 1px 7px; border: 1px solid var(--hairline); background: var(--graphite); color: var(--bone); border-radius: 2px; margin-right: 4px; margin-bottom: 4px; }
+.anatomy-val .pill.req { color: var(--paper); border-color: var(--bronze); }
+.anatomy-val .pill.opt { color: var(--ash); }
+.anatomy-val ul { list-style: none; padding: 0; margin: 4px 0 0 0; }
+.anatomy-val ul li { padding-left: 14px; position: relative; margin-bottom: 4px; }
+.anatomy-val ul li::before { content: '·'; position: absolute; left: 4px; color: var(--bronze); }
+
+/* Component renderings */
+.cr-row { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+
+/* Risk marker rendering */
+.risk-marker { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; padding: 6px 10px; border-radius: 2px; }
+.risk-marker .sev { font-weight: 500; }
+.risk-marker.low { background: rgba(90, 155, 181, 0.10); color: var(--slate-blue); border: 1px solid rgba(90, 155, 181, 0.3); }
+.risk-marker.med { background: rgba(232, 168, 46, 0.10); color: var(--amber); border: 1px solid rgba(232, 168, 46, 0.3); }
+.risk-marker.high { background: rgba(227, 93, 93, 0.10); color: var(--clay); border: 1px solid rgba(227, 93, 93, 0.3); }
+.risk-marker .lbl { color: var(--bone); font-weight: 400; letter-spacing: 0.06em; text-transform: none; font-size: 11px; }
+.risk-row { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; background: var(--graphite); border: 1px solid var(--hairline); }
+.risk-row .label { font-size: 12px; color: var(--bone); }
+.risk-row .label strong { color: var(--paper); font-weight: 500; }
+.risk-row .meta { display: flex; gap: 12px; font-family: var(--mono); font-size: 10px; color: var(--ash); }
+.risk-row .meta .own { color: var(--bronze); }
+
+/* Milestone node rendering */
+.ms-set { display: flex; align-items: stretch; gap: 0; }
+.ms-step { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px 14px; min-width: 100px; }
+.ms-node { width: 12px; height: 12px; transform: rotate(45deg); }
+.ms-node.future { background: var(--graphite); border: 1.5px solid var(--bronze); }
+.ms-node.current { background: var(--bronze); box-shadow: 0 0 12px rgba(212, 165, 116, 0.5); }
+.ms-node.past { background: var(--bronze); }
+.ms-node.blocked { background: var(--graphite); border: 1.5px solid var(--clay); }
+.ms-date { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--bronze); text-transform: uppercase; }
+.ms-label { font-family: var(--display); font-size: 13px; color: var(--paper); font-weight: 500; line-height: 1.2; text-align: center; letter-spacing: -0.01em; }
+.ms-link { display: flex; align-items: center; padding: 12px 0; padding-top: 24px; }
+.ms-link .l { width: 18px; height: 1px; background: var(--bronze); opacity: 0.5; }
+
+/* Decision gate rendering */
+.dg { background: var(--graphite); border: 1px solid var(--hairline); padding: 20px 24px; max-width: 460px; }
+.dg-q { font-family: var(--display); font-style: italic; font-size: 19px; color: var(--paper); line-height: 1.25; margin-bottom: 16px; font-variation-settings: 'opsz' 36; }
+.dg-opts { display: flex; flex-direction: column; gap: 10px; }
+.dg-opt { display: grid; grid-template-columns: 70px 1fr; gap: 14px; padding: 10px 12px; align-items: baseline; border-left: 2px solid transparent; }
+.dg-opt.rec { background: rgba(93, 187, 106, 0.05); border-left-color: var(--sage); }
+.dg-opt-key { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.dg-opt-key.rec { color: var(--sage); }
+.dg-opt-text { font-size: 12px; line-height: 1.5; color: var(--bone); }
+.dg-opt-text strong { color: var(--paper); font-weight: 500; }
+.dg-foot { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; color: var(--ash); padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--hairline); display: flex; justify-content: space-between; }
+
+/* Proof badge rendering */
+.pb { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; color: var(--bone); padding: 0; }
+.pb .glyph { color: var(--bronze); transform: rotate(-8deg); display: inline-block; }
+.pb-row { padding: 14px 18px; background: var(--graphite); border: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 6px; }
+.pb-claim { font-size: 13px; color: var(--paper); }
+.pb-claim strong { color: var(--paper); font-weight: 500; }
+.pb-source { font-family: var(--mono); font-size: 10px; color: var(--ash); letter-spacing: 0.04em; padding-left: 12px; border-left: 1px solid var(--hairline); }
+.pb-conf { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 6px; border-radius: 2px; }
+.pb-conf.high { color: var(--sage); border: 1px solid rgba(93, 187, 106, 0.4); background: rgba(93, 187, 106, 0.06); }
+.pb-conf.med { color: var(--amber); border: 1px solid rgba(232, 168, 46, 0.4); background: rgba(232, 168, 46, 0.06); }
+.pb-conf.low { color: var(--clay); border: 1px solid rgba(227, 93, 93, 0.4); background: rgba(227, 93, 93, 0.06); }
+
+/* Caveat chip rendering */
+.cv-chip { display: inline-flex; align-items: center; gap: 4px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; background: rgba(232, 168, 46, 0.07); color: var(--amber); border: 1px solid rgba(232, 168, 46, 0.3); border-radius: 2px; }
+.cv-chip.scoped { background: rgba(90, 155, 181, 0.07); color: var(--slate-blue); border-color: rgba(90, 155, 181, 0.3); }
+.cv-chip.bound { background: rgba(212, 165, 116, 0.07); color: var(--bronze); border-color: rgba(212, 165, 116, 0.3); }
+.cv-row { padding: 14px 18px; background: var(--graphite); border: 1px solid var(--hairline); font-size: 12px; line-height: 1.5; color: var(--bone); }
+.cv-row strong { color: var(--paper); font-weight: 500; }
+
+/* Metric treatment rendering */
+.mt { padding: 22px 24px; background: linear-gradient(180deg, var(--slate) 0%, var(--graphite) 80%); border: 1px solid var(--hairline); position: relative; min-width: 220px; max-width: 280px; }
+.mt-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--ash); text-transform: uppercase; margin-bottom: 8px; }
+.mt-stat { font-family: var(--display); font-weight: 500; font-size: 84px; line-height: 0.9; color: var(--paper); font-variation-settings: 'opsz' 144; letter-spacing: -0.04em; }
+.mt-stat .unit { font-family: var(--display); font-style: italic; font-weight: 400; font-size: 18px; color: var(--oxblood); margin-left: 3px; vertical-align: top; position: relative; top: 12px; font-variation-settings: 'opsz' 36; }
+.mt-rule { height: 1px; background: var(--bronze); width: calc(60% + 24px); margin-left: -24px; margin-top: 10px; margin-bottom: 8px; }
+.mt-interp { font-size: 11px; color: var(--bone); line-height: 1.5; }
+.mt-interp .delta { font-family: var(--mono); font-size: 10px; color: var(--sage); margin-right: 4px; }
+.mt-interp .delta.dn { color: var(--clay); }
+.mt-compact { padding: 14px 16px; background: var(--graphite); border: 1px solid var(--hairline); }
+.mt-compact-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--ash); text-transform: uppercase; margin-bottom: 4px; }
+.mt-compact-stat { font-family: var(--display); font-size: 28px; font-weight: 500; line-height: 1; color: var(--paper); font-variation-settings: 'opsz' 36; letter-spacing: -0.02em; }
+.mt-compact-stat .unit { font-family: var(--display); font-style: italic; font-size: 11px; color: var(--oxblood); margin-left: 2px; }
+.mt-compact-meta { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ash); margin-top: 4px; text-transform: uppercase; }
+.mt-compact-meta .up { color: var(--sage); } .mt-compact-meta .dn { color: var(--clay); }
+
+/* Dependency connector rendering */
+.dc { display: flex; align-items: center; gap: 0; padding: 18px 22px; background: var(--graphite); border: 1px solid var(--hairline); }
+.dc-node { padding: 8px 12px; background: var(--stone); border: 1px solid var(--hairline); }
+.dc-node-label { font-family: var(--display); font-size: 13px; color: var(--paper); font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; }
+.dc-node-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--bronze); text-transform: uppercase; margin-bottom: 2px; }
+.dc-link { display: flex; align-items: center; padding: 0 4px; }
+.dc-link-l { width: 16px; height: 1px; background: var(--bronze); opacity: 0.5; }
+.dc-link-n { width: 8px; height: 8px; background: var(--graphite); border: 1.5px solid var(--bronze); transform: rotate(45deg); flex-shrink: 0; }
+.dc-link-cond { font-family: var(--mono); font-size: 9px; color: var(--bronze); padding: 0 6px; letter-spacing: 0.06em; }
+
+/* Composition pattern entry */
+.cp-pat { display: grid; grid-template-columns: 220px 1fr; gap: 32px; padding: 32px 0; border-top: 1px solid var(--hairline); align-items: start; }
+.cp-pat:first-of-type { border-top: none; }
+.cp-pat-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; margin-bottom: 8px; }
+.cp-pat-name { font-family: var(--display); font-size: 22px; font-weight: 500; color: var(--paper); line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 8px; font-variation-settings: 'opsz' 36; }
+.cp-pat-job { font-size: 13px; line-height: 1.55; color: var(--ash); }
+.cp-pat-detail { display: grid; grid-template-columns: 100px 1fr; gap: 14px 18px; align-items: baseline; font-size: 13px; line-height: 1.6; }
+.cp-pat-key { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; padding-top: 2px; }
+.cp-pat-val { color: var(--bone); }
+.cp-pat-val strong { color: var(--paper); font-weight: 500; }
+.cp-pat-val em { color: var(--bronze); font-style: normal; }
+.cp-pat-shape { display: flex; flex-wrap: wrap; align-items: center; gap: 0; }
+.cp-pat-step { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; color: var(--bone); text-transform: uppercase; padding: 5px 9px; background: var(--stone); border: 1px solid var(--hairline); }
+.cp-pat-arrow { color: var(--bronze); font-family: var(--mono); padding: 0 6px; opacity: 0.7; }
+
+/* Stress-test slides */
+.stress-intro { padding: 0 0 32px; }
+.slide-wrap { margin-bottom: 64px; scroll-margin-top: 60px; }
+.slide { aspect-ratio: 16 / 9; background: var(--graphite); border: 1px solid var(--hairline); padding: 48px 56px 40px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.slide-corner { position: absolute; top: 22px; right: 26px; font-family: var(--display); font-weight: 600; font-size: 15px; color: var(--paper); letter-spacing: -0.02em; }
+.slide-corner::after { content: ''; display: inline-block; width: 4px; height: 4px; background: var(--bronze); transform: rotate(45deg); margin-left: 5px; position: relative; bottom: 1px; }
+.slide-num { position: absolute; bottom: 22px; right: 30px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--ash); text-transform: uppercase; }
+.slide-num .of { color: var(--hairline); margin: 0 3px; }
+.slide-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--bronze); margin-bottom: 14px; }
+.slide-h { font-family: var(--display); font-weight: 500; font-size: 40px; line-height: 1.05; letter-spacing: -0.025em; color: var(--paper); font-variation-settings: 'opsz' 144; max-width: 22ch; }
+.slide-h em { font-style: italic; color: var(--bronze); }
+.slide-h .ox { font-style: italic; color: var(--oxblood); }
+.slide-body { font-size: 13px; line-height: 1.6; color: var(--bone); margin-top: 12px; max-width: 60ch; }
+.slide-body em { color: var(--paper); font-style: normal; font-weight: 500; }
+.slide-source { font-family: var(--mono); font-size: 9px; letter-spacing: 0.06em; color: var(--ash); position: absolute; bottom: 22px; left: 56px; padding-left: 10px; border-left: 1px solid var(--hairline); }
+.slide-content { flex: 1; margin-top: 22px; display: flex; flex-direction: column; }
+.slide-annotation { background: var(--stone); border: 1px solid var(--hairline); border-top: none; padding: 14px 22px; display: grid; grid-template-columns: 110px repeat(3, 1fr); gap: 22px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.04em; align-items: baseline; }
+.anno-label { color: var(--bronze); letter-spacing: 0.16em; text-transform: uppercase; }
+.anno-cell { color: var(--ash); line-height: 1.5; text-transform: uppercase; letter-spacing: 0.08em; }
+.anno-cell .key { color: var(--bronze); }
+.anno-cell .val { color: var(--bone); }
+
+/* Stress-test specific layouts */
+.s-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; align-items: center; }
+.s-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; flex: 1; align-items: stretch; }
+.s-grid-2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; flex: 1; align-items: start; }
+.s-rail-list { display: flex; flex-direction: column; gap: 8px; padding: 14px 18px; background: var(--stone); border: 1px solid var(--hairline); }
+.s-rail-h { font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em; color: var(--bronze); text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
+.s-rail-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline; font-size: 11px; line-height: 1.5; padding: 4px 0; }
+.s-rail-item .k { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ash); text-transform: uppercase; }
+.s-rail-item .t { color: var(--bone); }
+.s-rail-item .src { font-family: var(--mono); font-size: 9px; color: var(--ash); }
+
+/* Risk register table inside stress-test */
+.risk-tbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 4px; }
+.risk-tbl th { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; text-align: left; padding: 8px 10px; font-weight: 500; border-bottom: 1px solid var(--hairline); }
+.risk-tbl td { padding: 9px 10px; border-bottom: 1px solid var(--hairline); color: var(--bone); vertical-align: middle; }
+.risk-tbl td.label { color: var(--paper); font-weight: 500; }
+.risk-tbl td.mono { font-family: var(--mono); font-size: 10px; color: var(--ash); letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* Comparison columns inside stress-test */
+.cmp-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; flex: 1; }
+.cmp-col { background: var(--stone); border: 1px solid var(--hairline); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.cmp-col.rec { border-color: rgba(93, 187, 106, 0.4); background: linear-gradient(180deg, rgba(93, 187, 106, 0.04) 0%, var(--stone) 60%); }
+.cmp-col-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.cmp-col-tag.rec { color: var(--sage); }
+.cmp-col-h { font-family: var(--display); font-size: 14px; color: var(--paper); font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; }
+.cmp-col-rows { display: grid; grid-template-columns: 80px 1fr; gap: 6px 10px; font-size: 10.5px; line-height: 1.5; }
+.cmp-col-rows .k { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.1em; color: var(--ash); text-transform: uppercase; padding-top: 1px; }
+.cmp-col-rows .v { color: var(--bone); }
+.cmp-col-rows .v.strong { color: var(--paper); }
+
+/* Diagnosis bridge */
+.diag-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 0; align-items: stretch; flex: 1; }
+.diag-step { background: var(--stone); border: 1px solid var(--hairline); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.diag-step-tag { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.diag-step-h { font-family: var(--display); font-size: 16px; color: var(--paper); font-weight: 500; line-height: 1.2; letter-spacing: -0.01em; }
+.diag-step-body { font-size: 11px; line-height: 1.5; color: var(--bone); }
+.diag-bridge { display: flex; align-items: center; padding: 0 8px; }
+.diag-bridge-l { width: 14px; height: 1px; background: var(--bronze); opacity: 0.5; }
+.diag-bridge-n { width: 8px; height: 8px; background: var(--graphite); border: 1.5px solid var(--bronze); transform: rotate(45deg); }
+
+/* Synthesis cards */
+.syn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; flex: 1; align-items: stretch; }
+.syn-card { background: var(--stone); border: 1px solid var(--hairline); padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+.syn-num { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--bronze); text-transform: uppercase; }
+.syn-take { font-family: var(--display); font-style: italic; font-size: 17px; color: var(--paper); line-height: 1.3; padding-left: 18px; position: relative; font-variation-settings: 'opsz' 36; }
+.syn-take::before { content: ''; position: absolute; left: 4px; top: 4px; bottom: 8px; width: 1px; background: var(--bronze); }
+.syn-take::after { content: ''; position: absolute; left: 0; bottom: 2px; width: 7px; height: 7px; background: var(--bronze); transform: rotate(45deg); }
+.syn-body { font-size: 11px; line-height: 1.5; color: var(--ash); }
+
+/* Implementation */
+.impl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 56px; margin-top: 24px; }
+.impl-item { border-top: 1px solid var(--hairline); padding: 16px 0; display: grid; grid-template-columns: 160px 1fr; gap: 16px; align-items: baseline; }
+.impl-key { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--bronze); }
+.impl-val { font-size: 13px; line-height: 1.55; color: var(--bone); }
+.impl-val code { font-family: var(--mono); font-size: 11px; color: var(--paper); background: var(--stone); padding: 1px 6px; border-radius: 2px; }
+
+/* Closing */
+.closing { padding: 140px 0 80px; border-top: 1px solid var(--hairline); }
+.closing-quote { font-family: var(--display); font-style: italic; font-size: 32px; line-height: 1.25; font-weight: 400; color: var(--oxblood); font-variation-settings: 'opsz' 144; max-width: 660px; position: relative; padding-left: 36px; }
+.closing-quote::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 18px; width: 1px; background: var(--bronze); }
+.closing-quote::after { content: ''; position: absolute; left: 3px; bottom: 4px; width: 11px; height: 11px; background: var(--bronze); transform: rotate(45deg); }
+.closing-meta { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ash); margin-top: 56px; display: flex; justify-content: flex-end; gap: 16px; flex-wrap: wrap; }
+.closing-meta span:not(:first-child)::before { content: '/'; color: var(--hairline); margin-right: 16px; }
+
+/* Mobile */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; padding: 0 24px; }
+  .toc { display: none; }
+  main { padding: 40px 0 120px; }
+  .section-h { font-size: 28px; }
+  .hero-mark { font-size: 64px; }
+  .hero-sub { font-size: 22px; }
+  .recipe-head { grid-template-columns: 1fr; gap: 24px; }
+  .anatomy { grid-template-columns: 1fr; }
+  .anatomy-key { border-right: none; border-bottom: 1px solid var(--hairline); padding: 10px 16px; }
+  .anatomy-val { padding: 12px 16px; }
+  .sci-grid, .np-grid, .vp-grid { grid-template-columns: 1fr; }
+  .vp-card { grid-template-columns: 1fr; }
+  .vp-render { width: 100%; max-width: 200px; }
+  .arch-layer { grid-template-columns: 60px 1fr; }
+  .arch-desc { grid-column: 1 / -1; padding: 14px 22px 22px; border-top: 1px solid var(--hairline); }
+  .phil-row, .cp-pat { grid-template-columns: 1fr; gap: 24px; }
+  .impl-grid { grid-template-columns: 1fr; }
+  .slide { padding: 28px; }
+  .slide-h { font-size: 22px; }
+  .slide-annotation { grid-template-columns: 1fr; gap: 8px; padding: 14px 16px; }
+  .s-grid-3, .s-grid-2, .cmp-cols, .syn-grid, .diag-flow { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="toc">
+    <a href="#hero" class="toc-mark">Plumb</a>
+    <span class="toc-sub">Presentation Component<br>&amp; Communication<br>Pattern System</span>
+    <ol class="toc-list">
+      <li><span class="toc-num">01</span><a href="#hero" class="toc-link">Cover</a></li>
+      <li><span class="toc-num">02</span><a href="#why" class="toc-link">The problem</a></li>
+      <li><span class="toc-num">03</span><a href="#science" class="toc-link">The science</a></li>
+      <li><span class="toc-num">04</span><a href="#architecture" class="toc-link">Architecture</a></li>
+      <li><span class="toc-num">05</span><a href="#narrative" class="toc-link">Narrative primitives</a></li>
+      <li><span class="toc-num">06</span><a href="#visual" class="toc-link">Visual primitives</a></li>
+      <li><span class="toc-num">07</span><a href="#recipes" class="toc-link">Component recipes</a></li>
+      <li class="indent"><span class="toc-num">7.1</span><a href="#r-risk" class="toc-link">Risk marker</a></li>
+      <li class="indent"><span class="toc-num">7.2</span><a href="#r-milestone" class="toc-link">Milestone node</a></li>
+      <li class="indent"><span class="toc-num">7.3</span><a href="#r-decision" class="toc-link">Decision gate</a></li>
+      <li class="indent"><span class="toc-num">7.4</span><a href="#r-proof" class="toc-link">Proof badge</a></li>
+      <li class="indent"><span class="toc-num">7.5</span><a href="#r-caveat" class="toc-link">Caveat chip</a></li>
+      <li class="indent"><span class="toc-num">7.6</span><a href="#r-metric" class="toc-link">Metric treatment</a></li>
+      <li class="indent"><span class="toc-num">7.7</span><a href="#r-dependency" class="toc-link">Dependency connector</a></li>
+      <li><span class="toc-num">08</span><a href="#patterns" class="toc-link">Composition patterns</a></li>
+      <li><span class="toc-num">09</span><a href="#stress" class="toc-link">Stress-test slides</a></li>
+      <li><span class="toc-num">10</span><a href="#impl" class="toc-link">Implementation</a></li>
+      <li><span class="toc-num">11</span><a href="#closing" class="toc-link">Closing</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- 01 Cover -->
+    <section id="hero" class="hero">
+      <div class="hero-mark">Plumb</div>
+      <div class="hero-sub">Presentation Component &amp; Communication Pattern System.</div>
+      <div class="hero-meta"><span>v1.0</span><span>Studio Mode</span><span>May 2026</span></div>
+    </section>
+
+    <!-- 02 The problem -->
+    <section id="why">
+      <div class="section-num">02 / The problem</div>
+      <h2 class="section-h">A grammar between brand and finished slide.</h2>
+      <div class="phil-row">
+        <div class="phil-body">
+          <p>Most design systems handle two layers: <em>how the brand looks</em> (color, type, logo) and <em>what slide layouts exist</em> (templates). Both are necessary. Neither makes a slide actually communicate.</p>
+          <p>The missing layer is the one between them — a system that defines <em>how information behaves</em>. What role each piece is playing in the story. What visual primitive expresses that role. How those primitives compose into reusable components. How the components flex through variants and states without becoming rigid templates.</p>
+          <p>This document defines that layer. It sits inside the brand system and powers the catalog above it. <em>Slide-type catalog is downstream output, not foundation.</em></p>
+        </div>
+        <aside class="margin-note">A slide can hold a great deal of information when the information is structured well. The discipline is structure, not subtraction.</aside>
+      </div>
+    </section>
+
+    <!-- 03 The science -->
+    <section id="science">
+      <div class="section-num">03 / The science</div>
+      <h2 class="section-h">Why the system works isn't aesthetics.</h2>
+      <p class="section-lede">The components in this system don't perform because they look right. They perform because they map onto how perception, working memory, and reading actually function. Seven foundations the system rests on — cited where they earn the page in component definitions below.</p>
+
+      <div class="sci-grid">
+        <div class="sci-card">
+          <div class="sci-num">03.1</div>
+          <div class="sci-name">Cognitive load theory</div>
+          <div class="sci-cite">Sweller, 1988</div>
+          <div class="sci-tells">Working memory holds about <em>four chunks</em> at a time. Slides that exceed it force re-reading or refusal. Structure (hierarchy, grouping, recurring shapes) reduces extraneous load and lets the audience spend its bandwidth on the content, not the parsing.</div>
+          <div class="sci-shows">Used by every component below. Especially: hierarchy in metric treatments, grouping in caveat rails, schemas across the system.</div>
+        </div>
+
+        <div class="sci-card">
+          <div class="sci-num">03.2</div>
+          <div class="sci-name">Pre-attentive processing</div>
+          <div class="sci-cite">Treisman, 1985 · Few, 2009</div>
+          <div class="sci-tells">A small set of visual properties — color, position, length, orientation, shape — are detected by the eye in <em>under 250 ms</em>, before conscious attention engages. The reader sees them before they read.</div>
+          <div class="sci-shows">Risk markers (color), status ribbons (color + shape), milestone nodes (orientation), KPI position-encoding.</div>
+        </div>
+
+        <div class="sci-card">
+          <div class="sci-num">03.3</div>
+          <div class="sci-name">Gestalt grouping</div>
+          <div class="sci-cite">Wertheimer, 1923 · Koffka, 1935</div>
+          <div class="sci-tells">The brain auto-groups by <em>proximity, similarity, continuity, closure</em>. Visual hierarchy isn't optional — the eye will impose one whether you design it or not. The job is to design the one you want.</div>
+          <div class="sci-shows">Caveat rail proximity, status ribbon similarity, hairline bridge continuity, every divider variant.</div>
+        </div>
+
+        <div class="sci-card">
+          <div class="sci-num">03.4</div>
+          <div class="sci-name">Encoding hierarchy</div>
+          <div class="sci-cite">Cleveland &amp; McGill, JASA 1984</div>
+          <div class="sci-tells">For perceptual accuracy: <em>position on a common scale &gt; length &gt; angle &gt; area &gt; color saturation</em>. Pick the encoding by the comparison the reader needs to make. Position is the only encoding the eye reads precisely.</div>
+          <div class="sci-shows">Metric treatments (position), KPI rules (length), risk severity (color, used because saturation contrast not magnitude is what matters).</div>
+        </div>
+
+        <div class="sci-card">
+          <div class="sci-num">03.5</div>
+          <div class="sci-name">Data-ink &amp; lie factor</div>
+          <div class="sci-cite">Tufte, Visual Display 1983 · Beautiful Evidence 2006</div>
+          <div class="sci-tells">Maximize the proportion of ink that <em>shows data</em> over ink that decorates it. A chart's lie factor — the ratio of effect shown to effect in the data — should be 1.0. Defaults aren't neutral; they will lie for you if you let them.</div>
+          <div class="sci-shows">Restraint as system principle. Every gradient, every gridline, every divider has to earn its place. Truth gets its own implementation note.</div>
+        </div>
+
+        <div class="sci-card">
+          <div class="sci-num">03.6</div>
+          <div class="sci-name">Schema theory</div>
+          <div class="sci-cite">Bartlett, 1932 · Rumelhart, 1980</div>
+          <div class="sci-tells">Recurring structures build mental scaffolds. A reader who's seen the same status ribbon shape forty times <em>parses the forty-first without effort</em>. Schemas are bandwidth — and consistency is how a system earns them.</div>
+          <div class="sci-shows">Why every component has a single canonical form. Why variants are constrained. Why the system insists on consistency of slot order.</div>
+        </div>
+
+        <div class="sci-card">
+          <div class="sci-num">03.7</div>
+          <div class="sci-name">Information foraging</div>
+          <div class="sci-cite">Pirolli &amp; Card, 1995</div>
+          <div class="sci-tells">Readers scan for <em>information scent</em> — small cues that signal "what kind of thing this is" before reading content. Eyebrow labels, ribbons, KPI numerals, caveat chips: all scent markers. They tell the reader where to invest attention.</div>
+          <div class="sci-shows">Eyebrow primitives, status ribbons, caveat chips, source rules, metric labels — every scent-bearing element in the system.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 Architecture -->
+    <section id="architecture">
+      <div class="section-num">04 / Architecture</div>
+      <h2 class="section-h">Six layers. Top to bottom.</h2>
+      <p class="section-lede">Most design systems work the top and bottom — brand and templates — and skip the meaning layer where the work happens. This is the full stack.</p>
+
+      <div class="arch-stack">
+        <div class="arch-layer"><div class="arch-num">01</div><div class="arch-name"><div class="arch-name-label">Brand System</div><div class="arch-name-role">Look &amp; feel</div></div><div class="arch-desc">Color, typography, motion, voice. <strong>Plumb's Studio Mode lives here.</strong> The visual identity layer.</div></div>
+        <div class="arch-layer"><div class="arch-num">02</div><div class="arch-name"><div class="arch-name-label">Visual Primitives</div><div class="arch-name-role">Reusable visual atoms</div></div><div class="arch-desc">Flag, chip, rail, node, connector, badge, marker, label, annotation, divider, bracket, glyph, ribbon, source rule. <strong>Atoms with variants.</strong></div></div>
+        <div class="arch-layer"><div class="arch-num">03</div><div class="arch-name"><div class="arch-name-label">Narrative Primitives</div><div class="arch-name-role">Story roles</div></div><div class="arch-desc">Claim · Takeaway · Evidence · Caveat · Implication · Tension · Contrast · Recommendation · Decision · Risk · Next Step · Honest Translation. <strong>Meaning roles, not visuals.</strong></div></div>
+        <div class="arch-layer"><div class="arch-num">04</div><div class="arch-name"><div class="arch-name-label">Component recipes</div><div class="arch-name-role">Primitives composed</div></div><div class="arch-desc">A narrative primitive expressed by a visual primitive, with required and optional slots. <strong>Risk marker. Milestone node. Decision gate. Proof badge. Caveat chip. Metric treatment. Dependency connector.</strong></div></div>
+        <div class="arch-layer"><div class="arch-num">05</div><div class="arch-name"><div class="arch-name-label">Composition patterns</div><div class="arch-name-role">Communication jobs</div></div><div class="arch-desc">How components assemble for recurring jobs: recommend under uncertainty, communicate progress, diagnose, compare options, synthesize, surface risk. <strong>Jobs, not slide types.</strong></div></div>
+        <div class="arch-layer"><div class="arch-num">06</div><div class="arch-name"><div class="arch-name-label">Slide-type catalog</div><div class="arch-name-role">Output, not foundation</div></div><div class="arch-desc">The downstream artifact a team draws from in PowerPoint. <strong>Generated by the system above, not the source of truth.</strong> A team can build any slide type they need from layers 02–05.</div></div>
+      </div>
+    </section>
+
+    <!-- 05 Narrative primitives -->
+    <section id="narrative">
+      <div class="section-num">05 / Layer 03 · Narrative primitives</div>
+      <h2 class="section-h">Twelve roles. Every line in every slide is one of these.</h2>
+      <p class="section-lede">A narrative primitive defines what a piece of information is <em>doing</em> in the story. Before "how should this look," ask "what role is it playing." Visual choices follow narrative roles, never the reverse.</p>
+
+      <div class="np-grid">
+        <div class="np-card"><div class="np-num">05.1</div><div class="np-name">Claim</div><div class="np-job">Job · the assertion the slide rests on</div><div class="np-def">The main point the audience must understand. The thing you'd say if you only had one sentence.</div><div class="np-eg">"Multi-model reduces failure-mode exposure by 40%."</div></div>
+        <div class="np-card"><div class="np-num">05.2</div><div class="np-name">Takeaway</div><div class="np-job">Job · the line they remember a week later</div><div class="np-def">The distilled point — often shorter and sharper than the claim. The line you want quoted.</div><div class="np-eg">"Orchestration is the differentiator now. Speed isn't."</div></div>
+        <div class="np-card"><div class="np-num">05.3</div><div class="np-name">Evidence</div><div class="np-job">Job · proof under the claim</div><div class="np-def">Quantitative or qualitative support — sourced, dated, sized. The thing that earns the claim.</div><div class="np-eg">"Eval pass-rate climbed 23 pts; n=2,400 across four windows."</div></div>
+        <div class="np-card"><div class="np-num">05.4</div><div class="np-name">Caveat</div><div class="np-job">Job · the boundary on the claim</div><div class="np-def">A nuance, condition, or scope that prevents oversimplification. Trust accelerator, not hedge.</div><div class="np-eg">"Holds while context windows stay under 8K tokens."</div></div>
+        <div class="np-card"><div class="np-num">05.5</div><div class="np-name">Implication</div><div class="np-job">Job · the so-what</div><div class="np-def">What the information means for the next decision, the strategy, or the operator's day.</div><div class="np-eg">"Priority shifts from feature expansion to workflow reliability."</div></div>
+        <div class="np-card"><div class="np-num">05.6</div><div class="np-name">Tension</div><div class="np-job">Job · the conflict that makes the story matter</div><div class="np-def">The unresolved problem. Without it, slides are recitation. With it, they have a reason to exist.</div><div class="np-eg">"Teams want flexibility; leadership needs control. Both can't win."</div></div>
+        <div class="np-card"><div class="np-num">05.7</div><div class="np-name">Contrast</div><div class="np-job">Job · two states held against each other</div><div class="np-def">A structured comparison — A vs. B, before vs. after, current vs. future. The delta is the point.</div><div class="np-eg">"40 min per ticket → 12 min per ticket."</div></div>
+        <div class="np-card"><div class="np-num">05.8</div><div class="np-name">Recommendation</div><div class="np-job">Job · the proposed action</div><div class="np-def">The path Plumb's voice picks and defends. Hedged recommendations read as no recommendation.</div><div class="np-eg">"Adopt multi-model with one default and two fallbacks."</div></div>
+        <div class="np-card"><div class="np-num">05.9</div><div class="np-name">Decision</div><div class="np-job">Job · the choice awaiting an answer</div><div class="np-def">A specific question that needs a verdict. Distinct from a recommendation: a question, not an answer.</div><div class="np-eg">"Standardize on one model — or support multiple?"</div></div>
+        <div class="np-card"><div class="np-num">05.10</div><div class="np-name">Risk</div><div class="np-job">Job · a caveat with consequence</div><div class="np-def">A surfaced threat with severity and (ideally) mitigation. Distinct from a caveat — a caveat bounds; a risk warns.</div><div class="np-eg">"High · token-cost differential could exceed 1.4× through Q3."</div></div>
+        <div class="np-card"><div class="np-num">05.11</div><div class="np-name">Next Step</div><div class="np-job">Job · the concrete action that follows</div><div class="np-def">Owner, deadline, definition of done. The slide's discharge into reality.</div><div class="np-eg">"Align on design-system scope by Wk 4. Owner: e.luckey."</div></div>
+        <div class="np-card"><div class="np-num">05.12</div><div class="np-name">Honest Translation</div><div class="np-job">Job · ground polished claim in plain English</div><div class="np-def">Plumb's quiet refusal to sound smarter than it is. Polished claim, hairline rule, plain version.</div><div class="np-eg">"…Plainly: if your team can't run it without us, we didn't finish."</div></div>
+      </div>
+    </section>
+
+    <!-- 06 Visual primitives -->
+    <section id="visual">
+      <div class="section-num">06 / Layer 02 · Visual primitives</div>
+      <h2 class="section-h">Fourteen atoms. Every component below is built from these.</h2>
+      <p class="section-lede">A visual primitive is a small reusable element with a single visual job. Each has variants. Components are made by combining primitives — not by drawing new shapes.</p>
+
+      <div class="vp-grid">
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.1 / Flag</div><div class="vp-name">Flag</div><div class="vp-def">A small directional shape that points at content or status.</div><div class="vp-variants">variants · solid, hollow, severity-coded</div></div><div class="vp-render"><span class="r-flag"></span></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.2 / Chip</div><div class="vp-name">Chip</div><div class="vp-def">A bordered label with a single short string. Distinct from a ribbon: no trailing slash.</div><div class="vp-variants">variants · neutral, scoped, bound, tone-coded</div></div><div class="vp-render"><span class="r-chip">scoped</span></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.3 / Rail</div><div class="vp-name">Rail</div><div class="vp-def">A vertical hairline that organizes flush-left content; tick marks anchor sections.</div><div class="vp-variants">variants · 2-mark, 3-mark, full-bleed</div></div><div class="vp-render"><div class="r-rail"><span></span></div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.4 / Node</div><div class="vp-name">Node</div><div class="vp-def">A rotated diamond marking a discrete point. Filled / hollow encodes state.</div><div class="vp-variants">variants · future, current, past, blocked</div></div><div class="vp-render"><div class="r-node"></div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.5 / Connector</div><div class="vp-name">Connector</div><div class="vp-def">A Bronze hairline punctuated by node joints. Replaces arrows in flow diagrams.</div><div class="vp-variants">variants · linear, fan-out, fan-in, conditional</div></div><div class="vp-render"><div class="r-conn"><div class="l"></div><div class="n"></div><div class="l"></div></div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.6 / Badge</div><div class="vp-name">Badge</div><div class="vp-def">A small enclosed mark conferring status on adjacent content. Often circular or chip-shaped.</div><div class="vp-variants">variants · verification, confidence, ownership</div></div><div class="vp-render"><div class="r-badge">✓</div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.7 / Marker</div><div class="vp-name">Marker</div><div class="vp-def">A small leading symbol that classifies what follows. A semantic period.</div><div class="vp-variants">variants · dot, diamond, glyph, numeric</div></div><div class="vp-render"><span class="r-marker">live</span></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.8 / Label</div><div class="vp-name">Label</div><div class="vp-def">Short Geist Mono caps text that names a thing. The eyebrow above a heading; the role above a value.</div><div class="vp-variants">variants · eyebrow, footer, inline</div></div><div class="vp-render"><span class="r-label">section / 03</span></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.9 / Annotation</div><div class="vp-name">Annotation</div><div class="vp-def">A small label connected to a target by a hairline. Tells the reader what they're looking at, in place.</div><div class="vp-variants">variants · inline, callout, footnote</div></div><div class="vp-render"><div class="r-anno"><div class="l"></div><div class="t">94%</div></div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.10 / Divider</div><div class="vp-name">Divider</div><div class="vp-def">A horizontal hairline separating sections. The Tension Line variant has gaps at each end.</div><div class="vp-variants">variants · full-bleed, tension-line, ruled-edge</div></div><div class="vp-render"><div class="r-divider"></div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.11 / Bracket</div><div class="vp-name">Bracket</div><div class="vp-def">An L- or U-shaped outline that frames a region of content for emphasis. Used for callout overlays on images and diagrams.</div><div class="vp-variants">variants · L-bracket, U-bracket, full-frame</div></div><div class="vp-render"><div class="r-bracket"></div></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.12 / Glyph</div><div class="vp-name">Glyph</div><div class="vp-def">A small typographic symbol carrying a fixed meaning. Plumb's Verification Glyph is a slightly-rotated checkmark.</div><div class="vp-variants">variants · verification, decision-pending, in-spec</div></div><div class="vp-render"><span class="r-glyph">✓</span></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.13 / Ribbon</div><div class="vp-name">Ribbon</div><div class="vp-def">A status label in Geist Mono caps with a trailing slash. Filesystem-coded; reads as production tooling.</div><div class="vp-variants">variants · live, draft, beta, embargo, blocked</div></div><div class="vp-render"><span class="r-ribbon">Live</span></div></div>
+        <div class="vp-card"><div class="vp-info"><div class="vp-num">06.14 / Source rule</div><div class="vp-name">Source rule</div><div class="vp-def">A short hairline-anchored mono caption attributing a claim. Lives at the foot of the unit it supports.</div><div class="vp-variants">variants · single, double, dated</div></div><div class="vp-render"><div class="r-source">n=2,400 · 2026-W18</div></div></div>
+      </div>
+    </section>
+
+    <!-- 07 Component recipes -->
+    <section id="recipes">
+      <div class="section-num">07 / Layer 04 · Component recipes</div>
+      <h2 class="section-h">Seven recipes. Each one a narrative role, expressed by a visual primitive, with slots that flex.</h2>
+      <p class="section-lede">A component recipe combines layer 02 (visual) with layer 03 (narrative) into a reusable element with a clear job. Each entry below documents <em>communication job, narrative primitive, visual primitive, anatomy, slots (required + optional), variants and states, example, and failure mode.</em> Same eight fields, every time. Schemas earn bandwidth.</p>
+
+      <!-- 7.1 Risk marker -->
+      <div class="recipe" id="r-risk">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.1 / Risk marker</div>
+            <h3 class="recipe-name">Surface risk <em>without</em> alarming.</h3>
+          </div>
+          <div class="recipe-render">
+            <div class="cr-row">
+              <div class="risk-marker low"><span class="sev">Low</span><span class="lbl">No-op</span></div>
+              <div class="risk-marker med"><span class="sev">Med</span><span class="lbl">Mitigated</span></div>
+              <div class="risk-marker high"><span class="sev">High</span><span class="lbl">Pending</span></div>
+            </div>
+            <div style="margin-top: 18px;">
+              <div class="risk-row">
+                <div class="label"><strong>Token cost differential exceeds 1.4×.</strong></div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <div class="risk-marker high"><span class="sev">High</span></div>
+                  <span style="font-size: 11px; color: var(--bone);">Mitigation · cap experimental band at 8% of inference</span>
+                </div>
+                <div class="meta"><span>Owner · <span class="own">e.luckey</span></span><span>Review · Wk 18</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Make a risk visible to the reader at <em>severity-appropriate weight</em> — without the slide becoming about the risk. The reader sees there is risk, of what magnitude, and what is being done about it, in one read.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Risk</em> (a kind of caveat with consequence)</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Flag + chip,</em> color-coded by severity. Pre-attentive (Treisman, 1985) — the eye registers severity before reading the label.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Severity flag (color-coded) + severity label + risk label + (optional) mitigation note + (optional) owner chip + (optional) review date.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Severity</span><span class="pill req">Label</span><span class="pill opt">Mitigation</span><span class="pill opt">Owner</span><span class="pill opt">Deadline</span><span class="pill opt">Source</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>Density</strong> · light (severity + label only) / dense (with mitigation, owner, deadline). <strong>Position</strong> · inline (within prose) / margin (in caveat rail) / cell (in a register table). <strong>Severity</strong> · low (Slate Blue) / medium (Amber) / high (Clay).</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">Inline within a Recommendation slide. As a column in a quarterly Risk Register. As a chip in a Caveat Rail. Appears in stress-test 06 (surface risk).</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Don't use as the primary visual element of a slide — that turns the deck alarmist. Don't use High severity without a mitigation note — reads as accusation, not analysis. Don't stack more than three on a single slide unless the slide IS a risk register.</div></div>
+        </div>
+      </div>
+
+      <!-- 7.2 Milestone node -->
+      <div class="recipe" id="r-milestone">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.2 / Milestone node</div>
+            <h3 class="recipe-name">Mark a date with <em>commitment</em>.</h3>
+          </div>
+          <div class="recipe-render">
+            <div class="ms-set">
+              <div class="ms-step"><div class="ms-node past"></div><div class="ms-date">Wk 02</div><div class="ms-label">Diagnose</div></div>
+              <div class="ms-link"><div class="l"></div></div>
+              <div class="ms-step"><div class="ms-node past"></div><div class="ms-date">Wk 06</div><div class="ms-label">Architect</div></div>
+              <div class="ms-link"><div class="l"></div></div>
+              <div class="ms-step"><div class="ms-node current"></div><div class="ms-date">Wk 12</div><div class="ms-label">Build</div></div>
+              <div class="ms-link"><div class="l"></div></div>
+              <div class="ms-step"><div class="ms-node future"></div><div class="ms-date">Wk 16</div><div class="ms-label">Hand off</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Anchor a discrete, dated achievement or commitment within a longer trajectory. The reader sees what's done, what's next, and the rhythm of work in one glance.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Next Step</em> (anchored to time)</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Node</em> (the rotated diamond from the Hairline Bridge family). State encoded by fill: future = hollow, current = glowing solid, past = solid, blocked = hollow with Clay outline.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Diamond marker + date or week-number + label + (optional) status note + (optional) owner chip.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Date / timeframe</span><span class="pill req">Label</span><span class="pill opt">Owner</span><span class="pill opt">Status note</span><span class="pill opt">Dependency arrow</span><span class="pill opt">Brief description</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>States</strong> · future (hollow), current (filled + glow), past (filled), blocked (hollow + Clay border). <strong>Position</strong> · inline (in roadmap), standalone (anchor on slide), corner (signing line).</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">In a roadmap. On a contract signing line. As the trajectory anchor in stress-test 02 (communicate progress). As a section divider on engagement-arc slides.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Avoid using if the date is uncertain — milestones imply commitment. Using them for guesses erodes the system's credibility. For uncertain dates, use a Dependency Connector or a Status Card instead.</div></div>
+        </div>
+      </div>
+
+      <!-- 7.3 Decision gate -->
+      <div class="recipe" id="r-decision">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.3 / Decision gate</div>
+            <h3 class="recipe-name">Stop the slide. <em>Force a verdict.</em></h3>
+          </div>
+          <div class="recipe-render">
+            <div class="dg">
+              <div class="dg-q">Standardize on one model — or support multiple?</div>
+              <div class="dg-opts">
+                <div class="dg-opt"><div class="dg-opt-key">A · Lock</div><div class="dg-opt-text">Standardize on the primary. Lower cost, slower experimentation.</div></div>
+                <div class="dg-opt rec"><div class="dg-opt-key rec">B · Pick</div><div class="dg-opt-text"><strong>Multi-model with a primary.</strong> One default, two fallbacks, governed by policy guardrail.</div></div>
+                <div class="dg-opt"><div class="dg-opt-key">C · Defer</div><div class="dg-opt-text">Wait until Wk 12 evaluation closes. Adds latency to dependent decisions.</div></div>
+              </div>
+              <div class="dg-foot"><span>Decision · required by Wk 8</span><span>Owner · e.luckey</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Stop the reader at a decision and <em>force a verdict</em>. Names the question, lays out the options, picks one explicitly. Use when discussion is the wrong outcome.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Decision</em> (often paired with Recommendation in the recommended option)</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Bracket</em> (visual frame indicating "stop here") + <em>chip</em> (recommended-option marker, Sage). Gestalt proximity (Wertheimer, 1923) groups the options as a single decision unit.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Decision question (italic Fraunces) + options list (≥ 2) + recommendation indicator (Sage left-rule on chosen option) + (optional) rationale + (optional) deadline + (optional) owner.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Question</span><span class="pill req">≥ 2 options</span><span class="pill req">Recommendation marker</span><span class="pill opt">Rationale</span><span class="pill opt">Tradeoff</span><span class="pill opt">Risk per option</span><span class="pill opt">Deadline</span><span class="pill opt">Owner</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>Lead</strong> · recommendation-first (executive) / options-first (collaborative) / criteria-led (analyst) / tradeoff (no clean answer) / action (decision made; focus on execution). <strong>State</strong> · pending / decided / escalated.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">Mid-deck before a strategic choice. On a one-pager proposal. In a status review. Stress-test 04 (compare options) ends in this gate.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Don't deploy without an explicit recommendation — reads as a discussion, not a decision. Don't use if options aren't actually different. Don't use to soft-launch a decision already made; use the Action variant if execution is the focus.</div></div>
+        </div>
+      </div>
+
+      <!-- 7.4 Proof badge -->
+      <div class="recipe" id="r-proof">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.4 / Proof badge</div>
+            <h3 class="recipe-name">Mark a claim <em>earned</em>, not asserted.</h3>
+          </div>
+          <div class="recipe-render">
+            <div class="cr-row">
+              <div class="pb"><span style="color: var(--bone);">Eval pass-rate climbed to <strong style="color: var(--paper);">94%</strong></span><span class="glyph">✓</span></div>
+              <div class="pb-conf high">High</div>
+              <div class="pb-conf med">Med</div>
+              <div class="pb-conf low">Low</div>
+            </div>
+            <div style="margin-top: 16px;">
+              <div class="pb-row">
+                <div class="pb-claim">Inference cost dropped <strong>18%</strong> over the trailing 14-day window <span class="glyph" style="color: var(--bronze);">✓</span></div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <div class="pb-source">n=14,287 traces · prod traffic · 2026-W17</div>
+                  <div class="pb-conf high">High confidence</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Stake the claim that something is <em>verified, sourced, or operating in production</em>. The reader sees "this is earned, not asserted."</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Evidence</em> (with provenance)</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Glyph</em> (Verification — a slightly-rotated Bronze checkmark) + <em>source rule.</em> Information foraging (Pirolli &amp; Card, 1995): the glyph is high-density scent at low ink-cost.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Verification glyph + (optional) source line + (optional) confidence chip + (optional) sample size + (optional) timestamp window.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Glyph</span><span class="pill opt">Source</span><span class="pill opt">Confidence (high / med / low)</span><span class="pill opt">n-size</span><span class="pill opt">Timestamp / window</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>Position</strong> · inline (after a stat) / footer (under a chart) / standalone (in a register). <strong>Confidence</strong> · high (Sage) / medium (Amber) / low (Clay). Color encodes pre-attentively.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">Inline after a metric. In the source line of a chart. On a contract signature row. Inside a case study. Appears throughout stress-tests 01, 02, 03.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Don't apply to opinions or projections — the badge implies verification. Misuse erodes trust everywhere. If confidence is low, attach the chip explicitly; an unmarked badge reads as high.</div></div>
+        </div>
+      </div>
+
+      <!-- 7.5 Caveat chip -->
+      <div class="recipe" id="r-caveat">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.5 / Caveat chip</div>
+            <h3 class="recipe-name">Bound the claim, <em>then keep moving</em>.</h3>
+          </div>
+          <div class="recipe-render">
+            <div class="cr-row">
+              <span class="cv-chip scoped">Scoped to enterprise</span>
+              <span class="cv-chip bound">Under 8K context</span>
+              <span class="cv-chip">Pending Q3 review</span>
+            </div>
+            <div style="margin-top: 16px;">
+              <div class="cv-row">P95 latency holds at <strong>312 ms</strong> across production traffic <span class="cv-chip bound" style="margin-left: 4px; vertical-align: middle;">Under 8K context</span> — above that, p95 climbs past 700 ms.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Surface a nuance or boundary on a claim <em>without disrupting the main message</em>. Sized to its weight: a one-line scope note, not a paragraph.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Caveat</em></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Chip.</em> Distinct from a Status Ribbon: no trailing slash, no schema-coded color set. The chip's job is bounding, not state-signaling.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Chip label (Geist Mono caps, short) + (optional) condition + (optional) source.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Label</span><span class="pill opt">Condition</span><span class="pill opt">Source</span><span class="pill opt">Confidence</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>Tone</strong> · neutral (Amber) / scoped (Slate Blue) / bound (Bronze). <strong>Position</strong> · inline (within sentence) / margin (in a caveat rail) / standalone (header tag).</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">Inline mid-sentence to bound a claim. As a slide-header tag indicating scope. In a Caveat Rail alongside an assumption set. Used in stress-test 01, 03.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Don't stack more than two on a single claim — the reader can't track more than two simultaneous bounds. If the claim has three+ caveats, lift them out into a Caveat Rail. Don't use a chip when a Risk Marker is the right shape — caveats <em>bound</em>; risks <em>warn</em>.</div></div>
+        </div>
+      </div>
+
+      <!-- 7.6 Metric treatment -->
+      <div class="recipe" id="r-metric">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.6 / Metric treatment</div>
+            <h3 class="recipe-name">A number, anchored by <em>interpretation</em>.</h3>
+          </div>
+          <div class="recipe-render">
+            <div class="cr-row" style="align-items: stretch;">
+              <div class="mt">
+                <div class="mt-label">Eval pass-rate · production</div>
+                <div class="mt-stat">94<span class="unit">%</span></div>
+                <div class="mt-rule"></div>
+                <div class="mt-interp"><span class="delta">↑ 23 pts</span> from 71% baseline · 8-week build</div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="mt-compact"><div class="mt-compact-label">P95 latency</div><div class="mt-compact-stat">312<span class="unit">ms</span></div><div class="mt-compact-meta"><span class="up">↓ 41ms</span> · vs target</div></div>
+                <div class="mt-compact"><div class="mt-compact-label">Tokens / day</div><div class="mt-compact-stat">2.4<span class="unit">M</span></div><div class="mt-compact-meta"><span class="up">↑ 8%</span> · vs avg</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Make a number <em>feel intentional and comparable</em>. The reader sees the number, the unit, the context, and the trend in one read. A bare number lies; this treatment refuses that.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Evidence</em> (quantitative)</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Marker + label + divider.</em> Cleveland &amp; McGill (1984): position-on-common-scale is the most accurate encoding; the hairline rule extends past the card edge to anchor without enclosing — a Tufte data-ink move.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Numeral (Fraunces, oversized) + unit (italic Oxblood) + label + (optional) interpretation + (optional) trend marker (delta + arrow + color) + (optional) source rule.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Numeral</span><span class="pill req">Label</span><span class="pill opt">Unit</span><span class="pill opt">Interpretation</span><span class="pill opt">Trend (delta + arrow)</span><span class="pill opt">Source</span><span class="pill opt">Baseline reference</span><span class="pill opt">n-size</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>Scale</strong> · display (oversized hero) / standard (3-up KPI) / compact (in a strip or table). <strong>Trend</strong> · up (Sage) / down (Clay) / flat (Ash). Color encodes direction pre-attentively.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">On a hero slide. In a 3-up KPI strip. In a portfolio table cell. Headlines stress-test 02 (communicate progress).</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Don't show the numeral without a label and interpretation — the bare number is a lie. Don't deploy display-scale for non-headline metrics; over-emphasis devalues the system. If the trend isn't credible, omit the delta — a missing trend is honest, a misleading one is theft.</div></div>
+        </div>
+      </div>
+
+      <!-- 7.7 Dependency connector -->
+      <div class="recipe" id="r-dependency">
+        <div class="recipe-head">
+          <div>
+            <div class="recipe-num">07.7 / Dependency connector</div>
+            <h3 class="recipe-name">"X requires Y" — <em>without</em> arrows.</h3>
+          </div>
+          <div class="recipe-render">
+            <div class="dc">
+              <div class="dc-node"><div class="dc-node-tag">Workstream</div><div class="dc-node-label">Eval harness</div></div>
+              <div class="dc-link"><div class="dc-link-l"></div><div class="dc-link-n"></div><div class="dc-link-cond">requires</div><div class="dc-link-n"></div><div class="dc-link-l"></div></div>
+              <div class="dc-node"><div class="dc-node-tag">Workstream</div><div class="dc-node-label">Ground-truth set</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="anatomy">
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">01</span> Communication job</div><div class="anatomy-val">Show that one element <em>requires</em> another. Distinct from a sequence: not "X then Y," but "X needs Y." The reader sees the contingency without the misread of an arrow as direction-of-flow.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">02</span> Narrative primitive</div><div class="anatomy-val"><em>Implication</em> (in its dependency form — contingency)</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">03</span> Visual primitive</div><div class="anatomy-val"><em>Connector</em> (Bronze hairline + diamond joint) — explicitly NOT an arrow. Gestalt continuity (Koffka, 1935) carries the relation; the diamond punctuates without implying direction.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">04</span> Anatomy</div><div class="anatomy-val">Source node + connector hairline + diamond joint + (optional) condition label + target node + (optional) condition / dependency type.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">05</span> Slots</div><div class="anatomy-val"><span class="pill req">Source node</span><span class="pill req">Target node</span><span class="pill opt">Condition (e.g., "requires," "blocked by")</span><span class="pill opt">Confidence</span><span class="pill opt">Owner of dependency</span></div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">06</span> Variants &amp; states</div><div class="anatomy-val"><strong>Topology</strong> · linear (1 → 1) / fan-out (1 → many) / fan-in (many → 1) / cyclic (when allowed). <strong>State</strong> · confirmed / proposed / blocked.</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">07</span> Example usage</div><div class="anatomy-val">On an architecture diagram showing system contingencies. On a roadmap to mark cross-track dependencies. On a stakeholder map. Used in stress-test 04 (compare options) and 06 (surface risk).</div></div>
+          <div class="anatomy-row"><div class="anatomy-key"><span class="num">08</span> Failure mode</div><div class="anatomy-val">Don't use to show <em>step after</em> — that's a sequence, use a Hairline Bridge or Pipeline. Confusing dependency with sequence is the single most common diagram failure; this recipe exists to prevent it. Label the condition explicitly when it's anything other than "requires."</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 Composition patterns -->
+    <section id="patterns">
+      <div class="section-num">08 / Layer 05 · Composition patterns</div>
+      <h2 class="section-h">Eight communication jobs. <em>Not slide types.</em></h2>
+      <p class="section-lede">A composition pattern is a proven assembly of components for a recurring communication job. Use the pattern that matches the job; let the components inside it adapt to the actual content. <em>Communication jobs, not slide templates.</em></p>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.1</div><div class="cp-pat-name">Recommend an action under uncertainty</div><div class="cp-pat-job">When the audience needs an answer, but the answer carries risk.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val"><em>Decision gate</em> + <em>Proof badge</em> ×3 + <em>Caveat chip</em> + <em>Risk marker</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val"><strong>Claim</strong> → Evidence → Caveat → Risk → <strong>Recommendation</strong></div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Claim</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Evidence</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Caveat</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Risk</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Recommend</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">If the recommendation is hedged, the audience reads it as no recommendation. Pick.</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.2</div><div class="cp-pat-name">Communicate progress against a plan</div><div class="cp-pat-job">When the audience needs to see the trajectory, the current state, and what's coming.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val"><em>Milestone node</em> ×4 + <em>Metric treatment</em> ×3 + <em>Risk marker</em> + <em>Status ribbon</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Past → <strong>Current</strong> → Next → Risk against plan</div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Headline</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">KPIs</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Trajectory</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">What's next</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">Showing progress without naming what's <em>not</em> on track turns a status into theater.</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.3</div><div class="cp-pat-name">Diagnose what went wrong</div><div class="cp-pat-job">When the work is to find a cause, not to assign blame.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val"><em>Metric treatment</em> (the symptom) + <em>Dependency connector</em> + <em>Proof badge</em> ×2 + <em>Caveat chip</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Tension → <strong>Symptom</strong> → Cause → <strong>Implication</strong></div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Symptom</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Investigation</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Cause</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Implication</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">Diagnostics that lead with the cause skip the work the audience needs to see.</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.4</div><div class="cp-pat-name">Compare options for a decision</div><div class="cp-pat-job">When the audience must pick, and seeing the alternatives makes the pick obvious.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val"><em>Decision gate</em> + 3 columns × (<em>Metric treatment</em> + <em>Risk marker</em> + <em>Caveat chip</em>)</div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Decision → <strong>Options</strong> on shared criteria → Tradeoffs → <strong>Recommendation</strong></div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Question</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">A · B · C</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Criteria rows</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Pick</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">If the options aren't actually different, the comparison is theater. Cut to a recommendation.</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.5</div><div class="cp-pat-name">Synthesize discussion into memorable takeaways</div><div class="cp-pat-job">When an hour of conversation has to compress into three things the audience can repeat.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val">3 × (<em>Weighted Callout</em> + <em>Proof badge</em>) + closing <em>Implication</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Opening claim → 3 takeaways → Implication</div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Opening</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Take 1</span><span class="cp-pat-arrow">·</span><span class="cp-pat-step">Take 2</span><span class="cp-pat-arrow">·</span><span class="cp-pat-step">Take 3</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">So-what</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">More than three takeaways and the audience remembers none of them. Cognitive load theory holds (Sweller, 1988).</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.6</div><div class="cp-pat-name">Surface risk without alarming</div><div class="cp-pat-job">When risk has to be visible, sized to its severity, and accompanied by what's being done.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val">Risk register table = <em>Risk marker</em> ×N + <em>Caveat chip</em> ×N + <em>Milestone node</em> (review date) + <em>Owner chip</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Risk inventory → severity → mitigation → owner → review</div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Header</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Register table</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Trend / outlook</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">Risks without owners and review dates aren't risks — they're complaints.</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.7</div><div class="cp-pat-name">Evaluate evidence under conflicting signals</div><div class="cp-pat-job">When the data points different directions and the audience needs help weighing it.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val">Two <em>Metric treatments</em> in tension + <em>Proof badge</em> ×2 (with confidence chips) + <em>Caveat chip</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Signal A → Signal B (in conflict) → How to weigh → <strong>Implication</strong></div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Signal A</span><span class="cp-pat-arrow">↔</span><span class="cp-pat-step">Signal B</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Weighing</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Implication</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">Presenting both sides without weighing them is abdication. Pick a read or be explicit that the slide is for discussion.</div>
+        </div>
+      </div>
+
+      <div class="cp-pat">
+        <div><div class="cp-pat-num">08.8</div><div class="cp-pat-name">Set stakes for a strategic shift</div><div class="cp-pat-job">When the next chapter requires the audience to feel the weight of what changes if they don't move.</div></div>
+        <div class="cp-pat-detail">
+          <div class="cp-pat-key">Components</div><div class="cp-pat-val"><em>Tension Line</em> primitive + <em>Weighted Callout</em> + <em>Metric treatment</em> (the cost of inaction) + <em>Recommendation</em></div>
+          <div class="cp-pat-key">Narrative</div><div class="cp-pat-val">Tension → Cost of standing still → Path forward</div>
+          <div class="cp-pat-key">Shape</div><div class="cp-pat-val"><div class="cp-pat-shape"><span class="cp-pat-step">Tension</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Stakes</span><span class="cp-pat-arrow">→</span><span class="cp-pat-step">Path</span></div></div>
+          <div class="cp-pat-key">Failure</div><div class="cp-pat-val">Stakes without a path forward is fearmongering. Always pair with a recommendation.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 Stress-test slides -->
+    <section id="stress">
+      <div class="section-num">09 / Stress-test slides</div>
+      <h2 class="section-h">Six slides. Six different jobs. Real content pressure.</h2>
+      <p class="section-lede">Each slide below is a load test on the system. Different communication job each time, dense real-feeling content, no narrative thread between them. Annotation panel below each names the components and primitives at work.</p>
+
+      <!-- ST 01 — Recommend under uncertainty -->
+      <div class="slide-wrap" id="st1">
+        <div class="slide">
+          <div class="slide-corner">Plumb</div>
+          <div class="slide-eyebrow">Stress-test 01 · Recommend under uncertainty</div>
+          <h2 class="slide-h">Adopt <em>multi-model</em> for the Northwind agent build.</h2>
+          <div class="slide-content">
+            <div class="s-grid-2">
+              <div>
+                <div class="dg" style="max-width: none; padding: 16px 18px;">
+                  <div class="dg-q" style="font-size: 16px; margin-bottom: 12px;">Lock to one model, or run a primary with two fallbacks?</div>
+                  <div class="dg-opts" style="gap: 6px;">
+                    <div class="dg-opt"><div class="dg-opt-key">A · Lock</div><div class="dg-opt-text">Lower cost; single point of failure.</div></div>
+                    <div class="dg-opt rec"><div class="dg-opt-key rec">B · Multi-model</div><div class="dg-opt-text"><strong>Recommended.</strong> Absorbs failure modes already in production.</div></div>
+                    <div class="dg-opt"><div class="dg-opt-key">C · Defer</div><div class="dg-opt-text">Adds latency to dependent decisions.</div></div>
+                  </div>
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                  <div class="risk-marker med"><span class="sev">Med</span><span class="lbl">Cost differential</span></div>
+                  <div class="risk-marker low"><span class="sev">Low</span><span class="lbl">Vendor lock-in</span></div>
+                  <span class="cv-chip bound">Holds under 1.4× cost ratio</span>
+                </div>
+              </div>
+              <div class="s-rail-list">
+                <div class="s-rail-h">Evidence</div>
+                <div class="s-rail-item"><span class="k">▸ 01</span><span class="t">Production traffic shows 3 failure modes the primary can't absorb</span><span class="src"><span class="r-glyph" style="font-size:10px;">✓</span></span></div>
+                <div class="s-rail-item"><span class="k">▸ 02</span><span class="t">Two of three already covered by guardrail-v3 across both providers</span><span class="src"><span class="r-glyph" style="font-size:10px;">✓</span></span></div>
+                <div class="s-rail-item"><span class="k">▸ 03</span><span class="t">Cost differential observed 1.18× over trailing 14 days</span><span class="src"><span class="r-glyph" style="font-size:10px;">✓</span></span></div>
+                <div class="s-rail-h" style="margin-top: 8px;">Assumption rail</div>
+                <div class="s-rail-item"><span class="k">A1</span><span class="t">Token cost differential stays under 1.4× through Q3</span><span class="src" style="color: var(--sage)">High</span></div>
+                <div class="s-rail-item"><span class="k">A2</span><span class="t">Guardrail-v3 holds across both providers without per-model tuning</span><span class="src" style="color: var(--amber)">Med</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="slide-source">Engagement · Northwind agent v2 · Wk 12</div>
+          <div class="slide-num">01 <span class="of">/</span> 06</div>
+        </div>
+        <div class="slide-annotation">
+          <div class="anno-label">System /</div>
+          <div class="anno-cell"><span class="key">Pattern</span> · <span class="val">Recommend under uncertainty</span></div>
+          <div class="anno-cell"><span class="key">Components</span> · <span class="val">Decision gate, Risk marker ×2, Caveat chip, Proof badge ×3</span></div>
+          <div class="anno-cell"><span class="key">Primitives</span> · <span class="val">Bracket, Glyph, Chip, Flag, Source rule</span></div>
+        </div>
+      </div>
+
+      <!-- ST 02 — Communicate progress -->
+      <div class="slide-wrap" id="st2">
+        <div class="slide">
+          <div class="slide-corner">Plumb</div>
+          <div class="slide-eyebrow">Stress-test 02 · Communicate progress</div>
+          <h2 class="slide-h">Northwind &middot; week 12 of 16.</h2>
+          <div class="slide-content">
+            <div class="s-grid-3" style="margin-bottom: 14px;">
+              <div class="mt-compact"><div class="mt-compact-label">Eval pass-rate</div><div class="mt-compact-stat">87<span class="unit">%</span></div><div class="mt-compact-meta"><span class="up">↑ 9 pts</span> · vs Wk 8 <span class="r-glyph" style="font-size:10px;color:var(--bronze);">✓</span></div></div>
+              <div class="mt-compact"><div class="mt-compact-label">P95 latency</div><div class="mt-compact-stat">340<span class="unit">ms</span></div><div class="mt-compact-meta"><span class="dn">↑ 28 ms</span> · over budget</div></div>
+              <div class="mt-compact"><div class="mt-compact-label">Cost / inference</div><div class="mt-compact-stat">$0.018</div><div class="mt-compact-meta"><span class="up">↓ 12%</span> · vs Wk 8</div></div>
+            </div>
+            <div class="ms-set" style="justify-content: space-between; padding: 6px 0;">
+              <div class="ms-step"><div class="ms-node past"></div><div class="ms-date">Wk 02</div><div class="ms-label">Diagnose</div></div>
+              <div class="ms-link"><div class="l"></div></div>
+              <div class="ms-step"><div class="ms-node past"></div><div class="ms-date">Wk 06</div><div class="ms-label">Architect</div></div>
+              <div class="ms-link"><div class="l"></div></div>
+              <div class="ms-step"><div class="ms-node current"></div><div class="ms-date">Wk 12</div><div class="ms-label">Build</div></div>
+              <div class="ms-link"><div class="l"></div></div>
+              <div class="ms-step"><div class="ms-node future"></div><div class="ms-date">Wk 16</div><div class="ms-label">Hand off</div></div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center;">
+              <span class="r-ribbon" style="background: rgba(163, 116, 212, 0.14); color: var(--plum); border-color: rgba(163, 116, 212, 0.32);">Beta</span>
+              <div class="risk-marker med"><span class="sev">Med</span><span class="lbl">Latency over SLO budget</span></div>
+              <span class="cv-chip">Eval gate Wk 14</span>
+              <span style="font-family: var(--mono); font-size: 9px; color: var(--ash); letter-spacing: 0.06em; margin-left: auto;">Owner · e.luckey</span>
+            </div>
+          </div>
+          <div class="slide-source">Engagement · Northwind agent v2 · trailing 14d window</div>
+          <div class="slide-num">02 <span class="of">/</span> 06</div>
+        </div>
+        <div class="slide-annotation">
+          <div class="anno-label">System /</div>
+          <div class="anno-cell"><span class="key">Pattern</span> · <span class="val">Communicate progress against a plan</span></div>
+          <div class="anno-cell"><span class="key">Components</span> · <span class="val">Metric treatment ×3, Milestone node ×4, Risk marker, Caveat chip</span></div>
+          <div class="anno-cell"><span class="key">Primitives</span> · <span class="val">Marker, Node, Connector, Ribbon, Glyph, Source rule</span></div>
+        </div>
+      </div>
+
+      <!-- ST 03 — Diagnose -->
+      <div class="slide-wrap" id="st3">
+        <div class="slide">
+          <div class="slide-corner">Plumb</div>
+          <div class="slide-eyebrow">Stress-test 03 · Diagnose what went wrong</div>
+          <h2 class="slide-h">Why eval pass-rate dropped <span class="ox">9 points</span> last week.</h2>
+          <div class="slide-content">
+            <div class="diag-flow">
+              <div class="diag-step">
+                <div class="diag-step-tag">Symptom</div>
+                <div class="diag-step-h">Eval drop</div>
+                <div class="mt-compact-stat" style="font-size: 22px; margin: 4px 0;">94 → 85<span class="unit">%</span></div>
+                <div class="diag-step-body">Wk 17 → Wk 18</div>
+              </div>
+              <div class="diag-bridge"><div class="diag-bridge-l"></div><div class="diag-bridge-n"></div><div class="diag-bridge-l"></div></div>
+              <div class="diag-step">
+                <div class="diag-step-tag">Investigation</div>
+                <div class="diag-step-h">Cross-encoder rerank</div>
+                <div class="diag-step-body">P95 added 180 ms; rerank scores degraded on a queries with 8K+ context. <span class="r-glyph" style="font-size:11px; color: var(--bronze);">✓</span></div>
+              </div>
+              <div class="diag-bridge"><div class="diag-bridge-l"></div><div class="diag-bridge-n"></div><div class="diag-bridge-l"></div></div>
+              <div class="diag-step">
+                <div class="diag-step-tag">Cause</div>
+                <div class="diag-step-h">Rerank window not sized for new traffic mix</div>
+                <div class="diag-step-body">Long-context queries climbed 14% wk-over-wk; rerank tuned for ≤4K. <span class="r-glyph" style="font-size:11px; color: var(--bronze);">✓</span></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 14px; align-items: center; flex-wrap: wrap;">
+              <span class="cv-chip bound">Holds under 8K context</span>
+              <span style="font-family: var(--display); font-style: italic; font-size: 14px; color: var(--paper); padding-left: 16px; position: relative;"><span style="position: absolute; left: 4px; top: 6px; bottom: 4px; width: 1px; background: var(--bronze);"></span><span style="position: absolute; left: 0; bottom: 0; width: 7px; height: 7px; background: var(--bronze); transform: rotate(45deg);"></span>Implication · resize the rerank window before Wk 19 traffic.</span>
+            </div>
+          </div>
+          <div class="slide-source">Source · prod traces n=14,287 · 2026-W18 · review · e.luckey</div>
+          <div class="slide-num">03 <span class="of">/</span> 06</div>
+        </div>
+        <div class="slide-annotation">
+          <div class="anno-label">System /</div>
+          <div class="anno-cell"><span class="key">Pattern</span> · <span class="val">Diagnose what went wrong</span></div>
+          <div class="anno-cell"><span class="key">Components</span> · <span class="val">Metric treatment, Dependency connector, Proof badge ×2, Caveat chip</span></div>
+          <div class="anno-cell"><span class="key">Primitives</span> · <span class="val">Connector, Node, Glyph, Chip, Source rule</span></div>
+        </div>
+      </div>
+
+      <!-- ST 04 — Compare options -->
+      <div class="slide-wrap" id="st4">
+        <div class="slide">
+          <div class="slide-corner">Plumb</div>
+          <div class="slide-eyebrow">Stress-test 04 · Compare options for a decision</div>
+          <h2 class="slide-h">Three architectures for production retrieval.</h2>
+          <div class="slide-content">
+            <div class="cmp-cols">
+              <div class="cmp-col">
+                <div class="cmp-col-tag">A · Vector-only</div>
+                <div class="cmp-col-h">Embedding ANN</div>
+                <div class="cmp-col-rows"><span class="k">Latency</span><span class="v strong">~140ms</span><span class="k">Cost</span><span class="v">Lowest</span><span class="k">Recall</span><span class="v">68%</span></div>
+                <div style="display: flex; gap: 6px; margin-top: 4px;"><div class="risk-marker high" style="padding: 3px 6px; font-size: 9px;"><span class="sev">High</span></div><span class="cv-chip" style="font-size: 9px; padding: 2px 6px;">Recall ceiling</span></div>
+              </div>
+              <div class="cmp-col rec">
+                <div class="cmp-col-tag rec">B · Hybrid</div>
+                <div class="cmp-col-h">Vector + BM25 + rerank</div>
+                <div class="cmp-col-rows"><span class="k">Latency</span><span class="v strong">~310ms</span><span class="k">Cost</span><span class="v">2.4×</span><span class="k">Recall</span><span class="v strong">94%</span></div>
+                <div style="display: flex; gap: 6px; margin-top: 4px;"><div class="risk-marker low" style="padding: 3px 6px; font-size: 9px;"><span class="sev">Low</span></div><span class="cv-chip bound" style="font-size: 9px; padding: 2px 6px;">Recommended</span></div>
+              </div>
+              <div class="cmp-col">
+                <div class="cmp-col-tag">C · Knowledge-graph</div>
+                <div class="cmp-col-h">Entity-linked retrieval</div>
+                <div class="cmp-col-rows"><span class="k">Latency</span><span class="v strong">~480ms</span><span class="k">Cost</span><span class="v">3.8×</span><span class="k">Recall</span><span class="v">96%</span></div>
+                <div style="display: flex; gap: 6px; margin-top: 4px;"><div class="risk-marker med" style="padding: 3px 6px; font-size: 9px;"><span class="sev">Med</span></div><span class="cv-chip" style="font-size: 9px; padding: 2px 6px;">Build cost high</span></div>
+              </div>
+            </div>
+            <div class="dc" style="margin-top: 14px; padding: 10px 16px;">
+              <div class="dc-node" style="padding: 6px 10px;"><div class="dc-node-tag">Build B</div><div class="dc-node-label" style="font-size: 12px;">Hybrid retrieval</div></div>
+              <div class="dc-link"><div class="dc-link-l"></div><div class="dc-link-n"></div><div class="dc-link-cond">requires</div><div class="dc-link-n"></div><div class="dc-link-l"></div></div>
+              <div class="dc-node" style="padding: 6px 10px;"><div class="dc-node-tag">Workstream</div><div class="dc-node-label" style="font-size: 12px;">Eval harness Wk 14</div></div>
+            </div>
+          </div>
+          <div class="slide-source">Source · prototyping benchmarks · n=2,400 · production-eval set</div>
+          <div class="slide-num">04 <span class="of">/</span> 06</div>
+        </div>
+        <div class="slide-annotation">
+          <div class="anno-label">System /</div>
+          <div class="anno-cell"><span class="key">Pattern</span> · <span class="val">Compare options for a decision</span></div>
+          <div class="anno-cell"><span class="key">Components</span> · <span class="val">Decision gate (3 cols), Metric treatment ×9, Risk marker ×3, Caveat chip ×3, Dependency connector</span></div>
+          <div class="anno-cell"><span class="key">Primitives</span> · <span class="val">Bracket, Chip, Flag, Connector, Node</span></div>
+        </div>
+      </div>
+
+      <!-- ST 05 — Synthesize -->
+      <div class="slide-wrap" id="st5">
+        <div class="slide">
+          <div class="slide-corner">Plumb</div>
+          <div class="slide-eyebrow">Stress-test 05 · Synthesize discussion</div>
+          <h2 class="slide-h">Three reads from the strategy off-site.</h2>
+          <div class="slide-content">
+            <div class="syn-grid">
+              <div class="syn-card">
+                <div class="syn-num">01 · Direction</div>
+                <div class="syn-take">Ship boring infrastructure first. Showy demos last.</div>
+                <div class="syn-body">The team that's growing fastest invested in eval harnesses, not features.</div>
+                <div style="margin-top: auto; display: flex; gap: 6px;"><div class="pb-conf high" style="font-size: 8px; padding: 1px 5px;">High</div><span class="r-glyph" style="font-size: 11px; color: var(--bronze);">✓</span></div>
+              </div>
+              <div class="syn-card">
+                <div class="syn-num">02 · Pattern</div>
+                <div class="syn-take">Operability beats accuracy past 85%.</div>
+                <div class="syn-body">Above the threshold, every gain has been swallowed by integration debt.</div>
+                <div style="margin-top: auto; display: flex; gap: 6px;"><div class="pb-conf med" style="font-size: 8px; padding: 1px 5px;">Med</div><span class="r-glyph" style="font-size: 11px; color: var(--bronze);">✓</span></div>
+              </div>
+              <div class="syn-card">
+                <div class="syn-num">03 · Reframe</div>
+                <div class="syn-take">Hand-off is the deliverable, not the milestone.</div>
+                <div class="syn-body">Four of five renewals came from clients we made self-sufficient by Wk 8.</div>
+                <div style="margin-top: auto; display: flex; gap: 6px;"><div class="pb-conf high" style="font-size: 8px; padding: 1px 5px;">High</div><span class="r-glyph" style="font-size: 11px; color: var(--bronze);">✓</span></div>
+              </div>
+            </div>
+            <div style="font-family: var(--display); font-style: italic; font-size: 14px; color: var(--paper); margin-top: 14px; padding-left: 16px; position: relative;"><span style="position: absolute; left: 4px; top: 4px; bottom: 4px; width: 1px; background: var(--bronze);"></span><span style="position: absolute; left: 0; bottom: 0; width: 7px; height: 7px; background: var(--bronze); transform: rotate(45deg);"></span>Implication · the next quarter's bet is governance, not raw model gain.</div>
+          </div>
+          <div class="slide-source">Source · off-site notes · 2026-W18 · 14 engagements reviewed</div>
+          <div class="slide-num">05 <span class="of">/</span> 06</div>
+        </div>
+        <div class="slide-annotation">
+          <div class="anno-label">System /</div>
+          <div class="anno-cell"><span class="key">Pattern</span> · <span class="val">Synthesize discussion into takeaways</span></div>
+          <div class="anno-cell"><span class="key">Components</span> · <span class="val">Weighted Callout ×3, Proof badge ×3 (with confidence), Implication line</span></div>
+          <div class="anno-cell"><span class="key">Primitives</span> · <span class="val">Glyph, Chip, Marker, Source rule</span></div>
+        </div>
+      </div>
+
+      <!-- ST 06 — Surface risk -->
+      <div class="slide-wrap" id="st6">
+        <div class="slide">
+          <div class="slide-corner">Plumb</div>
+          <div class="slide-eyebrow">Stress-test 06 · Surface risk without alarming</div>
+          <h2 class="slide-h">Risk register &middot; <em>quarterly review</em>.</h2>
+          <div class="slide-content">
+            <table class="risk-tbl">
+              <thead>
+                <tr><th>Risk</th><th>Sev</th><th>Mitigation</th><th>Owner</th><th>Review</th><th>Trend</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="label">Token cost differential exceeds 1.4×</td><td><div class="risk-marker high" style="padding: 2px 6px; font-size: 9px;"><span class="sev">High</span></div></td><td>Cap experimental band at 8% inference</td><td class="mono">e.luckey</td><td class="mono">Wk 18</td><td class="mono" style="color: var(--clay);">↑</td></tr>
+                <tr><td class="label">Guardrail-v3 inconsistency across providers</td><td><div class="risk-marker med" style="padding: 2px 6px; font-size: 9px;"><span class="sev">Med</span></div></td><td>Per-model evals running</td><td class="mono">m.li</td><td class="mono">Wk 19</td><td class="mono" style="color: var(--ash);">→</td></tr>
+                <tr><td class="label">Rerank latency over SLO at 8K+ context</td><td><div class="risk-marker med" style="padding: 2px 6px; font-size: 9px;"><span class="sev">Med</span></div></td><td>Window resize Wk 19; cache warm-up</td><td class="mono">a.park</td><td class="mono">Wk 19</td><td class="mono" style="color: var(--clay);">↑</td></tr>
+                <tr><td class="label">Vendor approval review for fallback model</td><td><div class="risk-marker low" style="padding: 2px 6px; font-size: 9px;"><span class="sev">Low</span></div></td><td>In legal Q · awaiting</td><td class="mono">j.ortiz</td><td class="mono">Wk 22</td><td class="mono" style="color: var(--ash);">→</td></tr>
+                <tr><td class="label">Eval set drift on long-form queries</td><td><div class="risk-marker low" style="padding: 2px 6px; font-size: 9px;"><span class="sev">Low</span></div></td><td>Resampling Wk 21</td><td class="mono">e.luckey</td><td class="mono">Wk 21</td><td class="mono" style="color: var(--sage);">↓</td></tr>
+              </tbody>
+            </table>
+            <div style="display: flex; gap: 12px; margin-top: 12px; align-items: center;">
+              <span class="cv-chip bound">Active engagements only</span>
+              <span class="r-glyph" style="font-size: 12px; color: var(--bronze);">✓</span>
+              <span style="font-family: var(--mono); font-size: 10px; color: var(--ash); letter-spacing: 0.06em;">Reviewed · 2026-W18 · risk-council</span>
+            </div>
+          </div>
+          <div class="slide-source">Owners · per row · review cadence · biweekly</div>
+          <div class="slide-num">06 <span class="of">/</span> 06</div>
+        </div>
+        <div class="slide-annotation">
+          <div class="anno-label">System /</div>
+          <div class="anno-cell"><span class="key">Pattern</span> · <span class="val">Surface risk without alarming</span></div>
+          <div class="anno-cell"><span class="key">Components</span> · <span class="val">Risk marker ×5 (3 severities), Caveat chip, Milestone node (review dates), Owner chip</span></div>
+          <div class="anno-cell"><span class="key">Primitives</span> · <span class="val">Flag, Chip, Marker, Glyph, Source rule</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 Implementation -->
+    <section id="impl">
+      <div class="section-num">10 / Implementation</div>
+      <h2 class="section-h">How to use the system without breaking it.</h2>
+      <p class="section-lede">Twelve rules that keep the system honest. Most are violations of cognitive science when broken — not just preferences.</p>
+
+      <div class="impl-grid">
+        <div class="impl-item"><div class="impl-key">Start with the role</div><div class="impl-val">Before picking a component, name what each piece of information is <em>doing</em>. Claim, evidence, caveat, decision. Visual choices follow narrative roles, not the other way around.</div></div>
+        <div class="impl-item"><div class="impl-key">Slot discipline</div><div class="impl-val">Required slots are required for a reason. Optional slots have a cost — every filled optional slot eats working memory (Sweller, 1988). Fill only what the story actually needs.</div></div>
+        <div class="impl-item"><div class="impl-key">Schemas before novelty</div><div class="impl-val">A reader who's seen the same Status Ribbon shape forty times parses the forty-first without effort. Don't reinvent shapes; reuse them. Schemas are bandwidth.</div></div>
+        <div class="impl-item"><div class="impl-key">Pre-attentive duty</div><div class="impl-val">Color and position carry meaning the eye reads first. Use Sage / Amber / Clay only as state, never as decoration. Treat color as a contract.</div></div>
+        <div class="impl-item"><div class="impl-key">Encoding accuracy</div><div class="impl-val">For magnitude comparisons: position &gt; length &gt; angle &gt; area &gt; color saturation. Don't pie-chart what should bar-chart. Don't color-code what should position-code.</div></div>
+        <div class="impl-item"><div class="impl-key">Caveat ≠ Risk</div><div class="impl-val">A <em>caveat</em> bounds. A <em>risk</em> warns. They use different chips and different rails. Confusing them blunts both.</div></div>
+        <div class="impl-item"><div class="impl-key">Recommendation ≠ Decision</div><div class="impl-val">A <em>recommendation</em> answers. A <em>decision</em> asks. The Decision Gate component holds both — but the recommendation indicator must always be present and explicit.</div></div>
+        <div class="impl-item"><div class="impl-key">Numbers always interpret</div><div class="impl-val">A bare number lies. Every Metric treatment requires a label and an interpretation slot. Trend without baseline is theatrical.</div></div>
+        <div class="impl-item"><div class="impl-key">Sources earn trust</div><div class="impl-val">A claim without a source is opinion. Use the Verification Glyph for inline evidence; use a Source rule for the full attribution. Never claim what you can't back.</div></div>
+        <div class="impl-item"><div class="impl-key">Dependency ≠ Sequence</div><div class="impl-val">A Dependency Connector says "X requires Y." A Hairline Bridge says "X then Y." Different concepts. Mixing them is the most common diagram failure.</div></div>
+        <div class="impl-item"><div class="impl-key">First edit: removal</div><div class="impl-val">Tufte's data-ink rule. Every element must earn its place. Cluttered isn't depth; structured is.</div></div>
+        <div class="impl-item"><div class="impl-key">If the legend is taller than the chart</div><div class="impl-val">It wants to be a table. The same goes for slides — if a slide needs a legend taller than its content, the slide wants to be two slides.</div></div>
+      </div>
+    </section>
+
+    <!-- 11 Closing -->
+    <section id="closing" class="closing">
+      <div class="section-num">11 / Closing</div>
+      <div class="closing-quote">A grammar of reusable story moves. Built on perception, memory, and reading — <em>not on aesthetics.</em></div>
+      <div class="closing-meta">
+        <span>Plumb Presentation Component &amp; Communication Pattern System v1.0</span>
+        <span>May 2026</span>
+        <span>Build in confidence</span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function () {
+  const links = Array.from(document.querySelectorAll('.toc-link'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  function setActive() {
+    const y = window.scrollY + 200;
+    let active = sections[0];
+    for (const s of sections) {
+      if (!s) continue;
+      if (s.offsetTop <= y) active = s;
+    }
+    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + active.id));
+  }
+  document.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+})();
+</script>
+</body>
+</html>

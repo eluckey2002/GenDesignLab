@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Convergence · UMAT Life Stack</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    --bg: #050607;
+    --panel: #0d0f12;
+    --panel-edge: #1a1d22;
+    --ink: #d8dde3;
+    --ink-dim: #6b7380;
+    --ink-faint: #2a2e35;
+    --accent-tree: #aedca9; /* Jade */
+    --accent-swarm: #ffb878; /* Amber */
+    --accent-warn: #ff5555;
+    --accent-state: #7ac9c9;
+    --font-mono: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body, html {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--font-mono); font-size: 11px;
+    overflow: hidden; -webkit-font-smoothing: antialiased;
+  }
+  #layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    height: 100vh;
+  }
+  #canvas-wrap {
+    position: relative;
+    background: radial-gradient(circle at center, #0a0c0e 0%, #050607 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas#c { display: block; max-width: 100%; max-height: 100%; }
+
+  #sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--panel-edge);
+    display: flex; flex-direction: column;
+    padding: 24px; gap: 16px;
+    overflow-y: auto;
+  }
+
+  .hud-section { display: flex; flex-direction: column; gap: 6px; }
+  .hud-title { 
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-dim);
+    border-bottom: 1px solid var(--ink-faint); padding-bottom: 4px;
+    display: flex; justify-content: space-between;
+  }
+  .metric-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .metric-val { color: var(--ink); font-size: 13px; }
+  .metric-val.tree { color: var(--accent-tree); }
+  .metric-val.swarm { color: var(--accent-swarm); }
+
+  .status-bar-bg { width: 100%; height: 4px; background: var(--ink-faint); margin-top: 2px; position: relative; }
+  .status-bar-fill { height: 100%; transition: width 0.3s; }
+
+  /* Active System State */
+  #state-tag {
+    background: var(--panel-edge); color: var(--accent-state);
+    padding: 4px 8px; border-radius: 2px; font-size: 10px;
+    border: 1px solid var(--ink-faint); margin-top: 4px;
+    text-align: center; letter-spacing: 0.1em;
+  }
+
+  /* Species Data Readout */
+  .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+  .data-col { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--ink-faint); padding: 8px; }
+  .data-label { font-size: 8px; color: var(--ink-faint); text-transform: uppercase; }
+  .data-val { font-size: 11px; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip {
+    background: var(--panel-edge); border: 1px solid var(--ink-faint);
+    color: var(--ink-dim); padding: 4px 8px; font-size: 9px;
+    cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .chip:hover { border-color: var(--ink-dim); color: var(--ink); }
+  .chip.active { background: var(--ink-faint); color: var(--ink); border-color: var(--ink-dim); }
+
+  .control-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .control-item { display: flex; flex-direction: column; gap: 2px; }
+  .control-label { font-size: 9px; color: var(--ink-dim); text-transform: uppercase; display: flex; justify-content: space-between; }
+  input[type=range] { width: 100%; accent-color: var(--ink-dim); cursor: pointer; height: 18px; }
+
+  #lineage-wrap {
+    width: 100%; height: 120px;
+    background: #000; border: 1px solid var(--ink-faint);
+    position: relative; margin-top: 4px;
+  }
+  canvas#lineage-canvas { width: 100%; height: 100%; display: block; }
+
+  #log {
+    font-size: 9px; color: var(--ink-dim);
+    border-top: 1px solid var(--ink-faint); padding-top: 12px;
+    height: 60px; overflow-y: auto; line-height: 1.5;
+  }
+  .log-entry { margin-bottom: 2px; }
+
+  button.action-btn {
+    background: transparent; border: 1px solid var(--ink-faint);
+    color: var(--ink-dim); padding: 8px; font-family: var(--font-mono);
+    cursor: pointer; text-transform: uppercase; font-size: 10px;
+    margin-top: 4px;
+  }
+  button.action-btn:hover { border-color: var(--ink-dim); color: var(--ink); }
+  button#btn-cataclysm { border-color: #551111; color: #aa4444; }
+</style>
+</head>
+<body>
+
+<div id="layout">
+  <div id="canvas-wrap">
+    <canvas id="c"></canvas>
+  </div>
+
+  <div id="sidebar">
+    <div class="hud-section">
+      <div class="hud-title">System Vitals</div>
+      <div class="metric-row">
+        <span>Metabolic Health</span>
+        <span class="metric-val" id="val-metabolism">1.000</span>
+      </div>
+      <div class="status-bar-bg"><div id="bar-metabolism" class="status-bar-fill" style="width: 100%; background: var(--ink-dim);"></div></div>
+      <div id="state-tag">STATUS: BALANCED</div>
+    </div>
+
+    <div class="hud-section">
+      <div class="hud-title">Species Readout</div>
+      <div class="data-grid">
+        <div class="data-col" style="border-top: 2px solid var(--accent-tree)">
+          <span class="data-label">Tree Gen</span>
+          <span class="data-val" id="d-tree-gen">0</span>
+          <span class="data-label">Efficiency</span>
+          <span class="data-val" id="d-tree-eff">0.00</span>
+        </div>
+        <div class="data-col" style="border-top: 2px solid var(--accent-swarm)">
+          <span class="data-label">Swarm Gen</span>
+          <span class="data-val" id="d-swarm-gen">0</span>
+          <span class="data-label">Efficiency</span>
+          <span class="data-val" id="d-swarm-eff">0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-section">
+      <div class="hud-title">Lineage Strategy Map</div>
+      <div id="lineage-wrap">
+        <canvas id="lineage-canvas"></canvas>
+      </div>
+    </div>
+
+    <div class="hud-section">
+      <div class="hud-title">Population Ratio</div>
+      <div class="metric-row">
+        <span class="tree" style="color: var(--accent-tree)">Tree (N)</span>
+        <span class="metric-val tree" id="val-tree-n">0</span>
+      </div>
+      <div class="metric-row">
+        <span class="swarm" style="color: var(--accent-swarm)">Swarm (N)</span>
+        <span class="metric-val swarm" id="val-swarm-n">0</span>
+      </div>
+      <div class="status-bar-bg" style="display:flex;">
+        <div id="bar-tree" class="status-bar-fill" style="background: var(--accent-tree);"></div>
+        <div id="bar-swarm" class="status-bar-fill" style="background: var(--accent-swarm);"></div>
+      </div>
+    </div>
+
+    <div class="hud-section">
+      <div class="hud-title">Tuning & Cataclysm</div>
+      <div class="control-group">
+        <div class="control-item">
+          <span class="control-label">Replenish <span id="val-replenish">0.0018</span></span>
+          <input type="range" id="sl-replenish" min="0.0001" max="0.01" step="0.0001" value="0.0018">
+        </div>
+        <div class="control-item">
+          <span class="control-label">Branch Rate <span id="val-branch">0.015</span></span>
+          <input type="range" id="sl-branch" min="0.001" max="0.05" step="0.001" value="0.015">
+        </div>
+        <button class="action-btn" id="btn-cataclysm">Trigger Cataclysm</button>
+        <button class="action-btn" id="btn-reset">Reset Convergence</button>
+      </div>
+    </div>
+
+    <div id="log"></div>
+  </div>
+</div>
+
+<script>
+// --- UMAT CORE ---
+const UMAT = {
+  RateCoupler: (opts) => {
+    const cfg = { forage_strength: 0.7, ...opts };
+    return {
+      evaluate: (generator, field, x, y, fs) => {
+        const e = field.sample(x, y);
+        const lp = (fs !== undefined ? fs : cfg.forage_strength) * e;
+        if (Math.random() >= lp) { generator.step(); return true; }
+        return false;
+      },
+      setConfig: (p) => Object.assign(cfg, p)
+    };
+  },
+  Senescence: (opts) => {
+    const cfg = { n_cap: 1000, e_starve: 0.12, t_starve: 180, p_death_max: 0.015, k_recycling: 0.08, ...opts };
+    return {
+      updateStress: (node, e, stateBuff = 1) => {
+        if (node.starve === undefined) node.starve = 0;
+        if (e < cfg.e_starve) node.starve += (1 * stateBuff);
+        else node.starve = Math.max(0, node.starve - 3);
+      },
+      shouldDie: (node, currentN, field, x, y) => {
+        if (node.starve < cfg.t_starve) return false;
+        const popFrac = currentN / cfg.n_cap;
+        let ps = popFrac < 0.3 ? 0 : popFrac > 0.85 ? 1 : (popFrac - 0.3) / 0.55;
+        if (Math.random() < cfg.p_death_max * ps) {
+          if (field) field.deposit(x, y, -cfg.k_recycling);
+          return true;
+        }
+        return false;
+      },
+      setConfig: (p) => Object.assign(cfg, p),
+      get config() { return cfg; }
+    };
+  },
+  Inheritance: (opts) => {
+    const cfg = { drift_strength: 0.02, jump_chance: 0.02, jump_magnitude: 0.4, ...opts };
+    const gauss = () => (Math.random() + Math.random() + Math.random() + Math.random() - 2) / 2;
+    return {
+      procreate: (parent, keys) => {
+        const child = { ...parent };
+        keys.forEach(k => {
+          const isJump = Math.random() < cfg.jump_chance;
+          const s = isJump ? cfg.jump_magnitude : cfg.drift_strength;
+          child[k] = Math.max(0.05, Math.min(0.95, child[k] + gauss() * s));
+        });
+        child.gen = (parent.gen || 0) + 1;
+        return child;
+      },
+      setConfig: (p) => Object.assign(cfg, p)
+    };
+  },
+  EnergyField: (opts) => {
+    const cfg = { size: 64, replenish: 0.0018, diffuse: 0.1, initial: 1.0, ...opts };
+    const FS = cfg.size;
+    let buf = new Float32Array(FS * FS).fill(cfg.initial);
+    let swap = new Float32Array(FS * FS);
+    const _toG = (x, y) => [(x + 1) * 0.5 * (FS - 1), (y + 1) * 0.5 * (FS - 1)];
+    return {
+      sample: (x, y) => {
+        const [fi, fj] = _toG(x, y);
+        if (fi < 0 || fi > FS - 1 || fj < 0 || fj > FS - 1) return 1.0;
+        const i0 = Math.floor(fi), j0 = Math.floor(fj), i1 = Math.min(FS-1, i0+1), j1 = Math.min(FS-1, j0+1);
+        const fx = fi - i0, fy = fj - j0;
+        return (buf[j0*FS+i0]*(1-fx) + buf[j0*FS+i1]*fx)*(1-fy) + (buf[j1*FS+i0]*(1-fx) + buf[j1*FS+i1]*fx)*fy;
+      },
+      deposit: (x, y, amt) => {
+        const [fi, fj] = _toG(x, y);
+        const i = Math.round(fi), j = Math.round(fj);
+        if (i >= 0 && i < FS && j >= 0 && j < FS) buf[j*FS+i] = Math.max(0, buf[j*FS+i] - amt);
+      },
+      step: () => {
+        for (let i = 0; i < buf.length; i++) buf[i] += (1.0 - buf[i]) * cfg.replenish;
+        for (let j = 0; j < FS; j++) for (let i = 0; i < FS; i++) {
+          const idx = j * FS + i;
+          const n = j > 0 ? buf[idx - FS] : buf[idx], s = j < FS - 1 ? buf[idx + FS] : buf[idx];
+          const w = i > 0 ? buf[idx - 1] : buf[idx], e = i < FS - 1 ? buf[idx + 1] : buf[idx];
+          swap[idx] = buf[idx] + cfg.diffuse * ((n + s + w + e) * 0.25 - buf[idx]);
+        }
+        [buf, swap] = [swap, buf];
+      },
+      reset: (val) => buf.fill(val !== undefined ? val : cfg.initial),
+      setConfig: (p) => Object.assign(cfg, p),
+      stats: () => ({ mean: buf.reduce((a, b) => a + b, 0) / buf.length }),
+      buf
+    };
+  }
+};
+
+// --- SIMULATION ---
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const linCanvas = document.getElementById('lineage-canvas');
+const linCtx = linCanvas.getContext('2d');
+
+const metab = UMAT.EnergyField({ size: 64, replenish: 0.0022 });
+const sen = UMAT.Senescence({ n_cap: 1100 });
+const inher = UMAT.Inheritance({ drift_strength: 0.02, jump_chance: 0.02 });
+
+let treeNodes = [], swarmAgents = [], frame = 0, history = [];
+let state = { current: "BALANCED", treeBuff: 1, swarmBuff: 1 };
+let params = { branchRate: 0.015 };
+
+function resetSim() {
+  metab.reset(); history = [];
+  treeNodes = [{ x: 0, y: 0, starve: 0, traits: { growth_threshold: 0.55, hue: 145, gen: 0 } }];
+  swarmAgents = Array.from({length: 20}, () => ({
+    x: (Math.random()-0.5)*0.3, y: (Math.random()-0.5)*0.3, 
+    starve: 0, ax: Math.random()*0.2, ay: Math.random()*0.2,
+    traits: { forage_strength: 0.65, hue: 45, gen: 0 }
+  }));
+  frame = 0; log("Convergence Lab Initialized.");
+}
+
+function triggerCataclysm() {
+  treeNodes.splice(0, Math.floor(treeNodes.length * 0.97));
+  swarmAgents.splice(0, Math.floor(swarmAgents.length * 0.97));
+  metab.reset(0.01);
+  log("!!! CATACLYSM DETECTED !!!");
+}
+
+function checkStates() {
+  const m = metab.stats().mean;
+  const total = treeNodes.length + swarmAgents.length;
+  const ratio = treeNodes.length / total;
+
+  let newState = "BALANCED";
+  state.treeBuff = 1; state.swarmBuff = 1;
+
+  if (m < 0.35) {
+    newState = "FAMINE";
+    state.treeBuff = 0.5; state.swarmBuff = 0.5; // Resilience buff
+  } else if (ratio > 0.92) {
+    newState = "TREE DOMINANT";
+    state.swarmBuff = 0.1; // Huge buff to losing species
+  } else if (ratio < 0.08) {
+    newState = "SWARM DOMINANT";
+    state.treeBuff = 0.1;
+  }
+
+  if (newState !== state.current) {
+    state.current = newState;
+    document.getElementById('state-tag').textContent = `STATUS: ${newState}`;
+    log(`Environment shifted to: ${newState}`);
+  }
+}
+
+function log(msg) {
+  const el = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = 'log-entry';
+  d.textContent = `[${frame}] ${msg}`;
+  el.prepend(d);
+  if (el.childNodes.length > 5) el.lastChild.remove();
+}
+
+function update() {
+  metab.step();
+  checkStates();
+
+  swarmAgents.forEach(a => {
+    const e = metab.sample(a.x, a.y);
+    sen.updateStress(a, e, state.swarmBuff);
+    const fs = a.traits.forage_strength;
+    const linger = Math.random() < fs * e;
+    if (!linger) {
+      const nx = Math.sin(-1.4 * a.ay) + 1.0 * Math.cos(-1.4 * a.ax);
+      const ny = Math.sin(1.6 * a.ax) + 0.7 * Math.cos(1.6 * a.ay);
+      a.ax = nx; a.ay = ny; a.x = nx * 0.45; a.y = ny * 0.45;
+    }
+    metab.deposit(a.x, a.y, linger ? 0.012 : 0.005);
+    if (e > 0.93 && Math.random() < 0.014 && (swarmAgents.length + treeNodes.length) < sen.config.n_cap) {
+      swarmAgents.push({ ...a, x: a.x+(Math.random()-0.5)*0.01, y: a.y+(Math.random()-0.5)*0.01, starve: 0, traits: inher.procreate(a.traits, ['forage_strength', 'hue']) });
+    }
+  });
+
+  const buds = [];
+  treeNodes.forEach(n => {
+    const e = metab.sample(n.x, n.y);
+    sen.updateStress(n, e, state.treeBuff);
+    metab.deposit(n.x, n.y, 0.0040);
+    if (e > n.traits.growth_threshold && Math.random() < params.branchRate && (swarmAgents.length + treeNodes.length) < sen.config.n_cap) {
+      const ang = Math.random() * Math.PI * 2, d = 0.045;
+      buds.push({ x: n.x + Math.cos(ang)*d, y: n.y + Math.sin(ang)*d, starve: 0, traits: inher.procreate(n.traits, ['growth_threshold', 'hue']) });
+    }
+  });
+  treeNodes.push(...buds);
+
+  const total = swarmAgents.length + treeNodes.length;
+  swarmAgents = swarmAgents.filter(a => !sen.shouldDie(a, total, metab, a.x, a.y));
+  treeNodes = treeNodes.filter(n => !sen.shouldDie(n, total, metab, n.x, n.y));
+
+  frame++;
+  if (frame % 60 === 0) {
+    updateHUD();
+    history.push({ tree: treeNodes.map(n => n.traits.growth_threshold), swarm: swarmAgents.map(a => a.traits.forage_strength) });
+    if (history.length > 100) history.shift();
+    drawLineage();
+  }
+}
+
+function updateHUD() {
+  const s = metab.stats();
+  document.getElementById('val-metabolism').textContent = s.mean.toFixed(3);
+  document.getElementById('bar-metabolism').style.width = (s.mean * 100) + '%';
+  document.getElementById('val-tree-n').textContent = treeNodes.length;
+  document.getElementById('val-swarm-n').textContent = swarmAgents.length;
+  
+  const totalN = treeNodes.length + swarmAgents.length;
+  if (totalN > 0) {
+    document.getElementById('bar-tree').style.width = (treeNodes.length / totalN * 100) + '%';
+    document.getElementById('bar-swarm').style.width = (swarmAgents.length / totalN * 100) + '%';
+    
+    const avgTreeGen = treeNodes.reduce((sum, n) => sum + n.traits.gen, 0) / treeNodes.length || 0;
+    const avgSwarmGen = swarmAgents.reduce((sum, a) => sum + a.traits.gen, 0) / swarmAgents.length || 0;
+    document.getElementById('d-tree-gen').textContent = Math.round(avgTreeGen);
+    document.getElementById('d-swarm-gen').textContent = Math.round(avgSwarmGen);
+    
+    // Efficiency: Population / Energy Pulse (Approximated)
+    document.getElementById('d-tree-eff').textContent = (treeNodes.length / (1.01 - s.mean)).toFixed(1);
+    document.getElementById('d-swarm-eff').textContent = (swarmAgents.length / (1.01 - s.mean)).toFixed(1);
+  }
+}
+
+function drawLineage() {
+  linCtx.fillStyle = '#000'; linCtx.fillRect(0, 0, linCanvas.width, linCanvas.height);
+  if (history.length < 2) return;
+  const dx = linCanvas.width / 100;
+  history.forEach((snap, idx) => {
+    const x = idx * dx;
+    snap.tree.forEach(v => { linCtx.fillStyle = `hsla(140, 40%, 60%, 0.18)`; linCtx.fillRect(x, linCanvas.height * (1-v), 2, 2); });
+    snap.swarm.forEach(v => { linCtx.fillStyle = `hsla(40, 80%, 70%, 0.18)`; linCtx.fillRect(x, linCanvas.height * (1-v), 2, 2); });
+  });
+}
+
+function draw() {
+  ctx.fillStyle = '#050607'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const cx = 400, cy = 400, cs = 360;
+  const fs = 64, step = (cs * 2) / fs, buf = metab.buf;
+  for (let j = 0; j < fs; j++) for (let i = 0; i < fs; i++) {
+    const v = buf[j * fs + i];
+    if (v < 0.99) {
+      ctx.fillStyle = `rgba(200, 150, 90, ${ (1 - v) * 0.35 })`;
+      ctx.fillRect(cx - cs + i * step, cy - cs + j * step, step + 1, step + 1);
+    }
+  }
+  treeNodes.forEach(n => { ctx.fillStyle = `hsla(${n.traits.hue}, 50%, 60%, 0.7)`; ctx.beginPath(); ctx.arc(cx + n.x * cs, cy - n.y * cs, 1.8, 0, Math.PI*2); ctx.fill(); });
+  swarmAgents.forEach(a => { ctx.fillStyle = `hsla(${a.traits.hue}, 80%, 70%, 1.0)`; ctx.beginPath(); ctx.arc(cx + a.x * cs, cy - a.y * cs, 2.8, 0, Math.PI*2); ctx.fill(); });
+}
+
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+
+window.onload = () => {
+  canvas.width = 800; canvas.height = 800;
+  linCanvas.width = 300; linCanvas.height = 120;
+  resetSim(); loop();
+  document.getElementById('sl-replenish').oninput = e => {
+    const v = parseFloat(e.target.value); metab.setConfig({ replenish: v });
+    document.getElementById('val-replenish').textContent = v.toFixed(4);
+  };
+  document.getElementById('sl-branch').oninput = e => {
+    params.branchRate = parseFloat(e.target.value);
+    document.getElementById('val-branch').textContent = params.branchRate.toFixed(3);
+  };
+  document.getElementById('btn-reset').onclick = resetSim;
+  document.getElementById('btn-cataclysm').onclick = triggerCataclysm;
+};
+</script>
+</body>
+</html>

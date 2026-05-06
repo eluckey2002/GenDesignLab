@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuclear Compound: Depth-3 Ring Modulation</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      background: #0a0a0f; 
+      color: #e0e0e0; 
+      font-family: 'Courier New', monospace;
+      display: flex;
+      height: 100vh;
+    }
+    
+    #canvas-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    
+    canvas { 
+      background: #000;
+      border: 1px solid #333;
+    }
+    
+    #controls {
+      width: 320px;
+      padding: 20px;
+      background: #111;
+      border-left: 1px solid #333;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    
+    h1 {
+      font-size: 14px;
+      color: #ff6b6b;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    h2 {
+      font-size: 11px;
+      color: #888;
+      margin: 16px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 4px;
+    }
+    
+    .control-group {
+      margin-bottom: 12px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 4px;
+      color: #aaa;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      margin-bottom: 2px;
+    }
+    
+    .value {
+      color: #6bffb8;
+      font-size: 11px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 4px 0;
+      background: #222;
+      border: 1px solid #444;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+    }
+    
+    button:hover { background: #333; }
+    button.active { background: #6b4bff; border-color: #8b6bff; }
+    
+    #structure {
+      font-size: 10px;
+      color: #666;
+      margin-top: 20px;
+      padding: 10px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      line-height: 1.6;
+    }
+    
+    #structure code {
+      color: #ff6b6b;
+    }
+    
+    .substrate-toggle {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    
+    .substrate-toggle button {
+      flex: 1;
+    }
+    
+    #stats {
+      margin-top: 12px;
+      padding: 8px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      font-size: 10px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
+  
+  <div id="controls">
+    <h1>Nuclear Compound</h1>
+    <p style="font-size: 10px; color: #666; margin-bottom: 12px;">
+      Depth-3 Ã— Ring Mod Ã— Nested Ã— Additive
+    </p>
+    
+    <h2>Substrate</h2>
+    <div class="substrate-toggle">
+      <button id="btn-euclidean" class="active">Euclidean</button>
+      <button id="btn-hyperbolic">Hyperbolic</button>
+    </div>
+    
+    <h2>Rose (Nested Source 1)</h2>
+    <div class="control-group">
+      <label>k (petals): <span class="value" id="val-roseK">5</span></label>
+      <input type="range" id="roseK" min="2" max="13" step="1" value="5">
+    </div>
+    
+    <h2>Lissajous (Ring Mod Carrier)</h2>
+    <div class="control-group">
+      <label>a (x freq): <span class="value" id="val-lissA">7</span></label>
+      <input type="range" id="lissA" min="1" max="13" step="1" value="7">
+    </div>
+    <div class="control-group">
+      <label>b (y freq): <span class="value" id="val-lissB">5</span></label>
+      <input type="range" id="lissB" min="1" max="13" step="1" value="5">
+    </div>
+    <div class="control-group">
+      <label>Î´ (phase): <span class="value" id="val-lissDelta">0.00</span></label>
+      <input type="range" id="lissDelta" min="0" max="3.14159" step="0.01" value="0">
+    </div>
+    
+    <h2>Spiral (Nested Source 2)</h2>
+    <div class="control-group">
+      <label>Ï‰ (frequency): <span class="value" id="val-spiralOmega">3</span></label>
+      <input type="range" id="spiralOmega" min="1" max="10" step="0.5" value="3">
+    </div>
+    <div class="control-group">
+      <label>Î» (expansion): <span class="value" id="val-spiralLambda">0.15</span></label>
+      <input type="range" id="spiralLambda" min="0.01" max="0.5" step="0.01" value="0.15">
+    </div>
+    
+    <h2>Sine (Additive Y)</h2>
+    <div class="control-group">
+      <label>Ï‰ (frequency): <span class="value" id="val-sineOmega">4</span></label>
+      <input type="range" id="sineOmega" min="1" max="15" step="0.5" value="4">
+    </div>
+    
+    <h2>Trace</h2>
+    <div class="control-group">
+      <label>t max (Ã—Ï€): <span class="value" id="val-tMax">20</span></label>
+      <input type="range" id="tMax" min="2" max="60" step="2" value="20">
+    </div>
+    <div class="control-group">
+      <label>samples: <span class="value" id="val-samples">8000</span></label>
+      <input type="range" id="samples" min="1000" max="30000" step="1000" value="8000">
+    </div>
+    <div class="control-group">
+      <label>scale: <span class="value" id="val-scale">150</span></label>
+      <input type="range" id="scale" min="50" max="400" step="10" value="150">
+    </div>
+    
+    <h2>Hyperbolic</h2>
+    <div class="control-group">
+      <label>compression: <span class="value" id="val-hyperbolicScale">2.0</span></label>
+      <input type="range" id="hyperbolicScale" min="0.5" max="5" step="0.1" value="2.0">
+    </div>
+    
+    <button id="btn-randomize">Randomize Parameters</button>
+    
+    <div id="stats"></div>
+    
+    <div id="structure">
+      <strong>Structure:</strong><br>
+      <code>x(t) = (Circle(âˆ Rose) + Rose)_x Ã— Liss_x</code><br>
+      <code>y(t) = (Spiral(âˆ Liss) + Sin)_y Ã— Liss_y</code><br><br>
+      <strong>Depth:</strong> 3<br>
+      <strong>Operations:</strong> Nested âˆ˜ Additive + Ring Ã—
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Size canvas
+    function resize() {
+      const container = document.getElementById('canvas-container');
+      const size = Math.min(container.clientWidth - 40, container.clientHeight - 40);
+      canvas.width = size;
+      canvas.height = size;
+      render();
+    }
+    window.addEventListener('resize', resize);
+    
+    // State
+    let substrate = 'euclidean';
+    
+    // Get parameters from controls
+    function getParams() {
+      return {
+        roseK: parseFloat(document.getElementById('roseK').value),
+        lissA: parseFloat(document.getElementById('lissA').value),
+        lissB: parseFloat(document.getElementById('lissB').value),
+        lissDelta: parseFloat(document.getElementById('lissDelta').value),
+        spiralOmega: parseFloat(document.getElementById('spiralOmega').value),
+        spiralLambda: parseFloat(document.getElementById('spiralLambda').value),
+        sineOmega: parseFloat(document.getElementById('sineOmega').value),
+        tMax: parseFloat(document.getElementById('tMax').value) * Math.PI,
+        samples: parseInt(document.getElementById('samples').value),
+        scale: parseFloat(document.getElementById('scale').value),
+        hyperbolicScale: parseFloat(document.getElementById('hyperbolicScale').value)
+      };
+    }
+    
+    // Update displayed values
+    function updateValues() {
+      document.getElementById('val-roseK').textContent = document.getElementById('roseK').value;
+      document.getElementById('val-lissA').textContent = document.getElementById('lissA').value;
+      document.getElementById('val-lissB').textContent = document.getElementById('lissB').value;
+      document.getElementById('val-lissDelta').textContent = parseFloat(document.getElementById('lissDelta').value).toFixed(2);
+      document.getElementById('val-spiralOmega').textContent = document.getElementById('spiralOmega').value;
+      document.getElementById('val-spiralLambda').textContent = document.getElementById('spiralLambda').value;
+      document.getElementById('val-sineOmega').textContent = document.getElementById('sineOmega').value;
+      document.getElementById('val-tMax').textContent = document.getElementById('tMax').value;
+      document.getElementById('val-samples').textContent = document.getElementById('samples').value;
+      document.getElementById('val-scale').textContent = document.getElementById('scale').value;
+      document.getElementById('val-hyperbolicScale').textContent = document.getElementById('hyperbolicScale').value;
+    }
+    
+    // Primitives
+    function rose(k, t) {
+      const r = Math.cos(k * t);
+      return { x: r * Math.cos(t), y: r * Math.sin(t) };
+    }
+    
+    function circle(theta) {
+      return { x: Math.cos(theta), y: Math.sin(theta) };
+    }
+    
+    function lissajous(a, b, delta, t) {
+      return { x: Math.sin(a * t + delta), y: Math.sin(b * t) };
+    }
+    
+    function spiral(omega, lambda, theta) {
+      const r = Math.exp(lambda * theta);
+      return { x: r * Math.cos(omega * theta), y: r * Math.sin(omega * theta) };
+    }
+    
+    // Nuclear compound
+    function nuclearCompound(t, params) {
+      const { roseK, lissA, lissB, lissDelta, spiralOmega, spiralLambda, sineOmega } = params;
+      
+      // Rose point and angle
+      const rosePoint = rose(roseK, t);
+      const roseAngle = Math.atan2(rosePoint.y, rosePoint.x);
+      
+      // Circle fed by Rose's angle (nested)
+      const circleFromRose = circle(roseAngle);
+      
+      // Lissajous point and angle
+      const lissPoint = lissajous(lissA, lissB, lissDelta, t);
+      const lissAngle = Math.atan2(lissPoint.y, lissPoint.x);
+      
+      // Spiral fed by Lissajous's angle (nested)
+      const spiralFromLiss = spiral(spiralOmega, spiralLambda, lissAngle);
+      
+      // Sine value
+      const sineValue = Math.sin(sineOmega * t);
+      
+      // Left side: (Circle(âˆ Rose) + Rose)_x
+      const leftX = circleFromRose.x + rosePoint.x;
+      
+      // Left side: (Spiral(âˆ Liss) + Sin)_y
+      const leftY = spiralFromLiss.y + sineValue;
+      
+      // Ring modulation: component-wise multiply by Lissajous
+      const x = leftX * lissPoint.x;
+      const y = leftY * lissPoint.y;
+      
+      return { x, y };
+    }
+    
+    // Euclidean to PoincarÃ© disk
+    function toPoincare(x, y, scale) {
+      const r = Math.sqrt(x * x + y * y);
+      if (r < 0.0001) return { x: 0, y: 0 };
+      
+      // Compress to disk using tanh
+      const rHyp = Math.tanh(r / scale);
+      const ratio = rHyp / r;
+      
+      return { x: x * ratio, y: y * ratio };
+    }
+    
+    // Generate trace
+    function generateTrace(params) {
+      const points = [];
+      const dt = params.tMax / params.samples;
+      
+      let minX = Infinity, maxX = -Infinity;
+      let minY = Infinity, maxY = -Infinity;
+      let zeroCount = 0;
+      
+      for (let i = 0; i <= params.samples; i++) {
+        const t = i * dt;
+        const p = nuclearCompound(t, params);
+        
+        if (isFinite(p.x) && isFinite(p.y)) {
+          points.push(p);
+          minX = Math.min(minX, p.x);
+          maxX = Math.max(maxX, p.x);
+          minY = Math.min(minY, p.y);
+          maxY = Math.max(maxY, p.y);
+          
+          // Count near-zero (pinch points)
+          if (Math.abs(p.x) < 0.01 && Math.abs(p.y) < 0.01) zeroCount++;
+        }
+      }
+      
+      return { points, bounds: { minX, maxX, minY, maxY }, zeroCount };
+    }
+    
+    // Render
+    function render() {
+      const params = getParams();
+      const { points, bounds, zeroCount } = generateTrace(params);
+      
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = Math.min(cx, cy) - 20;
+      
+      // Clear
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      if (substrate === 'hyperbolic') {
+        // Draw PoincarÃ© disk boundary
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      
+      // Draw trace
+      ctx.strokeStyle = 'rgba(107, 255, 184, 0.6)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      
+      let started = false;
+      for (let i = 0; i < points.length; i++) {
+        let { x, y } = points[i];
+        
+        if (substrate === 'euclidean') {
+          x = cx + x * params.scale;
+          y = cy - y * params.scale;
+        } else {
+          // Hyperbolic projection
+          const hyp = toPoincare(x, y, params.hyperbolicScale);
+          x = cx + hyp.x * radius;
+          y = cy - hyp.y * radius;
+        }
+        
+        if (!started) {
+          ctx.moveTo(x, y);
+          started = true;
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+      
+      // Stats
+      const rangeX = bounds.maxX - bounds.minX;
+      const rangeY = bounds.maxY - bounds.minY;
+      document.getElementById('stats').innerHTML = `
+        Points: ${points.length}<br>
+        X range: ${bounds.minX.toFixed(2)} â†’ ${bounds.maxX.toFixed(2)}<br>
+        Y range: ${bounds.minY.toFixed(2)} â†’ ${bounds.maxY.toFixed(2)}<br>
+        Pinch points: ${zeroCount} (${(100*zeroCount/points.length).toFixed(1)}%)
+      `;
+    }
+    
+    // Event listeners
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+      input.addEventListener('input', () => {
+        updateValues();
+        render();
+      });
+    });
+    
+    document.getElementById('btn-euclidean').addEventListener('click', () => {
+      substrate = 'euclidean';
+      document.getElementById('btn-euclidean').classList.add('active');
+      document.getElementById('btn-hyperbolic').classList.remove('active');
+      render();
+    });
+    
+    document.getElementById('btn-hyperbolic').addEventListener('click', () => {
+      substrate = 'hyperbolic';
+      document.getElementById('btn-hyperbolic').classList.add('active');
+      document.getElementById('btn-euclidean').classList.remove('active');
+      render();
+    });
+    
+    document.getElementById('btn-randomize').addEventListener('click', () => {
+      document.getElementById('roseK').value = 2 + Math.floor(Math.random() * 11);
+      document.getElementById('lissA').value = 1 + Math.floor(Math.random() * 12);
+      document.getElementById('lissB').value = 1 + Math.floor(Math.random() * 12);
+      document.getElementById('lissDelta').value = (Math.random() * Math.PI).toFixed(2);
+      document.getElementById('spiralOmega').value = 1 + Math.floor(Math.random() * 9);
+      document.getElementById('spiralLambda').value = (0.01 + Math.random() * 0.49).toFixed(2);
+      document.getElementById('sineOmega').value = 1 + Math.floor(Math.random() * 14);
+      updateValues();
+      render();
+    });
+    
+    // Initialize
+    updateValues();
+    resize();
+  </script>
+</body>
+</html>

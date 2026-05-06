@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hyperbolic Phyllotaxis v2 â€” Long-Span Geodesics</title>
+  <style>
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#080810; color:#e0e0e0; }
+    .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
+    .panel { background:#0d0d14; border-right:1px solid #2a2a3a; padding:16px; overflow:auto; }
+    h2 { margin:0 0 10px; font-size:16px; color:#fff; }
+    .row { margin:10px 0; }
+    label { display:flex; justify-content:space-between; gap:12px; font-size:12px; color:#aaa; }
+    input[type="range"]{ width:100%; background:#2a2a3a; }
+    select, button {
+      width:100%; padding:10px; border-radius:10px; border:1px solid #3a3a4a; background:#1a1a24;
+      font-size:13px; cursor:pointer; color:#e0e0e0;
+    }
+    button:hover { background:#2a2a3a; }
+    .hint { font-size:12px; color:#777; line-height:1.45; margin-top:12px; }
+    .canvasWrap { display:flex; align-items:center; justify-content:center; padding:16px; background:#080810; }
+    canvas { background:#080810; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+    .pill { display:inline-block; padding:4px 8px; border-radius:999px; background:#2a2a3a; font-size:11px; color:#f8a; }
+    .pill.green { color:#8fa; }
+    .pill.blue { color:#8af; }
+    .divider { height:1px; background:#2a2a3a; margin:14px 0; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .stats { background:#1a1a24; border-radius:8px; padding:10px; margin-top:10px; font-size:11px; color:#888; }
+    .stats span { color:#8fa; }
+  </style>
+</head>
+<body>
+<!--
+catalogue:
+  world: HyperbolicPhyllotaxisV2
+  generator.object: pointset
+  generator.family: phyllotaxis
+  substrate: hyperbolic
+  substrate.model: poincare_disk
+  pairing.rule: [skip, radial_cross, antipodal]
+  edge.model: hyperbolic
+  edge.path: intrinsic
+  novelty: hybrid_variant
+  purpose: amplify_geodesic_visibility
+-->
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Hyperbolic Phyllotaxis v2</h2>
+    <div class="pill">long-span geodesics</div>
+    <div class="pill blue" style="margin-left:4px;">forced curvature</div>
+
+    <div class="row" style="margin-top:14px;">
+      <label>Preset <span id="presetName" class="pill green">â€”</span></label>
+      <select id="preset"></select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Points N <span id="NOut">300</span></label>
+      <input id="N" type="range" min="50" max="800" step="10" value="300">
+    </div>
+
+    <div class="row">
+      <label>Divergence Angle <span id="angleOut">137.5Â°</span></label>
+      <input id="angle" type="range" min="90" max="180" step="0.1" value="137.5">
+    </div>
+
+    <div class="row">
+      <label>Disk Coverage <span id="coverageOut">0.95</span></label>
+      <input id="coverage" type="range" min="0.6" max="0.98" step="0.01" value="0.95">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Connection Rule <span class="pill">long-span modes</span></label>
+      <select id="rule">
+        <option value="skip">Index Skip (i â†’ i+k)</option>
+        <option value="radial">Radial Cross (inner â†” outer)</option>
+        <option value="antipodal">Antipodal (opposite side)</option>
+        <option value="fibonacci">Fibonacci Skip (Â±13, Â±21)</option>
+        <option value="random_long">Random Long (min distance)</option>
+      </select>
+    </div>
+
+    <div class="row" id="skipRow">
+      <label>Skip k <span id="skipOut">89</span></label>
+      <input id="skip" type="range" min="1" max="200" step="1" value="89">
+    </div>
+
+    <div class="row" id="radiusThreshRow" style="display:none;">
+      <label>Radius Threshold <span id="radiusThreshOut">0.50</span></label>
+      <input id="radiusThresh" type="range" min="0.2" max="0.8" step="0.05" value="0.50">
+    </div>
+
+    <div class="row" id="minDistRow" style="display:none;">
+      <label>Min Distance <span id="minDistOut">0.60</span></label>
+      <input id="minDist" type="range" min="0.3" max="1.5" step="0.05" value="0.60">
+    </div>
+
+    <div class="row">
+      <label>Max Connections <span id="maxConnOut">400</span></label>
+      <input id="maxConn" type="range" min="50" max="2000" step="50" value="400">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Connector Type <span class="pill">THE KEY TEST</span></label>
+      <select id="connector">
+        <option value="geodesic">Hyperbolic Geodesic</option>
+        <option value="straight">Euclidean Straight</option>
+        <option value="both">Both (overlay comparison)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>Geodesic Steps <span id="gStepsOut">64</span></label>
+      <input id="gSteps" type="range" min="16" max="128" step="4" value="64">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label>Color Mode</label>
+      <select id="colorMode">
+        <option value="curvature">By geodesic curvature</option>
+        <option value="length">By connection length</option>
+        <option value="angle">By connection angle</option>
+        <option value="solid">Solid</option>
+      </select>
+    </div>
+
+    <div class="grid2">
+      <div class="row">
+        <label>Line Width <span id="lwOut">0.5</span></label>
+        <input id="lw" type="range" min="0.1" max="2.0" step="0.1" value="0.5">
+      </div>
+      <div class="row">
+        <label>Alpha <span id="alphaOut">0.20</span></label>
+        <input id="alpha" type="range" min="0.03" max="0.6" step="0.01" value="0.20">
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="row">
+        <label>Show Points</label>
+        <select id="showPoints">
+          <option value="none">None</option>
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Show Boundary</label>
+        <select id="showBoundary">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="grid2">
+      <button id="render">Render</button>
+      <button id="exportPng">Export PNG</button>
+    </div>
+
+    <div class="stats" id="stats">
+      Points: <span>â€”</span> | Connections: <span>â€”</span>
+    </div>
+
+    <div class="hint" style="margin-top:16px;">
+      <b>Why v2?</b> The original hybrid used short local connections where geodesics â‰ˆ straight lines.
+      <br><br>
+      <b>This version forces long connections</b> that span the disk, making geodesic curvature dramatically visible.
+      <br><br>
+      <b>Key test:</b> Toggle between Geodesic and Straight. You should see a <em>massive</em> difference now.
+    </div>
+  </div>
+
+  <div class="canvasWrap">
+    <canvas id="c" width="900" height="900"></canvas>
+  </div>
+</div>
+
+<script>
+/** ---------- Phyllotaxis Generation ---------- **/
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+
+function generatePhyllotaxis(N, angleDeg, maxRadius) {
+  const angleRad = angleDeg * Math.PI / 180;
+  const pts = new Array(N);
+  
+  for (let i = 0; i < N; i++) {
+    const r = maxRadius * Math.sqrt(i / N);
+    const theta = i * angleRad;
+    
+    pts[i] = {
+      x: r * Math.cos(theta),
+      y: r * Math.sin(theta),
+      index: i,
+      r: r,
+      theta: theta
+    };
+  }
+  
+  return pts;
+}
+
+/** ---------- Hyperbolic Geometry ---------- **/
+
+function geodesicPolyline(p, q, steps) {
+  const px = p.x, py = p.y, qx = q.x, qy = q.y;
+  const cross = px * qy - py * qx;
+  
+  if (Math.abs(cross) < 1e-8) {
+    const out = new Array(steps + 1);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      out[i] = { x: px + (qx - px) * t, y: py + (qy - py) * t };
+    }
+    return out;
+  }
+  
+  const p2 = px * px + py * py;
+  const q2 = qx * qx + qy * qy;
+  const rhs1 = (p2 + 1) / 2;
+  const rhs2 = (q2 + 1) / 2;
+  
+  const det = px * qy - py * qx;
+  if (Math.abs(det) < 1e-10) {
+    const out = new Array(steps + 1);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      out[i] = { x: px + (qx - px) * t, y: py + (qy - py) * t };
+    }
+    return out;
+  }
+  
+  const cx = (rhs1 * qy - py * rhs2) / det;
+  const cy = (-rhs1 * qx + px * rhs2) / det;
+  const rad = Math.hypot(px - cx, py - cy);
+  
+  let a0 = Math.atan2(py - cy, px - cx);
+  let a1 = Math.atan2(qy - cy, qx - cx);
+  
+  let da = a1 - a0;
+  while (da > Math.PI) da -= 2 * Math.PI;
+  while (da < -Math.PI) da += 2 * Math.PI;
+  
+  const out = new Array(steps + 1);
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const a = a0 + da * t;
+    out[i] = { x: cx + rad * Math.cos(a), y: cy + rad * Math.sin(a) };
+  }
+  
+  return out;
+}
+
+function geodesicCurvature(p, q) {
+  const px = p.x, py = p.y, qx = q.x, qy = q.y;
+  const cross = px * qy - py * qx;
+  
+  if (Math.abs(cross) < 1e-8) return 0;
+  
+  const p2 = px * px + py * py;
+  const q2 = qx * qx + qy * qy;
+  const rhs1 = (p2 + 1) / 2;
+  const rhs2 = (q2 + 1) / 2;
+  const det = px * qy - py * qx;
+  
+  const cx = (rhs1 * qy - py * rhs2) / det;
+  const cy = (-rhs1 * qx + px * rhs2) / det;
+  const rad = Math.hypot(px - cx, py - cy);
+  
+  return 1 / rad;
+}
+
+/** ---------- Long-Span Connection Algorithms ---------- **/
+
+function skipConnections(pts, k, maxConn) {
+  const edges = [];
+  const N = pts.length;
+  
+  for (let i = 0; i < N && edges.length < maxConn; i++) {
+    const j = (i + k) % N;
+    if (i !== j) {
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      edges.push({ i, j, dist: Math.sqrt(dx*dx + dy*dy) });
+    }
+  }
+  
+  return edges;
+}
+
+function radialCrossConnections(pts, radiusThresh, maxConn) {
+  const edges = [];
+  const N = pts.length;
+  
+  // Separate into inner and outer
+  const inner = [], outer = [];
+  for (let i = 0; i < N; i++) {
+    if (pts[i].r < radiusThresh) inner.push(i);
+    else outer.push(i);
+  }
+  
+  // Connect inner to outer
+  for (const i of inner) {
+    if (edges.length >= maxConn) break;
+    
+    // Find closest outer point by angle
+    let bestJ = -1, bestAngleDiff = Infinity;
+    for (const j of outer) {
+      const angleDiff = Math.abs(pts[i].theta - pts[j].theta);
+      const wrapped = Math.min(angleDiff, 2*Math.PI - angleDiff);
+      if (wrapped < bestAngleDiff) {
+        bestAngleDiff = wrapped;
+        bestJ = j;
+      }
+    }
+    
+    if (bestJ >= 0) {
+      const dx = pts[bestJ].x - pts[i].x;
+      const dy = pts[bestJ].y - pts[i].y;
+      edges.push({ i, j: bestJ, dist: Math.sqrt(dx*dx + dy*dy) });
+    }
+  }
+  
+  return edges;
+}
+
+function antipodalConnections(pts, maxConn) {
+  const edges = [];
+  const N = pts.length;
+  
+  for (let i = 0; i < N && edges.length < maxConn; i++) {
+    // Find point on opposite side of disk
+    const targetAngle = pts[i].theta + Math.PI;
+    
+    let bestJ = -1, bestScore = Infinity;
+    for (let j = 0; j < N; j++) {
+      if (i === j) continue;
+      
+      const angleDiff = Math.abs(pts[j].theta - targetAngle);
+      const wrapped = Math.min(angleDiff % (2*Math.PI), 2*Math.PI - (angleDiff % (2*Math.PI)));
+      const radiusDiff = Math.abs(pts[j].r - pts[i].r);
+      const score = wrapped + radiusDiff * 0.5;
+      
+      if (score < bestScore) {
+        bestScore = score;
+        bestJ = j;
+      }
+    }
+    
+    if (bestJ >= 0 && bestScore < 0.5) {
+      const dx = pts[bestJ].x - pts[i].x;
+      const dy = pts[bestJ].y - pts[i].y;
+      edges.push({ i, j: bestJ, dist: Math.sqrt(dx*dx + dy*dy) });
+    }
+  }
+  
+  return edges;
+}
+
+function fibonacciSkipConnections(pts, maxConn) {
+  const edges = [];
+  const N = pts.length;
+  const fibs = [13, 21, 34, 55, 89];
+  
+  for (const k of fibs) {
+    if (k >= N) continue;
+    for (let i = 0; i < N && edges.length < maxConn; i++) {
+      const j = (i + k) % N;
+      const dx = pts[j].x - pts[i].x;
+      const dy = pts[j].y - pts[i].y;
+      edges.push({ i, j, dist: Math.sqrt(dx*dx + dy*dy) });
+    }
+  }
+  
+  return edges.slice(0, maxConn);
+}
+
+function randomLongConnections(pts, minDist, maxConn) {
+  const edges = [];
+  const N = pts.length;
+  const tried = new Set();
+  
+  // Randomly sample pairs that are far apart
+  let attempts = 0;
+  while (edges.length < maxConn && attempts < maxConn * 20) {
+    attempts++;
+    const i = Math.floor(Math.random() * N);
+    const j = Math.floor(Math.random() * N);
+    if (i === j) continue;
+    
+    const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+    if (tried.has(key)) continue;
+    tried.add(key);
+    
+    const dx = pts[j].x - pts[i].x;
+    const dy = pts[j].y - pts[i].y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    
+    if (dist >= minDist) {
+      edges.push({ i, j, dist });
+    }
+  }
+  
+  return edges;
+}
+
+/** ---------- Rendering ---------- **/
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+
+function gatherParams() {
+  return {
+    N: +$('N').value,
+    angle: +$('angle').value,
+    coverage: +$('coverage').value,
+    rule: $('rule').value,
+    skip: +$('skip').value,
+    radiusThresh: +$('radiusThresh').value,
+    minDist: +$('minDist').value,
+    maxConn: +$('maxConn').value,
+    connector: $('connector').value,
+    gSteps: +$('gSteps').value,
+    colorMode: $('colorMode').value,
+    lw: +$('lw').value,
+    alpha: +$('alpha').value,
+    showPoints: $('showPoints').value,
+    showBoundary: $('showBoundary').value
+  };
+}
+
+function hsl(h, s, l) {
+  return `hsl(${h} ${s}% ${l}%)`;
+}
+
+function render(params) {
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+  const radius = Math.min(W, H) * 0.44;
+  
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+  
+  // Boundary
+  if (params.showBoundary === 'yes') {
+    ctx.strokeStyle = 'rgba(255,150,100,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  
+  // Generate points
+  const pts = generatePhyllotaxis(params.N, params.angle, params.coverage);
+  
+  // Generate connections based on rule
+  let edges;
+  switch (params.rule) {
+    case 'skip':
+      edges = skipConnections(pts, params.skip, params.maxConn);
+      break;
+    case 'radial':
+      edges = radialCrossConnections(pts, params.radiusThresh * params.coverage, params.maxConn);
+      break;
+    case 'antipodal':
+      edges = antipodalConnections(pts, params.maxConn);
+      break;
+    case 'fibonacci':
+      edges = fibonacciSkipConnections(pts, params.maxConn);
+      break;
+    case 'random_long':
+      edges = randomLongConnections(pts, params.minDist, params.maxConn);
+      break;
+    default:
+      edges = skipConnections(pts, params.skip, params.maxConn);
+  }
+  
+  $('stats').innerHTML = `Points: <span>${params.N}</span> | Connections: <span>${edges.length}</span>`;
+  
+  // Compute curvature range
+  let minCurv = Infinity, maxCurv = 0;
+  for (const e of edges) {
+    const curv = geodesicCurvature(pts[e.i], pts[e.j]);
+    if (curv < minCurv && curv > 0) minCurv = curv;
+    if (curv > maxCurv) maxCurv = curv;
+  }
+  if (maxCurv - minCurv < 0.001) maxCurv = minCurv + 0.1;
+  
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  
+  function drawEdge(e, connType, alpha) {
+    const p1 = pts[e.i];
+    const p2 = pts[e.j];
+    
+    // Color
+    let hue = 160;
+    switch (params.colorMode) {
+      case 'curvature':
+        const curv = geodesicCurvature(p1, p2);
+        const u = Math.min(1, (curv - minCurv) / (maxCurv - minCurv));
+        hue = (1 - u) * 180 + u * 320;
+        break;
+      case 'length':
+        hue = Math.min(1, e.dist / 1.5) * 280 + 60;
+        break;
+      case 'angle':
+        const ang = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        hue = ((ang + Math.PI) / (2 * Math.PI)) * 360;
+        break;
+    }
+    
+    ctx.strokeStyle = params.colorMode === 'solid' ? '#4a9' : hsl(hue, 65, 55);
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = params.lw;
+    
+    ctx.beginPath();
+    
+    if (connType === 'geodesic') {
+      const poly = geodesicPolyline(p1, p2, params.gSteps);
+      ctx.moveTo(cx + poly[0].x * radius, cy + poly[0].y * radius);
+      for (let k = 1; k < poly.length; k++) {
+        ctx.lineTo(cx + poly[k].x * radius, cy + poly[k].y * radius);
+      }
+    } else {
+      ctx.moveTo(cx + p1.x * radius, cy + p1.y * radius);
+      ctx.lineTo(cx + p2.x * radius, cy + p2.y * radius);
+    }
+    
+    ctx.stroke();
+  }
+  
+  // Draw
+  if (params.connector === 'both') {
+    // Straight in red/dim
+    ctx.globalAlpha = params.alpha * 0.5;
+    for (const e of edges) {
+      const p1 = pts[e.i], p2 = pts[e.j];
+      ctx.strokeStyle = 'rgba(255,100,100,0.5)';
+      ctx.lineWidth = params.lw * 0.8;
+      ctx.beginPath();
+      ctx.moveTo(cx + p1.x * radius, cy + p1.y * radius);
+      ctx.lineTo(cx + p2.x * radius, cy + p2.y * radius);
+      ctx.stroke();
+    }
+    // Geodesic in cyan
+    for (const e of edges) {
+      const p1 = pts[e.i], p2 = pts[e.j];
+      const poly = geodesicPolyline(p1, p2, params.gSteps);
+      ctx.strokeStyle = 'rgba(100,255,200,0.7)';
+      ctx.lineWidth = params.lw;
+      ctx.globalAlpha = params.alpha;
+      ctx.beginPath();
+      ctx.moveTo(cx + poly[0].x * radius, cy + poly[0].y * radius);
+      for (let k = 1; k < poly.length; k++) {
+        ctx.lineTo(cx + poly[k].x * radius, cy + poly[k].y * radius);
+      }
+      ctx.stroke();
+    }
+  } else {
+    for (const e of edges) {
+      drawEdge(e, params.connector, params.alpha);
+    }
+  }
+  
+  // Points
+  if (params.showPoints !== 'none') {
+    const ptSize = params.showPoints === 'small' ? 2 : 4;
+    ctx.globalAlpha = 0.7;
+    
+    for (const p of pts) {
+      const x = cx + p.x * radius;
+      const y = cy + p.y * radius;
+      const hue = (p.r / params.coverage) * 280 + 30;
+      ctx.fillStyle = hsl(hue, 60, 65);
+      ctx.beginPath();
+      ctx.arc(x, y, ptSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  
+  ctx.globalAlpha = 1;
+}
+
+/** ---------- UI ---------- **/
+
+function updateOutputs() {
+  const p = gatherParams();
+  
+  $('NOut').textContent = p.N;
+  $('angleOut').textContent = p.angle.toFixed(1) + 'Â°';
+  $('coverageOut').textContent = p.coverage.toFixed(2);
+  $('skipOut').textContent = p.skip;
+  $('radiusThreshOut').textContent = p.radiusThresh.toFixed(2);
+  $('minDistOut').textContent = p.minDist.toFixed(2);
+  $('maxConnOut').textContent = p.maxConn;
+  $('gStepsOut').textContent = p.gSteps;
+  $('lwOut').textContent = p.lw.toFixed(1);
+  $('alphaOut').textContent = p.alpha.toFixed(2);
+  
+  // Show/hide rule-specific controls
+  $('skipRow').style.display = (p.rule === 'skip') ? 'block' : 'none';
+  $('radiusThreshRow').style.display = (p.rule === 'radial') ? 'block' : 'none';
+  $('minDistRow').style.display = (p.rule === 'random_long') ? 'block' : 'none';
+}
+
+['N', 'angle', 'coverage', 'skip', 'radiusThresh', 'minDist', 'maxConn', 'gSteps', 'lw', 'alpha'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    updateOutputs();
+    render(gatherParams());
+  });
+});
+
+['rule', 'connector', 'colorMode', 'showPoints', 'showBoundary'].forEach(id => {
+  $(id).addEventListener('change', () => {
+    updateOutputs();
+    render(gatherParams());
+  });
+});
+
+$('render').addEventListener('click', () => render(gatherParams()));
+
+$('exportPng').addEventListener('click', () => {
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `hyper-phyllo-v2-${Date.now()}.png`;
+  a.click();
+});
+
+/** ---------- Presets ---------- **/
+
+const presets = [
+  {
+    name: "Skip k=89 (Fibonacci)",
+    params: { N:300, angle:137.5, coverage:0.95, rule:'skip', skip:89, radiusThresh:0.5, minDist:0.6, maxConn:400,
+              connector:'geodesic', gSteps:64, colorMode:'curvature', lw:0.5, alpha:0.20, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Geodesic vs Straight (COMPARE)",
+    params: { N:200, angle:137.5, coverage:0.94, rule:'skip', skip:55, radiusThresh:0.5, minDist:0.6, maxConn:200,
+              connector:'both', gSteps:64, colorMode:'solid', lw:0.7, alpha:0.35, showPoints:'small', showBoundary:'yes' }
+  },
+  {
+    name: "Radial Cross",
+    params: { N:400, angle:137.5, coverage:0.95, rule:'radial', skip:89, radiusThresh:0.45, minDist:0.6, maxConn:300,
+              connector:'geodesic', gSteps:64, colorMode:'length', lw:0.5, alpha:0.25, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Antipodal Arcs",
+    params: { N:250, angle:137.5, coverage:0.93, rule:'antipodal', skip:89, radiusThresh:0.5, minDist:0.6, maxConn:250,
+              connector:'geodesic', gSteps:72, colorMode:'curvature', lw:0.6, alpha:0.30, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Fibonacci Multi-Skip",
+    params: { N:300, angle:137.5, coverage:0.94, rule:'fibonacci', skip:89, radiusThresh:0.5, minDist:0.6, maxConn:600,
+              connector:'geodesic', gSteps:56, colorMode:'angle', lw:0.4, alpha:0.15, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "Random Long Spans",
+    params: { N:350, angle:137.5, coverage:0.95, rule:'random_long', skip:89, radiusThresh:0.5, minDist:0.8, maxConn:300,
+              connector:'geodesic', gSteps:64, colorMode:'length', lw:0.5, alpha:0.22, showPoints:'none', showBoundary:'yes' }
+  },
+  {
+    name: "126Â° Pinwheel Geodesics",
+    params: { N:280, angle:126.2, coverage:0.93, rule:'skip', skip:55, radiusThresh:0.5, minDist:0.6, maxConn:300,
+              connector:'geodesic', gSteps:64, colorMode:'curvature', lw:0.5, alpha:0.25, showPoints:'none', showBoundary:'yes' }
+  }
+];
+
+const presetSel = $('preset');
+presets.forEach((preset, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = preset.name;
+  presetSel.appendChild(opt);
+});
+
+presetSel.addEventListener('change', () => {
+  const idx = +presetSel.value;
+  const p = presets[idx].params;
+  
+  $('presetName').textContent = presets[idx].name;
+  
+  Object.keys(p).forEach(key => {
+    const el = $(key);
+    if (el) {
+      if (el.tagName === 'SELECT') el.value = p[key];
+      else el.value = p[key];
+    }
+  });
+  
+  updateOutputs();
+  render(gatherParams());
+});
+
+// Initialize
+presetSel.value = '0';
+$('presetName').textContent = presets[0].name;
+updateOutputs();
+render(gatherParams());
+</script>
+</body>
+</html>
