@@ -59,6 +59,8 @@ No test runner is currently configured. When tests are introduced, write an ADR 
 See `docs/branch-protection.md` for the full ruleset and merge conflict runbook.
 
 - `main` is protected: PRs required, linear history, must be up-to-date before merge.
+- **Agents never push directly to `main`.** All agent work lands via PR only.
+- **Branch naming:** always use `feat/<short-description>` for feature work. Never use `claude/` or auto-generated branch names.
 - Feature branches → PR → squash merge to `main`.
 - Rebase, never merge: `git rebase origin/main`, then `git push --force-with-lease`.
 
