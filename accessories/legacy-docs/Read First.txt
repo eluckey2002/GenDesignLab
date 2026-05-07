@@ -1,3 +1,7 @@
+> ⚠️ HISTORICAL — DO NOT TREAT AS CURRENT. Captured 2026-05-06. Reflects an earlier snapshot of the project's framing/scope (notably: 4-category friendly recipe, which has known reconciliation gaps with the technical taxonomy). Decisions and direction have evolved. See docs/ for canonical sources as they land. Kept here for context only.
+
+---
+
 Using memory: I’m grounding this in your UMAT framework, but I’m intentionally stripping out the “generative art tool” framing.
 
 # Working One-Pager: Emergent Design Framework

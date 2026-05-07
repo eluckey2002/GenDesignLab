@@ -1,3 +1,7 @@
+> ⚠️ **HISTORICAL — DO NOT TREAT AS CURRENT.** Captured 2026-05-06. Reflects an earlier snapshot of the project's framing/scope. Decisions and direction have evolved since (notably: "foundations before roadmap" sequencing was adopted). See `docs/` for canonical sources as they land. Kept here for context only — do not act on the recommendations or roadmap in this document.
+
+---
+
 # Implementation Roadmap: The Phylogeny of Design
 
 This roadmap outlines the step-by-step process for validating the **Cross-Dimension Hypothesis** through structured experimentation in the emergent design sandbox.
