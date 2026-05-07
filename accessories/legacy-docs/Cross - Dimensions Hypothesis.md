@@ -1,3 +1,7 @@
+> 📎 **Reference, not active direction.** Captured 2026-05-06. Useful for context on the cross-domain portability theory; not load-bearing for current work. Consult `docs/` for canonical sources as they land.
+
+---
+
 # The Cross-Dimension Hypothesis: A "Rosetta Stone" for Design
 
 The **Cross-Dimension Hypothesis** is the core theory of this framework. It suggests that the "science" of how things grow, move, and survive isn't locked into biology. Instead, by breaking a system into **Pattern-makers, Worlds, and Pressures**, we can discover universal "Interaction Effects" that apply to everything from architecture to economics.
