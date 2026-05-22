@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/eluck/.claude/plugins -path \"*github*\" -name \"SKILL.md\" -o -path \"*github*\" -name \"*.md\" | grep -i \"skill\\\\|github\" | head -20)",
+      "Bash(xargs grep -l \"github\\\\|environment\\\\|deploy\\\\|env\")",
+      "Bash(ls \"C:\\\\Users\\\\eluck\\\\Downloads\\\\agentic-project-init_2.zip\")",
+      "Bash(tar -tf agentic-project-init_2.zip)",
+      "Bash(powershell -Command \"Expand-Archive -Path 'C:\\\\Users\\\\eluck\\\\Downloads\\\\agentic-project-init_2.zip' -DestinationPath 'C:\\\\Users\\\\eluck\\\\Downloads\\\\agentic-project-init_2_preview' -Force; Get-ChildItem -Recurse 'C:\\\\Users\\\\eluck\\\\Downloads\\\\agentic-project-init_2_preview' | Select-Object FullName\")",
+      "Bash(ls \"C:\\\\Users\\\\eluck\\\\.claude\\\\plugins\\\\\" 2>/dev/null || echo \"no plugins dir\")",
+      "Bash(powershell -Command \"Get-ChildItem 'C:\\\\Users\\\\eluck\\\\.claude\\\\plugins\\\\data' | Select-Object Name\")",
+      "Bash(powershell -Command \"Get-ChildItem 'C:\\\\Users\\\\eluck\\\\.claude\\\\plugins\\\\cache' | Select-Object Name\")",
+      "Bash(mkdir -p \"/c/Users/eluck/.claude/plugins/cache/claude-code-plugins-plus/agentic-project-init/1.0.0/.claude-plugin\" && echo \"created\")",
+      "Bash(find \"/c/Users/eluck/CoWorkPrrojcets/NewMath/NewSystem/.claude/worktrees/stupefied-kalam-589e2c\" -maxdepth 3 -type d | head -30)",
+      "Bash(mkdir -p \"/c/Users/eluck/CoWorkPrrojcets/NewMath/NewSystem/.claude/worktrees/stupefied-kalam-589e2c/.github/workflows\")",
+      "Bash(mkdir -p \"/c/Users/eluck/CoWorkPrrojcets/NewMath/NewSystem/.claude/worktrees/stupefied-kalam-589e2c/docs/adr\")",
+      "Bash(mkdir -p \"/c/Users/eluck/CoWorkPrrojcets/NewMath/NewSystem/.claude/worktrees/stupefied-kalam-589e2c/.claude/sessions\")",
+      "Bash(find \"C:/Users/eluck/CoWorkPrrojcets/NewMath/NewSystem\" -name \"*.md\" -type f | head -20)",
+      "Bash(mkdir -p \"/c/Users/eluck/CoWorkPrrojcets/NewMath/NewSystem/.claude/worktrees/stupefied-kalam-589e2c/docs/studies\" && echo \"done\")",
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(xargs grep -l \"glossary\")"
+    ]
+  }
+}

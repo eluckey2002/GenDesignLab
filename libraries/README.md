@@ -1,8 +1,9 @@
 # libraries/
 
-EDF.* portable modules. Single-file, no-deps. `EDF.EnergyField` is the reference shape — match its discipline (instrumented, deterministic, carries its own visualization, validated across multiple artifacts before standalone extraction).
+EDF.\* portable modules. Single-file, no-deps. `EDF.EnergyField` is the reference shape — match its discipline (instrumented, deterministic, carries its own visualization, validated across multiple artifacts before standalone extraction).
 
 Pillars (per Life Stack):
+
 - Metabolism → `EDF.EnergyField` (shipped, currently in `AppDev/` mid-sort)
 - Foraging → `EDF.RateCoupler` (shipped, currently in `AppDev/` mid-sort)
 - Senescence → `EDF.Senescence` (shipped, currently in `AppDev/` mid-sort)
