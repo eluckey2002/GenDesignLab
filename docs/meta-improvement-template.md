@@ -4,7 +4,7 @@
 
 A meta-improvement PR touches **no product code**. It improves the agentic workflow itself: the contract files (CLAUDE.md, AGENTS.md, CODEBASE.md), CI rules, ADR system, PR template, session note conventions.
 
-This template gives meta-PRs a structured protocol so they actually *improve* the system rather than drifting it.
+This template gives meta-PRs a structured protocol so they actually _improve_ the system rather than drifting it.
 
 ## When to Run a Meta-Improvement PR
 
@@ -20,19 +20,21 @@ Triggers — any one is enough, two or more is overdue:
 
 ## The Five Activities
 
-A meta-improvement PR walks all five in order. Skipping is fine — but *explicitly* skip with a one-line "no findings" rather than silently dropping the activity.
+A meta-improvement PR walks all five in order. Skipping is fine — but _explicitly_ skip with a one-line "no findings" rather than silently dropping the activity.
 
 ### 1. Audit
 
 **Question:** What has actually been happening in the agentic workflow since the last meta-PR?
 
 Inputs to read:
+
 - All `.claude/sessions/PR-*.md` notes since the last meta-PR
 - The last 5–10 closed PRs — specifically the **Deferred / Declined**, **Confidence**, and **Drift Risk** sections
 - Recent **Hey Claude —** comments from CI: which fired most? Which got ignored or worked around?
 - Any new ADRs and their actual usage (touchpoints firing? being honored?)
 
-Output: A short list of *observed patterns*, not opinions. Examples:
+Output: A short list of _observed patterns_, not opinions. Examples:
+
 - "Agents marked Confidence: Verify on 4/7 recent PRs — what's making them uncertain?"
 - "Drift Risk escape phrase used on 8/9 PRs — is the touchpoint detection too narrow?"
 - "Session notes mention a gotcha 3 times — promote to CODEBASE.md Key Patterns?"
@@ -42,6 +44,7 @@ Output: A short list of *observed patterns*, not opinions. Examples:
 **Question:** What's stale, duplicated, or vestigial?
 
 Targets:
+
 - Stale ADR touchpoints (files that no longer exist, or paths that have moved)
 - Dead session notes (covered by ADRs now, or obsoleted by later changes)
 - Duplicated utility functions discovered during audit
@@ -56,6 +59,7 @@ Output: A list of files to update or delete, with one-line reasons.
 **Question:** Where did the system bend, and where did it work?
 
 Failure modes — name them specifically:
+
 - CI false positives (reminders that fired but weren't real risks)
 - CI false negatives (real problems that slipped through)
 - Template sections that got hand-waved (instruction unclear? section value-low?)
@@ -63,6 +67,7 @@ Failure modes — name them specifically:
 - ADRs that got drift-flagged but weren't actually affected (touchpoint over-broad)
 
 Wins — also name specifically:
+
 - Reminders that caught real issues
 - Sentinel phrases that forced a useful conversation
 - ADRs that got correctly updated because the system surfaced them
@@ -110,19 +115,24 @@ META-IMPROVEMENT — [one-line description]
 ## Changes
 
 ### Audit findings
+
 - ...
 
 ### Cleanup
+
 - ...
 
 ### Retrospective
+
 - What bent: ...
 - What worked: ...
 
 ### Updates
+
 - ...
 
 ### Improvements
+
 - ...
 ```
 

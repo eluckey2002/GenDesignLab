@@ -3,8 +3,9 @@
 Every PR that introduces a new pattern-maker, world, pressure, or readout — or meaningfully modifies an existing one — must produce a study document in `docs/studies/`. Copy this template to `docs/studies/COMPONENT_ID.md` and fill both sections.
 
 The study has two phases:
-- **Pre-work (Hypothesis):** Written *before* implementation. Forces you to define what you expect to happen.
-- **Post-mortem (Findings):** Written *after* the PR is done. Records what actually happened, what broke, and what generalizes.
+
+- **Pre-work (Hypothesis):** Written _before_ implementation. Forces you to define what you expect to happen.
+- **Post-mortem (Findings):** Written _after_ the PR is done. Records what actually happened, what broke, and what generalizes.
 
 ---
 
@@ -27,10 +28,10 @@ _One sentence: what behavior does this component produce or enable?_
 _Which recipe formula does this fit into?_
 
 ```
-Pattern-maker: 
-World:         
-Pressure:      
-Readout:       
+Pattern-maker:
+World:
+Pressure:
+Readout:
 → Expected emergent behavior:
 ```
 
@@ -42,7 +43,7 @@ _What do you expect to observe when this runs? Be specific — name the visual o
 
 _Is this component designed to be portable (runnable in at least two distinct worlds)? If yes, what second world will you test it in?_
 
-- [ ] Portability target: _______________
+- [ ] Portability target: **\*\***\_\_\_**\*\***
 - [ ] Portability test is included in this PR / planned for next PR
 
 ### Invariants This Component Must Preserve

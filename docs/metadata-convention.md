@@ -8,14 +8,14 @@ Every EDF component file (pattern-maker, world, pressure, readout, outcome) must
 
 ## The 6 Fields
 
-| Field | Required values | Purpose |
-| ----- | --------------- | ------- |
-| `type` | `pattern-maker`, `world`, `pressure`, `readout`, `outcome`, `spec`, `narrative`, `audit`, `glossary` | What role this file plays in the framework |
-| `status` | `draft`, `working`, `stable`, `deprecated` | Maturity — agents treat `draft` as experimental |
-| `audience` | One or more of: `agent`, `engineer`, `designer`, `researcher`, `reviewer` | Who should read this |
-| `framework` | Always `emergent-design-framework` | Constant — scopes the component to this project |
-| `component_id` | kebab-case, behavior-descriptive, ends with `-vN` | Unique identifier — see naming rules below |
-| `depends_on` | List of other `component_id` values, or `[]` | Explicit dependency graph — keep accurate |
+| Field          | Required values                                                                                      | Purpose                                         |
+| -------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `type`         | `pattern-maker`, `world`, `pressure`, `readout`, `outcome`, `spec`, `narrative`, `audit`, `glossary` | What role this file plays in the framework      |
+| `status`       | `draft`, `working`, `stable`, `deprecated`                                                           | Maturity — agents treat `draft` as experimental |
+| `audience`     | One or more of: `agent`, `engineer`, `designer`, `researcher`, `reviewer`                            | Who should read this                            |
+| `framework`    | Always `emergent-design-framework`                                                                   | Constant — scopes the component to this project |
+| `component_id` | kebab-case, behavior-descriptive, ends with `-vN`                                                    | Unique identifier — see naming rules below      |
+| `depends_on`   | List of other `component_id` values, or `[]`                                                         | Explicit dependency graph — keep accurate       |
 
 ---
 
@@ -41,12 +41,12 @@ Place immediately after any `"use strict"` declaration, before all imports.
 
 ```html
 <head>
-  <meta name="framework:type"         content="world">
-  <meta name="framework:status"       content="working">
-  <meta name="framework:audience"     content="agent,designer">
-  <meta name="framework:id"           content="emergent-design-framework">
-  <meta name="framework:component_id" content="curved-substrate-v1">
-  <meta name="framework:depends_on"   content="branching-growth-v1">
+  <meta name="framework:type" content="world" />
+  <meta name="framework:status" content="working" />
+  <meta name="framework:audience" content="agent,designer" />
+  <meta name="framework:id" content="emergent-design-framework" />
+  <meta name="framework:component_id" content="curved-substrate-v1" />
+  <meta name="framework:depends_on" content="branching-growth-v1" />
 </head>
 ```
 
@@ -84,6 +84,7 @@ depends_on: []
 The ID must describe the **behavior or function**, not the aesthetic experience.
 
 **Good — behavior-descriptive:**
+
 - `branching-growth-v1`
 - `curved-substrate-v1`
 - `energy-scarcity-pressure-v2`
@@ -91,6 +92,7 @@ The ID must describe the **behavior or function**, not the aesthetic experience.
 - `swarm-movement-v1`
 
 **Bad — aesthetic/poetic:**
+
 - `slow-frill-v1` ❌
 - `pulse-v1` ❌
 - `wake-v1` ❌
@@ -115,11 +117,13 @@ This field is not decorative. CI uses it to trace dependency graphs and flag dri
 ## What Counts as a "Component File"
 
 Files that must have metadata:
+
 - Any `.js` file implementing a pattern-maker, world, pressure, readout, or outcome
 - Any `.html` file that is a recipe demonstration or world entry point
 - Any `.md` spec, audit, or narrative in `docs/knowledge-repo/` or `docs/studies/`
 
 Files that do NOT need metadata:
+
 - Utility helpers that are not EDF components (e.g., a `dom-utils.js` helper)
 - Config files (`package.json`, `.eslintrc`, etc.)
 - This file and other convention/process docs

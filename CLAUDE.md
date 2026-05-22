@@ -95,7 +95,7 @@ When you create a PR:
 When taking over an existing PR:
 
 1. Read the **"Agent Instructions"** section in the PR description first.
-2. Follow any constraints listed there (e.g., "autofix lint only", "do not touch src/lib/auth/**").
+2. Follow any constraints listed there (e.g., "autofix lint only", "do not touch src/lib/auth/\*\*").
 3. If no Agent Instructions section exists, proceed with standard judgment.
 
 ## ADR Triggers

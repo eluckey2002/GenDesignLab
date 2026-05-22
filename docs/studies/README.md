@@ -13,6 +13,6 @@ This is the lab notebook for the framework. It answers: "what did we learn when 
 
 ## Index
 
-| Component ID | Type | Status | PR |
-| ------------ | ---- | ------ | -- |
-| _(none yet)_ |      |        |    |
+| Component ID | Type | Status | PR  |
+| ------------ | ---- | ------ | --- |
+| _(none yet)_ |      |        |     |

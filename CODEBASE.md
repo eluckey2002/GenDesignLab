@@ -56,9 +56,9 @@ Emergence Design Framework (EDF) — [one-line description of what this project 
 
 <!-- Mirror of docs/adr/README.md index. Updated when ADRs are added or change status. -->
 
-| #    | Title                                | Status   |
-| ---- | ------------------------------------ | -------- |
-| 0001 | Initial Stack and Agentic Workflow   | Accepted |
+| #    | Title                              | Status   |
+| ---- | ---------------------------------- | -------- |
+| 0001 | Initial Stack and Agentic Workflow | Accepted |
 
 ADR files: `docs/adr/NNNN-*.md`. Template: `docs/adr/template.md`. Index: `docs/adr/README.md`.
 

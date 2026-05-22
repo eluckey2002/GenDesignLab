@@ -24,13 +24,13 @@ Every system in EDF can be expressed as one recipe:
 
 > **Pattern-maker + World + Pressure + Readout = Observable emergent behavior**
 
-| Friendly term     | Technical term                 | What it is |
-| ----------------- | ------------------------------ | ---------- |
-| **Pattern-maker** | Generator                      | Creates form, motion, growth, or structure |
-| **World**         | Substrate                      | The space or surface the pattern lives on |
+| Friendly term     | Technical term                 | What it is                                                             |
+| ----------------- | ------------------------------ | ---------------------------------------------------------------------- |
+| **Pattern-maker** | Generator                      | Creates form, motion, growth, or structure                             |
+| **World**         | Substrate                      | The space or surface the pattern lives on                              |
 | **Pressure**      | Operation / Field / Constraint | The force that changes behavior: scarcity, attraction, selection, flow |
-| **Readout**       | Diagnostics / Visualization    | How we observe what happened |
-| **Outcome**       | Artifact / System behavior     | The visible result, discovery, or structure |
+| **Readout**       | Diagnostics / Visualization    | How we observe what happened                                           |
+| **Outcome**       | Artifact / System behavior     | The visible result, discovery, or structure                            |
 
 These five terms are the **canonical vocabulary**. Use them exactly. Do not substitute synonyms.
 
@@ -43,6 +43,7 @@ A component is only a **framework component** — not a one-off creative output 
 **Portability is testable, not assumed.** Every study document records whether portability was tested and in which second world.
 
 The flywheel:
+
 1. Build a behavior
 2. Prove it ports
 3. Add it to the catalog
@@ -68,12 +69,12 @@ This is the shift from making artifacts to making **conditions for discovery**.
 
 A pressure is anything that changes what grows, survives, moves, fades, branches, or adapts.
 
-| Friendly pressure            | Technical version        | What it reveals |
-| ---------------------------- | ------------------------ | --------------- |
+| Friendly pressure            | Technical version        | What it reveals                                |
+| ---------------------------- | ------------------------ | ---------------------------------------------- |
 | **Energy / scarcity**        | Metabolism / EnergyField | What survives, starves, recovers, or collapses |
-| **Attraction / repulsion**   | Force field              | What clusters, separates, or flows |
-| **Inheritance / adaptation** | Lineage / selection      | What traits persist or diverge |
-| **Flow / circulation**       | Vector field             | Where motion concentrates or bottlenecks |
+| **Attraction / repulsion**   | Force field              | What clusters, separates, or flows             |
+| **Inheritance / adaptation** | Lineage / selection      | What traits persist or diverge                 |
+| **Flow / circulation**       | Vector field             | Where motion concentrates or bottlenecks       |
 
 Energy and metabolism are especially important — they make patterns behave like living systems rather than static drawings.
 
@@ -91,14 +92,14 @@ Examples: flat surface, curved surface, dome, shell, terrain, city grid, buildin
 
 ## Example Recipe
 
-| Step | Example |
-| ---- | ------- |
-| Pattern-maker | Branching growth |
-| World | Curved architectural facade |
-| Pressure | Sunlight / heat exposure |
-| Readout | Density and survival map |
+| Step              | Example                                                                   |
+| ----------------- | ------------------------------------------------------------------------- |
+| Pattern-maker     | Branching growth                                                          |
+| World             | Curved architectural facade                                               |
+| Pressure          | Sunlight / heat exposure                                                  |
+| Readout           | Density and survival map                                                  |
 | Behavior observed | Pattern grows denser where shading is needed, opens where light is useful |
-| Outcome | Adaptive facade concept |
+| Outcome           | Adaptive facade concept                                                   |
 
 ---
 

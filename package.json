@@ -1,0 +1,20 @@
+{
+  "name": "emergence-design-framework",
+  "version": "0.1.0",
+  "description": "A framework for building and porting emergent design systems.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "eslint": "^9.27.0",
+    "prettier": "^3.5.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
