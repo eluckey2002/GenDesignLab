@@ -87,7 +87,7 @@ When you create a PR:
 6. In **Drift Risk**: check if files you changed appear as touchpoints in any ADR (`docs/adr/`). For each affected ADR, verify its invariants still hold and note whether you updated or confirmed it. CI will flag touchpoint overlaps automatically, but semantic drift requires your judgment.
 7. Check **Session Hygiene** boxes only if you actually performed each step.
 8. In **Suggested Squash Commit Message**: write a copy-pasteable commit message for the repo owner. Title line under 72 chars with PR number, blank line, bulleted body summarizing the changes.
-9. After creating the PR, **subscribe to PR activity** so you receive review comments and CI results. You are responsible for responding to review comments on PRs you create. Do not create a PR and walk away.
+9. After creating the PR, **you must subscribe to PR activity** — run `gh api repos/eluckey2002/GenDesignLab/issues/<PR_NUMBER>/subscribers -X PUT -f subscribed=true -f ignored=false`. You are responsible for responding to review comments and CI failures on PRs you create. Do not create a PR and walk away.
 10. **Never merge your own PR.** Only the repo owner squashes and merges to `main`.
 
 ## PR Takeover
