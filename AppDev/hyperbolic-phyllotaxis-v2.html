@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hyperbolic Phyllotaxis v2 â€” Long-Span Geodesics</title>
+  <title>Hyperbolic Phyllotaxis v2 — Long-Span Geodesics</title>
   <style>
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#080810; color:#e0e0e0; }
     .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
@@ -51,7 +51,7 @@ catalogue:
     <div class="pill blue" style="margin-left:4px;">forced curvature</div>
 
     <div class="row" style="margin-top:14px;">
-      <label>Preset <span id="presetName" class="pill green">â€”</span></label>
+      <label>Preset <span id="presetName" class="pill green">—</span></label>
       <select id="preset"></select>
     </div>
 
@@ -63,7 +63,7 @@ catalogue:
     </div>
 
     <div class="row">
-      <label>Divergence Angle <span id="angleOut">137.5Â°</span></label>
+      <label>Divergence Angle <span id="angleOut">137.5°</span></label>
       <input id="angle" type="range" min="90" max="180" step="0.1" value="137.5">
     </div>
 
@@ -77,10 +77,10 @@ catalogue:
     <div class="row">
       <label>Connection Rule <span class="pill">long-span modes</span></label>
       <select id="rule">
-        <option value="skip">Index Skip (i â†’ i+k)</option>
-        <option value="radial">Radial Cross (inner â†” outer)</option>
+        <option value="skip">Index Skip (i → i+k)</option>
+        <option value="radial">Radial Cross (inner ↔ outer)</option>
         <option value="antipodal">Antipodal (opposite side)</option>
-        <option value="fibonacci">Fibonacci Skip (Â±13, Â±21)</option>
+        <option value="fibonacci">Fibonacci Skip (±13, ±21)</option>
         <option value="random_long">Random Long (min distance)</option>
       </select>
     </div>
@@ -170,11 +170,11 @@ catalogue:
     </div>
 
     <div class="stats" id="stats">
-      Points: <span>â€”</span> | Connections: <span>â€”</span>
+      Points: <span>—</span> | Connections: <span>—</span>
     </div>
 
     <div class="hint" style="margin-top:16px;">
-      <b>Why v2?</b> The original hybrid used short local connections where geodesics â‰ˆ straight lines.
+      <b>Why v2?</b> The original hybrid used short local connections where geodesics ≈ straight lines.
       <br><br>
       <b>This version forces long connections</b> that span the disk, making geodesic curvature dramatically visible.
       <br><br>
@@ -601,7 +601,7 @@ function updateOutputs() {
   const p = gatherParams();
   
   $('NOut').textContent = p.N;
-  $('angleOut').textContent = p.angle.toFixed(1) + 'Â°';
+  $('angleOut').textContent = p.angle.toFixed(1) + '°';
   $('coverageOut').textContent = p.coverage.toFixed(2);
   $('skipOut').textContent = p.skip;
   $('radiusThreshOut').textContent = p.radiusThresh.toFixed(2);
@@ -675,7 +675,7 @@ const presets = [
               connector:'geodesic', gSteps:64, colorMode:'length', lw:0.5, alpha:0.22, showPoints:'none', showBoundary:'yes' }
   },
   {
-    name: "126Â° Pinwheel Geodesics",
+    name: "126° Pinwheel Geodesics",
     params: { N:280, angle:126.2, coverage:0.93, rule:'skip', skip:55, radiusThresh:0.5, minDist:0.6, maxConn:300,
               connector:'geodesic', gSteps:64, colorMode:'curvature', lw:0.5, alpha:0.25, showPoints:'none', showBoundary:'yes' }
   }

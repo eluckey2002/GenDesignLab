@@ -131,7 +131,7 @@
   <div id="controls">
     <h1>Nuclear Compound</h1>
     <p style="font-size: 10px; color: #666; margin-bottom: 12px;">
-      Depth-3 Ã— Ring Mod Ã— Nested Ã— Additive
+      Depth-3 × Ring Mod × Nested × Additive
     </p>
     
     <h2>Substrate</h2>
@@ -156,29 +156,29 @@
       <input type="range" id="lissB" min="1" max="13" step="1" value="5">
     </div>
     <div class="control-group">
-      <label>Î´ (phase): <span class="value" id="val-lissDelta">0.00</span></label>
+      <label>δ (phase): <span class="value" id="val-lissDelta">0.00</span></label>
       <input type="range" id="lissDelta" min="0" max="3.14159" step="0.01" value="0">
     </div>
     
     <h2>Spiral (Nested Source 2)</h2>
     <div class="control-group">
-      <label>Ï‰ (frequency): <span class="value" id="val-spiralOmega">3</span></label>
+      <label>ω (frequency): <span class="value" id="val-spiralOmega">3</span></label>
       <input type="range" id="spiralOmega" min="1" max="10" step="0.5" value="3">
     </div>
     <div class="control-group">
-      <label>Î» (expansion): <span class="value" id="val-spiralLambda">0.15</span></label>
+      <label>λ (expansion): <span class="value" id="val-spiralLambda">0.15</span></label>
       <input type="range" id="spiralLambda" min="0.01" max="0.5" step="0.01" value="0.15">
     </div>
     
     <h2>Sine (Additive Y)</h2>
     <div class="control-group">
-      <label>Ï‰ (frequency): <span class="value" id="val-sineOmega">4</span></label>
+      <label>ω (frequency): <span class="value" id="val-sineOmega">4</span></label>
       <input type="range" id="sineOmega" min="1" max="15" step="0.5" value="4">
     </div>
     
     <h2>Trace</h2>
     <div class="control-group">
-      <label>t max (Ã—Ï€): <span class="value" id="val-tMax">20</span></label>
+      <label>t max (×π): <span class="value" id="val-tMax">20</span></label>
       <input type="range" id="tMax" min="2" max="60" step="2" value="20">
     </div>
     <div class="control-group">
@@ -202,10 +202,10 @@
     
     <div id="structure">
       <strong>Structure:</strong><br>
-      <code>x(t) = (Circle(âˆ Rose) + Rose)_x Ã— Liss_x</code><br>
-      <code>y(t) = (Spiral(âˆ Liss) + Sin)_y Ã— Liss_y</code><br><br>
+      <code>x(t) = (Circle(∠Rose) + Rose)_x × Liss_x</code><br>
+      <code>y(t) = (Spiral(∠Liss) + Sin)_y × Liss_y</code><br><br>
       <strong>Depth:</strong> 3<br>
-      <strong>Operations:</strong> Nested âˆ˜ Additive + Ring Ã—
+      <strong>Operations:</strong> Nested ∘ Additive + Ring ×
     </div>
   </div>
 
@@ -298,10 +298,10 @@
       // Sine value
       const sineValue = Math.sin(sineOmega * t);
       
-      // Left side: (Circle(âˆ Rose) + Rose)_x
+      // Left side: (Circle(∠Rose) + Rose)_x
       const leftX = circleFromRose.x + rosePoint.x;
       
-      // Left side: (Spiral(âˆ Liss) + Sin)_y
+      // Left side: (Spiral(∠Liss) + Sin)_y
       const leftY = spiralFromLiss.y + sineValue;
       
       // Ring modulation: component-wise multiply by Lissajous
@@ -311,7 +311,7 @@
       return { x, y };
     }
     
-    // Euclidean to PoincarÃ© disk
+    // Euclidean to Poincaré disk
     function toPoincare(x, y, scale) {
       const r = Math.sqrt(x * x + y * y);
       if (r < 0.0001) return { x: 0, y: 0 };
@@ -365,7 +365,7 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
       if (substrate === 'hyperbolic') {
-        // Draw PoincarÃ© disk boundary
+        // Draw Poincaré disk boundary
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -406,8 +406,8 @@
       const rangeY = bounds.maxY - bounds.minY;
       document.getElementById('stats').innerHTML = `
         Points: ${points.length}<br>
-        X range: ${bounds.minX.toFixed(2)} â†’ ${bounds.maxX.toFixed(2)}<br>
-        Y range: ${bounds.minY.toFixed(2)} â†’ ${bounds.maxY.toFixed(2)}<br>
+        X range: ${bounds.minX.toFixed(2)} → ${bounds.maxX.toFixed(2)}<br>
+        Y range: ${bounds.minY.toFixed(2)} → ${bounds.maxY.toFixed(2)}<br>
         Pinch points: ${zeroCount} (${(100*zeroCount/points.length).toFixed(1)}%)
       `;
     }

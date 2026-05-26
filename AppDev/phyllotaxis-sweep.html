@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Phyllotaxis Anomaly Detector â€” Parameter Sweep</title>
+  <title>Phyllotaxis Anomaly Detector — Parameter Sweep</title>
   <style>
     * { box-sizing: border-box; }
     body { 
@@ -563,15 +563,15 @@
 
   <div class="controls">
     <div class="control-group">
-      <label>Angle Start (Â°)</label>
+      <label>Angle Start (°)</label>
       <input type="number" id="angleStart" value="90" min="0" max="360" step="0.5">
     </div>
     <div class="control-group">
-      <label>Angle End (Â°)</label>
+      <label>Angle End (°)</label>
       <input type="number" id="angleEnd" value="180" min="0" max="360" step="0.5">
     </div>
     <div class="control-group">
-      <label>Step (Â°)</label>
+      <label>Step (°)</label>
       <input type="number" id="angleStep" value="0.5" min="0.1" max="5" step="0.1">
     </div>
     <div class="control-group">
@@ -602,10 +602,10 @@
   </div>
 
   <div class="stats-bar" id="statsBar">
-    <div class="stat">Samples: <span id="statSamples">â€”</span></div>
-    <div class="stat">Mean Edge Count: <span id="statMean">â€”</span></div>
-    <div class="stat">Std Dev: <span id="statStd">â€”</span></div>
-    <div class="stat">Anomalies Found: <span id="statAnomalies">â€”</span></div>
+    <div class="stat">Samples: <span id="statSamples">—</span></div>
+    <div class="stat">Mean Edge Count: <span id="statMean">—</span></div>
+    <div class="stat">Std Dev: <span id="statStd">—</span></div>
+    <div class="stat">Anomalies Found: <span id="statAnomalies">—</span></div>
   </div>
 
   <div class="anomalies">
@@ -617,9 +617,9 @@
 
   <div class="thumbnails" id="thumbnailSection" style="display: none;">
     <h3>
-      Visual Confirmation â€” Anomaly Thumbnails
+      Visual Confirmation — Anomaly Thumbnails
       <span style="font-size: 11px; color: #666; font-weight: normal; margin-left: 12px;">
-        (Raw view â€” see Catalog below for classified patterns)
+        (Raw view — see Catalog below for classified patterns)
       </span>
     </h3>
     <div class="thumb-grid" id="thumbGrid"></div>
@@ -628,7 +628,7 @@
   <!-- Pattern Catalog Section -->
   <div class="catalog-section" id="catalogSection" style="display: none;">
     <h3>
-      Pattern Catalog â€” Classified & Deduplicated
+      Pattern Catalog — Classified & Deduplicated
       <div class="export-options">
         <button id="exportCatalogJson">Export JSON</button>
         <button id="exportCatalogText">Export Summary</button>
@@ -637,10 +637,10 @@
     </h3>
     
     <div class="catalog-stats" id="catalogStats">
-      Total: <span>â€”</span> | 
-      Unique: <span>â€”</span> | 
-      Starred: <span>â€”</span> | 
-      Hidden: <span>â€”</span>
+      Total: <span>—</span> | 
+      Unique: <span>—</span> | 
+      Starred: <span>—</span> | 
+      Hidden: <span>—</span>
     </div>
     
     <div id="catalogContent"></div>
@@ -648,12 +648,12 @@
 
   <!-- Modal for enlarged view with morph controls -->
   <div class="modal" id="modal">
-    <button class="modal-close" id="modalClose">Ã—</button>
+    <button class="modal-close" id="modalClose">×</button>
     <canvas id="modalCanvas" width="500" height="500"></canvas>
     <div class="modal-info" id="modalInfo"></div>
     <div class="modal-controls" id="modalControls">
-      <button id="morphBtn">â–¶ Morph Â±5Â°</button>
-      <button id="morphStop" style="display:none;">â¹ Stop</button>
+      <button id="morphBtn">▶ Morph ±5°</button>
+      <button id="morphStop" style="display:none;">⏹ Stop</button>
       <label>Speed:</label>
       <input type="range" id="morphSpeed" min="1" max="20" value="10">
       <span id="morphSpeedLabel" style="font-size:11px; color:#7fdbca;">10 fps</span>
@@ -662,7 +662,7 @@
 
   <!-- 2D Heatmap Section -->
   <div class="heatmap-section" id="heatmapSection">
-    <h3>2D Parameter Heatmap â€” Angle Ã— Threshold</h3>
+    <h3>2D Parameter Heatmap — Angle × Threshold</h3>
     
     <div class="heatmap-controls">
       <div class="control-group">
@@ -695,12 +695,12 @@
     
     <div class="heatmap-container">
       <div class="heatmap-axes">
-        <div class="heatmap-y-label">Threshold â†’</div>
+        <div class="heatmap-y-label">Threshold →</div>
         <div class="heatmap-canvas-wrap">
           <canvas id="heatmapCanvas" width="450" height="250"></canvas>
           <div class="heatmap-tooltip" id="heatmapTooltip"></div>
         </div>
-        <div class="heatmap-x-label">Divergence Angle â†’</div>
+        <div class="heatmap-x-label">Divergence Angle →</div>
       </div>
       
       <div class="heatmap-legend">
@@ -728,7 +728,7 @@ function generatePhyllotaxis(N, angleDeg, scale = 1.0) {
   const pts = new Array(N);
   
   for (let i = 0; i < N; i++) {
-    // Vogel's model: r = c * sqrt(n), Î¸ = n * angle
+    // Vogel's model: r = c * sqrt(n), θ = n * angle
     const r = scale * Math.sqrt(i) / Math.sqrt(N); // Normalize to ~[0,1]
     const theta = i * angleRad;
     
@@ -870,7 +870,7 @@ async function runSweep() {
     });
     
     step++;
-    progressEl.textContent = `${step}/${totalSteps} (${angle.toFixed(1)}Â°)`;
+    progressEl.textContent = `${step}/${totalSteps} (${angle.toFixed(1)}°)`;
     
     // Yield to UI every 10 steps
     if (step % 10 === 0) {
@@ -998,7 +998,7 @@ function drawEdgeCountChart(sweepResults, anomalies) {
   // X-axis labels
   for (let angle = Math.ceil(minAngle / 10) * 10; angle <= maxAngle; angle += 10) {
     const x = xScale(angle);
-    ctx.fillText(angle + 'Â°', x, H - padding.bottom + 16);
+    ctx.fillText(angle + '°', x, H - padding.bottom + 16);
   }
   
   // Y-axis labels
@@ -1078,7 +1078,7 @@ function drawZScoreChart(sweepResults, zThreshold) {
   // X-axis labels
   for (let angle = Math.ceil(minAngle / 10) * 10; angle <= maxAngle; angle += 10) {
     const x = xScale(angle);
-    ctx.fillText(angle + 'Â°', x, H - padding.bottom + 16);
+    ctx.fillText(angle + '°', x, H - padding.bottom + 16);
   }
   
   // Y-axis labels
@@ -1101,10 +1101,10 @@ function displayAnomalies(anomalies) {
   
   listEl.innerHTML = anomalies.map(a => `
     <div class="anomaly-item ${a.severity}">
-      <strong>${a.angle.toFixed(1)}Â°</strong> â€” 
+      <strong>${a.angle.toFixed(1)}°</strong> — 
       Edge Count: ${a.edgeCount} | 
       Z-Score: ${a.zScore > 0 ? '+' : ''}${a.zScore.toFixed(2)} | 
-      ${a.direction === 'spike' ? 'ðŸ“ˆ Spike' : 'ðŸ“‰ Drop'}
+      ${a.direction === 'spike' ? '📈 Spike' : '📉 Drop'}
     </div>
   `).join('');
 }
@@ -1209,7 +1209,7 @@ function classifyPattern(angle) {
   return {
     type: 'unclassified',
     category: 'Discoveries',
-    name: `Pattern @ ${canonical.toFixed(1)}Â°`,
+    name: `Pattern @ ${canonical.toFixed(1)}°`,
     fold: null,
     confidence: 'low'
   };
@@ -1227,7 +1227,7 @@ function gcd(a, b) {
 function getEquivalenceKey(angle) {
   // Canonical angle in 0-180 range
   const canonical = angle > 180 ? 360 - angle : angle;
-  // Round to 0.5Â° precision for grouping
+  // Round to 0.5° precision for grouping
   return Math.round(canonical * 2) / 2;
 }
 
@@ -1373,15 +1373,15 @@ function createCatalogCard(item, N, threshold) {
   card.innerHTML = `
     <div class="catalog-item-header">
       <div class="catalog-item-info">
-        <div class="catalog-item-angle">${item.angle.toFixed(1)}Â°</div>
+        <div class="catalog-item-angle">${item.angle.toFixed(1)}°</div>
         <div class="catalog-item-type">${item.name}</div>
         <div class="catalog-item-name" contenteditable="true" 
              data-angle="${item.angle}" 
              placeholder="Custom name...">${customName}</div>
       </div>
       <div class="catalog-item-controls">
-        <button class="star-btn" data-angle="${item.angle}" title="Star">â˜…</button>
-        <button class="hide-btn" data-angle="${item.angle}" title="Hide">Ã—</button>
+        <button class="star-btn" data-angle="${item.angle}" title="Star">★</button>
+        <button class="hide-btn" data-angle="${item.angle}" title="Hide">×</button>
       </div>
     </div>
   `;
@@ -1491,7 +1491,7 @@ function exportCatalogJson() {
 
 function exportCatalogText() {
   let text = `PHYLLOTAXIS PATTERN CATALOG\n`;
-  text += `â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n\n`;
+  text += `═══════════════════════════════════════════\n\n`;
   text += `Generated: ${new Date().toLocaleString()}\n`;
   text += `Parameters: N=${document.getElementById('pointCount').value}, `;
   text += `threshold=${document.getElementById('threshold').value}\n\n`;
@@ -1508,13 +1508,13 @@ function exportCatalogText() {
   
   for (const [category, items] of byCategory) {
     text += `${category.toUpperCase()}\n`;
-    text += `${'â”€'.repeat(40)}\n`;
+    text += `${'─'.repeat(40)}\n`;
     
     for (const item of items) {
-      const star = catalogData.starred.has(item.angle) ? 'â˜… ' : '  ';
+      const star = catalogData.starred.has(item.angle) ? '★ ' : '  ';
       const customName = catalogData.customNames[item.angle];
       const displayName = customName || item.name;
-      text += `${star}${item.angle.toFixed(1).padStart(6)}Â°  ${displayName.padEnd(20)}`;
+      text += `${star}${item.angle.toFixed(1).padStart(6)}°  ${displayName.padEnd(20)}`;
       if (item.fold) text += `  ${item.fold}-fold`;
       text += `\n`;
     }
@@ -1524,12 +1524,12 @@ function exportCatalogText() {
   // Starred summary
   if (catalogData.starred.size > 0) {
     text += `\nSTARRED PATTERNS (${catalogData.starred.size})\n`;
-    text += `${'â”€'.repeat(40)}\n`;
+    text += `${'─'.repeat(40)}\n`;
     for (const angle of catalogData.starred) {
       const item = catalogData.items.find(i => i.angle === angle);
       if (item) {
         const customName = catalogData.customNames[angle];
-        text += `â˜… ${angle.toFixed(1)}Â° â€” ${customName || item.name}\n`;
+        text += `★ ${angle.toFixed(1)}° — ${customName || item.name}\n`;
       }
     }
   }
@@ -1592,9 +1592,9 @@ function morphLoop() {
   
   const foldRatio = 360 / currentMorphAngle;
   info.innerHTML = `
-    <strong>${currentMorphAngle.toFixed(1)}Â°</strong><br>
+    <strong>${currentMorphAngle.toFixed(1)}°</strong><br>
     ${edges.length} edges<br>
-    <span style="color: #888;">Morphing: ${morphStartAngle - morphRange}Â° â†’ ${morphStartAngle + morphRange}Â°</span>
+    <span style="color: #888;">Morphing: ${morphStartAngle - morphRange}° → ${morphStartAngle + morphRange}°</span>
   `;
   
   // Update angle
@@ -1712,7 +1712,7 @@ async function generateHeatmap() {
 function valueToColor(value, min, max) {
   const t = (value - min) / (max - min);
   
-  // Color scale: dark blue (low) â†’ cyan â†’ yellow â†’ red (high)
+  // Color scale: dark blue (low) → cyan → yellow → red (high)
   if (t < 0.33) {
     const u = t / 0.33;
     return `rgb(${Math.round(20 + u * 40)}, ${Math.round(40 + u * 180)}, ${Math.round(80 + u * 140)})`;
@@ -1786,7 +1786,7 @@ function updateHeatmapPreview(cell) {
   renderPhyllotaxisToCanvas(canvas, cell.angle, heatmapData.N, cell.threshold);
   
   label.innerHTML = `
-    <strong>${cell.angle.toFixed(1)}Â°</strong> Ã— <strong>${cell.threshold.toFixed(3)}</strong><br>
+    <strong>${cell.angle.toFixed(1)}°</strong> × <strong>${cell.threshold.toFixed(3)}</strong><br>
     ${cell.edgeCount} edges
   `;
 }
@@ -1800,7 +1800,7 @@ document.getElementById('heatmapCanvas').addEventListener('mousemove', (e) => {
     tooltip.style.display = 'block';
     tooltip.style.left = (e.offsetX + 15) + 'px';
     tooltip.style.top = (e.offsetY + 15) + 'px';
-    tooltip.innerHTML = `${cell.angle.toFixed(1)}Â° Ã— ${cell.threshold.toFixed(3)}<br>${cell.edgeCount} edges`;
+    tooltip.innerHTML = `${cell.angle.toFixed(1)}° × ${cell.threshold.toFixed(3)}<br>${cell.edgeCount} edges`;
     
     updateHeatmapPreview(cell);
   } else {
@@ -1879,7 +1879,7 @@ function renderPhyllotaxisToCanvas(canvas, angleDeg, N, threshold) {
     
     // Color by length
     const u = (e.dist - minDist) / (maxDist - minDist);
-    const hue = (1 - u) * 120 + u * 280; // Green â†’ Purple
+    const hue = (1 - u) * 120 + u * 280; // Green → Purple
     
     ctx.strokeStyle = `hsl(${hue} 70% 55%)`;
     ctx.beginPath();
@@ -1949,12 +1949,12 @@ function createThumbnails(anomalies, N, threshold) {
     
     if (anomaly.isBaseline) {
       label.innerHTML = `
-        <strong style="color: #4a9c8c;">137.5Â° (Golden)</strong><br>
+        <strong style="color: #4a9c8c;">137.5° (Golden)</strong><br>
         <span style="color: #4a9c8c; font-size: 10px;">BASELINE</span>
       `;
     } else {
       label.innerHTML = `
-        <strong>${anomaly.angle.toFixed(1)}Â°</strong><br>
+        <strong>${anomaly.angle.toFixed(1)}°</strong><br>
         <span class="zscore">z = ${anomaly.zScore > 0 ? '+' : ''}${anomaly.zScore.toFixed(2)}</span>
       `;
     }
@@ -1984,10 +1984,10 @@ function showModal(anomaly, N, threshold) {
   const foldRatio = 360 / anomaly.angle;
   const foldDisplay = Number.isInteger(foldRatio) 
     ? `${foldRatio}-fold symmetry` 
-    : `â‰ˆ ${foldRatio.toFixed(2)} ratio`;
+    : `≈ ${foldRatio.toFixed(2)} ratio`;
   
   info.innerHTML = `
-    <strong>${anomaly.angle.toFixed(1)}Â°</strong><br>
+    <strong>${anomaly.angle.toFixed(1)}°</strong><br>
     ${edges.length} edges | Z-Score: ${anomaly.zScore > 0 ? '+' : ''}${anomaly.zScore.toFixed(2)}<br>
     <span style="color: #888;">${foldDisplay}</span>
   `;

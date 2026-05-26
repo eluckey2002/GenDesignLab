@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Phyllotaxis Proximity Web â€” Golden Angle Networks</title>
+  <title>Phyllotaxis Proximity Web — Golden Angle Networks</title>
   <style>
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#080810; color:#e0e0e0; }
     .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
@@ -49,7 +49,7 @@ catalogue:
     <h2>Phyllotaxis Proximity Web <span class="pill">golden angle + proximity</span></h2>
 
     <div class="row">
-      <label>Preset <span id="presetName" class="pill">â€”</span></label>
+      <label>Preset <span id="presetName" class="pill">—</span></label>
       <select id="preset"></select>
     </div>
 
@@ -61,11 +61,11 @@ catalogue:
     </div>
 
     <div class="row">
-      <label>Divergence Angle <span id="angleOut">137.5Â°</span></label>
+      <label>Divergence Angle <span id="angleOut">137.5°</span></label>
       <input id="angle" type="range" min="90" max="180" step="0.1" value="137.5">
     </div>
     
-    <div class="hint">Golden angle â‰ˆ 137.5077Â°. Try nearby values to see structure collapse.</div>
+    <div class="hint">Golden angle ≈ 137.5077°. Try nearby values to see structure collapse.</div>
 
     <div class="row">
       <label>Radial Scaling <span id="scaleOut">1.00</span></label>
@@ -95,7 +95,7 @@ catalogue:
     </div>
 
     <div class="row">
-      <label>Max Connections/Point <span id="maxConnOut">âˆž</span></label>
+      <label>Max Connections/Point <span id="maxConnOut">∞</span></label>
       <input id="maxConn" type="range" min="1" max="20" step="1" value="20">
     </div>
 
@@ -146,12 +146,12 @@ catalogue:
     </div>
 
     <div class="stats" id="stats">
-      Points: <span>â€”</span> | Connections: <span>â€”</span> | Avg degree: <span>â€”</span>
+      Points: <span>—</span> | Connections: <span>—</span> | Avg degree: <span>—</span>
     </div>
 
     <div class="hint" style="margin-top:16px;">
       <b>The Prediction:</b> At certain threshold values, the golden angle's irrational relationship 
-      should reveal <b>Fibonacci spirals</b> â€” 13, 21, 34 arms emerging from purely local connectivity rules.
+      should reveal <b>Fibonacci spirals</b> — 13, 21, 34 arms emerging from purely local connectivity rules.
       <br><br>
       <b>Risk:</b> This is a fundamentally different generator (points, not curves) and pairing rule 
       (proximity, not index). If it produces structure, the framework generalizes far beyond curves.
@@ -167,14 +167,14 @@ catalogue:
 /** ---------- Phyllotaxis Generation ---------- **/
 
 const PHI = (1 + Math.sqrt(5)) / 2;
-const GOLDEN_ANGLE = 360 / (PHI * PHI); // â‰ˆ 137.5077Â°
+const GOLDEN_ANGLE = 360 / (PHI * PHI); // ≈ 137.5077°
 
 function generatePhyllotaxis(N, angleDeg, scale) {
   const angleRad = angleDeg * Math.PI / 180;
   const pts = new Array(N);
   
   for (let i = 0; i < N; i++) {
-    // Vogel's model: r = c * sqrt(n), Î¸ = n * angle
+    // Vogel's model: r = c * sqrt(n), θ = n * angle
     const r = scale * Math.sqrt(i) / Math.sqrt(N); // Normalize to ~[0,1]
     const theta = i * angleRad;
     
@@ -403,7 +403,7 @@ function render(params) {
     switch (params.colorMode) {
       case 'length':
         const u = (e.dist - minDist) / (maxDist - minDist);
-        hue = (1 - u) * 120 + u * 280; // Green â†’ Purple
+        hue = (1 - u) * 120 + u * 280; // Green → Purple
         break;
       case 'angle':
         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
@@ -411,7 +411,7 @@ function render(params) {
         break;
       case 'radial':
         const avgR = (p1.r + p2.r) / 2;
-        hue = avgR * 280 + 60; // Yellow (center) â†’ Magenta (edge)
+        hue = avgR * 280 + 60; // Yellow (center) → Magenta (edge)
         break;
       case 'spiral':
         // Estimate which Fibonacci spiral arm based on index modulo
@@ -456,11 +456,11 @@ function updateOutputs() {
   const p = gatherParams();
   
   $('NOut').textContent = p.N;
-  $('angleOut').textContent = p.angle.toFixed(1) + 'Â°';
+  $('angleOut').textContent = p.angle.toFixed(1) + '°';
   $('scaleOut').textContent = p.scale.toFixed(2);
   $('thresholdOut').textContent = p.threshold.toFixed(3);
   $('knnOut').textContent = p.knn;
-  $('maxConnOut').textContent = p.maxConn >= 20 ? 'âˆž' : p.maxConn;
+  $('maxConnOut').textContent = p.maxConn >= 20 ? '∞' : p.maxConn;
   $('lwOut').textContent = p.lw.toFixed(1);
   $('alphaOut').textContent = p.alpha.toFixed(2);
   $('ptAlphaOut').textContent = p.ptAlpha.toFixed(1);
@@ -524,12 +524,12 @@ const presets = [
               colorMode:'length', lw:0.3, alpha:0.12, showPoints:'none', ptAlpha:0.5 }
   },
   {
-    name: "Broken Symmetry (138Â°)",
+    name: "Broken Symmetry (138°)",
     params: { N:500, angle:138.0, scale:1.0, rule:'proximity', threshold:0.08, knn:5, maxConn:20,
               colorMode:'angle', lw:0.5, alpha:0.25, showPoints:'small', ptAlpha:0.5 }
   },
   {
-    name: "Rational Collapse (120Â°)",
+    name: "Rational Collapse (120°)",
     params: { N:500, angle:120.0, scale:1.0, rule:'proximity', threshold:0.08, knn:5, maxConn:20,
               colorMode:'radial', lw:0.6, alpha:0.30, showPoints:'small', ptAlpha:0.5 }
   }

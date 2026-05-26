@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hyperbolic Flow Field â€” Confluence in Curved Space</title>
+  <title>Hyperbolic Flow Field — Confluence in Curved Space</title>
   <style>
     * { box-sizing: border-box; }
     body { 
@@ -180,7 +180,7 @@
           <input type="range" id="N" min="20" max="300" value="120">
         </div>
         <div class="row">
-          <label>Divergence Angle <span id="valAngle">137.5Â°</span></label>
+          <label>Divergence Angle <span id="valAngle">137.5°</span></label>
           <input type="range" id="angle" min="90" max="180" step="0.1" value="137.5">
         </div>
         <div class="row">
@@ -213,7 +213,7 @@
           <input type="range" id="fieldStrength" min="0.1" max="3" step="0.1" value="1.0">
         </div>
         <div class="row">
-          <label>Field Rotation <span id="valFieldRotation">0Â°</span></label>
+          <label>Field Rotation <span id="valFieldRotation">0°</span></label>
           <input type="range" id="fieldRotation" min="0" max="360" step="5" value="0">
         </div>
       </div>
@@ -282,7 +282,7 @@
       <div class="section">
         <div class="section-title">Presets</div>
         <select id="presets">
-          <option value="">â€” Select Preset â€”</option>
+          <option value="">— Select Preset —</option>
           <option value="silkRiver">Silk River</option>
           <option value="vortexDrain">Vortex Drain</option>
           <option value="boundaryDance">Boundary Dance</option>
@@ -300,14 +300,14 @@
       
       <div class="stats" id="stats">
         <strong>Points:</strong> 120<br>
-        <strong>Paths:</strong> â€”<br>
-        <strong>Confluences:</strong> â€”<br>
-        <strong>Render time:</strong> â€”
+        <strong>Paths:</strong> —<br>
+        <strong>Confluences:</strong> —<br>
+        <strong>Render time:</strong> —
       </div>
       
       <div class="hint">
         <strong>Confluence:</strong> Points emit flow paths through the vector field. 
-        Where paths pass near each other, they create connections â€” revealing natural 
+        Where paths pass near each other, they create connections — revealing natural 
         "watersheds" in curved space. Hyperbolic geometry warps these watersheds 
         dramatically near the boundary.
       </div>
@@ -404,8 +404,8 @@ function hyperbolicStep(p, dx, dy, stepSize, useHyperbolic) {
   }
   
   // Hyperbolic: scale step by conformal factor
-  // The metric at point z is ds = 2|dz|/(1-|z|Â²)
-  // So a unit step in direction v becomes v * (1-|z|Â²)/2
+  // The metric at point z is ds = 2|dz|/(1-|z|²)
+  // So a unit step in direction v becomes v * (1-|z|²)/2
   const r2 = p.x * p.x + p.y * p.y;
   const conformalFactor = (1 - r2) / 2;
   
@@ -852,11 +852,11 @@ function animate() {
 function setupUI() {
   const updateValues = () => {
     document.getElementById('valN').textContent = document.getElementById('N').value;
-    document.getElementById('valAngle').textContent = parseFloat(document.getElementById('angle').value).toFixed(1) + 'Â°';
+    document.getElementById('valAngle').textContent = parseFloat(document.getElementById('angle').value).toFixed(1) + '°';
     document.getElementById('valSpread').textContent = parseFloat(document.getElementById('spread').value).toFixed(2);
     document.getElementById('valFieldScale').textContent = parseFloat(document.getElementById('fieldScale').value).toFixed(1);
     document.getElementById('valFieldStrength').textContent = parseFloat(document.getElementById('fieldStrength').value).toFixed(1);
-    document.getElementById('valFieldRotation').textContent = document.getElementById('fieldRotation').value + 'Â°';
+    document.getElementById('valFieldRotation').textContent = document.getElementById('fieldRotation').value + '°';
     document.getElementById('valPathSteps').textContent = document.getElementById('pathSteps').value;
     document.getElementById('valStepSize').textContent = parseFloat(document.getElementById('stepSize').value).toFixed(3);
     document.getElementById('valConfluence').textContent = parseFloat(document.getElementById('confluence').value).toFixed(2);

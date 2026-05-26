@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hyperbolic Phyllotaxis â€” Golden Spirals in Curved Space</title>
+  <title>Hyperbolic Phyllotaxis — Golden Spirals in Curved Space</title>
   <style>
     body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#080810; color:#e0e0e0; }
     .wrap { display:grid; grid-template-columns: 380px 1fr; height:100vh; }
@@ -52,13 +52,13 @@ catalogue:
 <div class="wrap">
   <div class="panel">
     <h2>Hyperbolic Phyllotaxis 
-      <span class="badge phyllo">Ï† points</span>
-      <span class="badge hyper">HÂ² geodesics</span>
+      <span class="badge phyllo">φ points</span>
+      <span class="badge hyper">H² geodesics</span>
     </h2>
     <div class="pill">hybrid: golden angle + curved space</div>
 
     <div class="row" style="margin-top:14px;">
-      <label>Preset <span id="presetName" class="pill green">â€”</span></label>
+      <label>Preset <span id="presetName" class="pill green">—</span></label>
       <select id="preset"></select>
     </div>
 
@@ -70,7 +70,7 @@ catalogue:
     </div>
 
     <div class="row">
-      <label>Divergence Angle <span id="angleOut">137.5Â°</span></label>
+      <label>Divergence Angle <span id="angleOut">137.5°</span></label>
       <input id="angle" type="range" min="90" max="180" step="0.1" value="137.5">
     </div>
 
@@ -178,12 +178,12 @@ catalogue:
     </div>
 
     <div class="stats" id="stats">
-      Points: <span>â€”</span> | Connections: <span>â€”</span> | Avg degree: <span>â€”</span>
+      Points: <span>—</span> | Connections: <span>—</span> | Avg degree: <span>—</span>
     </div>
 
     <div class="hint" style="margin-top:16px;">
       <b>The Hypothesis:</b> Combining golden-angle points with hyperbolic geodesics should produce 
-      Fibonacci spirals that <em>curve toward the boundary</em> â€” organic tendrils reaching for infinity.
+      Fibonacci spirals that <em>curve toward the boundary</em> — organic tendrils reaching for infinity.
       <br><br>
       <b>Key Test:</b> Switch between Geodesic and Straight connectors. If they look fundamentally different,
       the Connector axis is truly independent.
@@ -224,14 +224,14 @@ function generatePhyllotaxis(N, angleDeg, maxRadius) {
 
 /** ---------- Hyperbolic Geometry ---------- **/
 
-// Hyperbolic distance in PoincarÃ© disk
+// Hyperbolic distance in Poincaré disk
 function hyperbolicDistance(p, q) {
   const px = p.x, py = p.y, qx = q.x, qy = q.y;
   const eucDist2 = (qx - px) * (qx - px) + (qy - py) * (qy - py);
   const p2 = px * px + py * py;
   const q2 = qx * qx + qy * qy;
   
-  // d_H(p,q) = acosh(1 + 2|p-q|Â² / ((1-|p|Â²)(1-|q|Â²)))
+  // d_H(p,q) = acosh(1 + 2|p-q|² / ((1-|p|²)(1-|q|²)))
   const denom = (1 - p2) * (1 - q2);
   if (denom <= 0) return Infinity;
   
@@ -239,7 +239,7 @@ function hyperbolicDistance(p, q) {
   return Math.acosh(Math.max(1, coshD));
 }
 
-// Geodesic arc between two points in PoincarÃ© disk
+// Geodesic arc between two points in Poincaré disk
 function geodesicPolyline(p, q, steps) {
   const px = p.x, py = p.y, qx = q.x, qy = q.y;
   const cross = px * qy - py * qx;
@@ -499,7 +499,7 @@ function render(params) {
       case 'curvature':
         const curv = geodesicCurvature(p1, p2);
         const u = (curv - minCurv) / (maxCurv - minCurv);
-        hue = (1 - u) * 180 + u * 320; // Cyan â†’ Magenta
+        hue = (1 - u) * 180 + u * 320; // Cyan → Magenta
         break;
       case 'length':
         const len = Math.hypot(p2.x - p1.x, p2.y - p1.y);
@@ -578,12 +578,12 @@ function updateOutputs() {
   const p = gatherParams();
   
   $('NOut').textContent = p.N;
-  $('angleOut').textContent = p.angle.toFixed(1) + 'Â°';
+  $('angleOut').textContent = p.angle.toFixed(1) + '°';
   $('coverageOut').textContent = p.coverage.toFixed(2);
   $('thresholdOut').textContent = p.threshold.toFixed(3);
   $('knnOut').textContent = p.knn;
   $('hypThreshOut').textContent = p.hypThresh.toFixed(1);
-  $('maxConnOut').textContent = p.maxConn >= 20 ? 'âˆž' : p.maxConn;
+  $('maxConnOut').textContent = p.maxConn >= 20 ? '∞' : p.maxConn;
   $('gStepsOut').textContent = p.gSteps;
   $('lwOut').textContent = p.lw.toFixed(1);
   $('alphaOut').textContent = p.alpha.toFixed(2);
@@ -643,7 +643,7 @@ const presets = [
               connector:'geodesic', gSteps:64, colorMode:'spiral', lw:0.4, alpha:0.18, showPoints:'none', showBoundary:'yes' }
   },
   {
-    name: "126Â° Pinwheel (hybrid angle)",
+    name: "126° Pinwheel (hybrid angle)",
     params: { N:450, angle:126.2, coverage:0.90, rule:'knn', threshold:0.12, knn:5, hypThresh:1.5, maxConn:10,
               connector:'geodesic', gSteps:48, colorMode:'curvature', lw:0.6, alpha:0.30, showPoints:'none', showBoundary:'yes' }
   },
@@ -653,7 +653,7 @@ const presets = [
               connector:'geodesic', gSteps:56, colorMode:'radial', lw:0.5, alpha:0.25, showPoints:'none', showBoundary:'yes' }
   },
   {
-    name: "Rational Collapse (120Â°)",
+    name: "Rational Collapse (120°)",
     params: { N:400, angle:120.0, coverage:0.90, rule:'proximity', threshold:0.12, knn:5, hypThresh:1.5, maxConn:8,
               connector:'geodesic', gSteps:48, colorMode:'radial', lw:0.7, alpha:0.35, showPoints:'small', showBoundary:'yes' }
   }

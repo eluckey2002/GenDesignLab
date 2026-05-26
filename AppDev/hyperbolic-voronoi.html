@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hyperbolic Voronoi â€” Phyllotaxis in Curved Space</title>
+  <title>Hyperbolic Voronoi — Phyllotaxis in Curved Space</title>
   <style>
     * { box-sizing: border-box; }
     body { 
@@ -183,7 +183,7 @@
       <h1>Hyperbolic Voronoi</h1>
       <div class="subtitle">
         <span class="badge novel">Novel</span>
-        Phyllotaxis â†’ Voronoi in PoincarÃ© Disk
+        Phyllotaxis → Voronoi in Poincaré Disk
       </div>
       
       <div class="section">
@@ -193,7 +193,7 @@
           <input type="range" id="N" min="10" max="400" value="150">
         </div>
         <div class="row">
-          <label>Divergence Angle <span id="valAngle">137.5Â°</span></label>
+          <label>Divergence Angle <span id="valAngle">137.5°</span></label>
           <input type="range" id="angle" min="90" max="180" step="0.1" value="137.5">
         </div>
         <div class="row">
@@ -248,12 +248,12 @@
       <div class="section">
         <div class="section-title">Presets</div>
         <select id="presets">
-          <option value="">â€” Select Preset â€”</option>
-          <option value="golden">Golden Spiral (137.5Â°)</option>
-          <option value="lucas">Lucas Spiral (99.5Â°)</option>
-          <option value="fibonacci">Dense Fibonacci (137.508Â°)</option>
-          <option value="rational">Rational Collapse (120Â°)</option>
-          <option value="pinwheel">Pinwheel (126.2Â°)</option>
+          <option value="">— Select Preset —</option>
+          <option value="golden">Golden Spiral (137.5°)</option>
+          <option value="lucas">Lucas Spiral (99.5°)</option>
+          <option value="fibonacci">Dense Fibonacci (137.508°)</option>
+          <option value="rational">Rational Collapse (120°)</option>
+          <option value="pinwheel">Pinwheel (126.2°)</option>
           <option value="sparse">Sparse Field</option>
         </select>
       </div>
@@ -265,13 +265,13 @@
       
       <div class="stats" id="stats">
         <strong>Points:</strong> 150<br>
-        <strong>Render time:</strong> â€”<br>
+        <strong>Render time:</strong> —<br>
         <strong>Mode:</strong> Hyperbolic
       </div>
       
       <div class="hint">
         <strong>What's happening:</strong> Voronoi cells computed using hyperbolic distance 
-        in the PoincarÃ© disk model. Cell boundaries curve toward the disk edge, 
+        in the Poincaré disk model. Cell boundaries curve toward the disk edge, 
         reflecting how distances grow near infinity in hyperbolic space.
       </div>
     </div>
@@ -299,7 +299,7 @@ const cxConj = (a) => cx(a.re, -a.im);
 const cxAbs = (a) => Math.sqrt(a.re * a.re + a.im * a.im);
 const cxScale = (a, s) => cx(a.re * s, a.im * s);
 
-// Hyperbolic distance in PoincarÃ© disk
+// Hyperbolic distance in Poincaré disk
 function hyperbolicDist(p1, p2) {
   // d(z1, z2) = 2 * arctanh(|z1 - z2| / |1 - z1 * conj(z2)|)
   const z1 = cx(p1.x, p1.y);
@@ -495,7 +495,7 @@ function computeDelaunayEdges(pixels, width, height, numPoints, neighborCounts) 
 // ============================================
 
 function spiralColor(point, N) {
-  // Color by spiral arm (theta mod 2Ï€)
+  // Color by spiral arm (theta mod 2π)
   const arm = ((point.theta % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
   const hue = (arm / (Math.PI * 2)) * 360;
   return hslToRgb(hue, 0.7, 0.5);
@@ -565,7 +565,7 @@ function drawGeodesic(ctx, p1, p2, useHyperbolic) {
     return;
   }
   
-  // PoincarÃ© disk geodesic: circular arc perpendicular to boundary
+  // Poincaré disk geodesic: circular arc perpendicular to boundary
   const x1 = p1.x, y1 = p1.y;
   const x2 = p2.x, y2 = p2.y;
   
@@ -669,7 +669,7 @@ function render() {
     <strong>Points:</strong> ${N}<br>
     <strong>Render time:</strong> ${renderTime}ms<br>
     <strong>Mode:</strong> ${isCompare ? 'Comparison' : (isHyperbolic ? 'Hyperbolic' : 'Euclidean')}<br>
-    <strong>Divergence:</strong> ${angle.toFixed(1)}Â°
+    <strong>Divergence:</strong> ${angle.toFixed(1)}°
   `;
 }
 
@@ -820,7 +820,7 @@ function setupUI() {
   // Value displays
   const updateValues = () => {
     document.getElementById('valN').textContent = document.getElementById('N').value;
-    document.getElementById('valAngle').textContent = parseFloat(document.getElementById('angle').value).toFixed(1) + 'Â°';
+    document.getElementById('valAngle').textContent = parseFloat(document.getElementById('angle').value).toFixed(1) + '°';
     document.getElementById('valSpread').textContent = parseFloat(document.getElementById('spread').value).toFixed(2);
     document.getElementById('valCellAlpha').textContent = parseFloat(document.getElementById('cellAlpha').value).toFixed(2);
     document.getElementById('valBorderWidth').textContent = parseFloat(document.getElementById('borderWidth').value).toFixed(1);

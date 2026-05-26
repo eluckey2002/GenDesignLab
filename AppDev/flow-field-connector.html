@@ -212,10 +212,10 @@
 <div class="wrap">
   <div class="panel">
     <h1>Flow-Field Connector</h1>
-    <div class="subtitle">HIGH-RISK VALIDATION â€” New connector paradigm</div>
+    <div class="subtitle">HIGH-RISK VALIDATION — New connector paradigm</div>
     
     <div class="warning">
-      âš ï¸ Experimental: Paths follow a vector field, not straight lines or geodesics. 
+      ⚠️ Experimental: Paths follow a vector field, not straight lines or geodesics. 
       May produce unexpected results.
     </div>
 
@@ -234,9 +234,9 @@
     <div class="section">
       <div class="section-title">Animation</div>
       <div class="anim-controls">
-        <button class="anim-btn" id="playBtn">â–¶ Play</button>
-        <button class="anim-btn" id="pauseBtn">â¸ Pause</button>
-        <button class="anim-btn" id="resetBtn">â†º Reset</button>
+        <button class="anim-btn" id="playBtn">▶ Play</button>
+        <button class="anim-btn" id="pauseBtn">⏸ Pause</button>
+        <button class="anim-btn" id="resetBtn">↺ Reset</button>
       </div>
       <div class="row">
         <label>Animation Mode</label>
@@ -271,7 +271,7 @@
         <input type="range" id="N" min="50" max="800" step="10" value="300">
       </div>
       <div class="row">
-        <label>Divergence Angle <span id="angleOut">137.51Â°</span></label>
+        <label>Divergence Angle <span id="angleOut">137.51°</span></label>
         <input type="range" id="angle" min="90" max="180" step="0.01" value="137.51">
       </div>
     </div>
@@ -281,7 +281,7 @@
       <div class="row">
         <label>Rule</label>
         <select id="pairingRule">
-          <option value="skip">Index Skip (i â†’ i+k)</option>
+          <option value="skip">Index Skip (i → i+k)</option>
           <option value="proximity">Proximity (distance threshold)</option>
           <option value="knn">K-Nearest Neighbors</option>
         </select>
@@ -616,7 +616,7 @@ function curlField(x, y, scale, turbulence, time = 0, animMode = 'none') {
     return v;
   };
   
-  // Curl of 2D scalar field: (-âˆ‚f/âˆ‚y, âˆ‚f/âˆ‚x)
+  // Curl of 2D scalar field: (-∂f/∂y, ∂f/∂x)
   const dfdx = (n(x + eps, y) - n(x - eps, y)) / (2 * eps);
   const dfdy = (n(x, y + eps) - n(x, y - eps)) / (2 * eps);
   
@@ -955,7 +955,7 @@ function getPathColor(pathData, colorMode, minLen, maxLen, minCurv, maxCurv, min
   t = Math.max(0, Math.min(1, t));
   
   // Color ramp: cyan -> magenta -> gold
-  const h = 0.5 - t * 0.4; // 180Â° to 36Â°
+  const h = 0.5 - t * 0.4; // 180° to 36°
   const [r, g, b] = hslToRgb(h, 0.7, 0.6);
   return [r, g, b];
 }
@@ -1242,7 +1242,7 @@ function applyParams(p) {
 
 function updateOutputs() {
   $('Nout').textContent = $('N').value;
-  $('angleOut').textContent = Number($('angle').value).toFixed(2) + 'Â°';
+  $('angleOut').textContent = Number($('angle').value).toFixed(2) + '°';
   $('kOut').textContent = $('k').value;
   $('thresholdOut').textContent = Number($('threshold').value).toFixed(2);
   $('knnOut').textContent = $('knn').value;
